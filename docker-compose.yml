@@ -1,0 +1,52 @@
+name: kitaza
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: kitaza
+      POSTGRES_PASSWORD: kitaza
+      POSTGRES_DB: kitaza
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kitaza -d kitaza"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    # Cached dashboards and rate-limit counters are both disposable, so no
+    # persistence is configured; a restart simply warms up again.
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgres://kitaza:kitaza@postgres:5432/kitaza
+      REDIS_URL: redis://redis:6379
+      KITAZA_JWT_SECRET: ${KITAZA_JWT_SECRET:-local-development-secret-change-me-32}
+      KITAZA_ALLOWED_ORIGINS: ${KITAZA_ALLOWED_ORIGINS:-*}
+      KITAZA_LOG: info,kitaza_server=debug
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

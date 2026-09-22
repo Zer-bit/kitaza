@@ -1,0 +1,180 @@
+# ─── Secrets ──────────────────────────────────────────────────────────────
+# Never commit real credentials. `.env.example` is the documented template and
+# is explicitly kept.
+.env
+.env.*
+*.env
+!.env.example
+!backend/.env.example
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# Signing material for Android releases
+*.keystore
+*.jks
+key.properties
+frontend/android/key.properties
+
+
+# ─── Rust / backend ───────────────────────────────────────────────────────
+# `Cargo.lock` IS committed: this crate builds a binary, so reproducible
+# dependency versions matter.
+target/
+**/*.rs.bk
+*.pdb
+
+
+# ─── Dart / Flutter ───────────────────────────────────────────────────────
+# `pubspec.lock` IS committed for the same reason as Cargo.lock.
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+**/doc/api/
+migrate_working_dir/
+.widget_preview/
+.fvm/
+.flutter-versions
+devtools_options.yaml
+
+# Symbolication and obfuscation output
+app.*.symbols
+app.*.map.json
+
+# Flutter's own crash screenshots
+flutter_*.png
+
+
+# ─── Android ──────────────────────────────────────────────────────────────
+.gradle/
+captures/
+gradlew
+gradlew.bat
+gradle-wrapper.jar
+local.properties
+.cxx/
+GeneratedPluginRegistrant.java
+frontend/android/app/debug/
+frontend/android/app/profile/
+frontend/android/app/release/
+
+
+# ─── iOS / macOS ──────────────────────────────────────────────────────────
+# Anchored to the iOS directory on purpose. Unanchored, Flutter's template
+# patterns reach into the rest of the repo - `**/*sync/` would swallow
+# `backend/src/features/sync/`, and `Icon?` matches any four-character name.
+frontend/ios/**/Pods/
+frontend/ios/**/.symlinks/
+frontend/ios/**/DerivedData/
+frontend/ios/**/dgph
+frontend/ios/**/*sync/
+frontend/ios/**/.generated/
+frontend/ios/**/.vagrant/
+frontend/ios/**/xcuserdata/
+frontend/ios/**/Icon?
+frontend/ios/ServiceDefinitions.json
+frontend/ios/Runner/GeneratedPluginRegistrant.*
+frontend/ios/Flutter/App.framework
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Flutter/ephemeral/
+frontend/ios/Flutter/app.flx
+frontend/ios/Flutter/app.zip
+frontend/ios/Flutter/flutter_assets/
+frontend/ios/Flutter/flutter_export_environment.sh
+frontend/macos/Pods/
+frontend/macos/Flutter/ephemeral/
+*.xcuserstate
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+.sconsign.dblite
+Podfile.lock
+
+# Exceptions Flutter's own template relies on
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
+
+
+# ─── Linux / Windows desktop ──────────────────────────────────────────────
+# `generated_plugin_registrant.*` and `generated_plugins.cmake` ARE committed:
+# Flutter treats them as checked-in sources on desktop targets.
+# `**/` matters: a pattern containing a slash is anchored to this file's
+# directory, so a bare `flutter/ephemeral/` would miss
+# `frontend/linux/flutter/ephemeral/`, whose generated files embed absolute
+# local paths.
+**/flutter/ephemeral/
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+
+# ─── Local databases ──────────────────────────────────────────────────────
+# Kitaza writes SQLite on the device; a developer copy must never be pushed.
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+kitaza.db*
+pgdata/
+
+
+# ─── Docker ───────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+
+# ─── Editors and IDEs ─────────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.history/
+.atom/
+.svn/
+.swiftpm/
+.build/
+.buildlog/
+*.sublime-project
+*.sublime-workspace
+
+
+# ─── Operating system ─────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+
+# ─── Logs and scratch output ──────────────────────────────────────────────
+*.log
+*.class
+*.pyc
+__pycache__/
+npm-debug.log*
+.tmp/
+tmp/
