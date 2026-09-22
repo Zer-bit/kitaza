@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
 import '../../data/models/report_models.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/page_body.dart';
@@ -22,7 +23,7 @@ class ReportsScreen extends ConsumerWidget {
     final report = ref.watch(periodReportProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(title: Text(context.l10n.reportTitle)),
       body: AsyncContent<PeriodReport>(
         value: report,
         onRetry: () => ref.invalidate(periodReportProvider),
@@ -33,13 +34,10 @@ class ReportsScreen extends ConsumerWidget {
               data.expenseBreakdown.isNotEmpty;
 
           if (!hasAnything) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.insights_rounded,
-              title: 'Nothing to report yet',
-              message:
-                  'Record a few sales and expenses and this screen will show '
-                  'which products earn, where your money goes, and how your '
-                  'profit is trending.',
+              title: context.l10n.reportEmptyTitle,
+              message: context.l10n.reportEmptyMessage,
             );
           }
 

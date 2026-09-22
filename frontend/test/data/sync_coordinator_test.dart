@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kitaza_app/core/diagnostics/error_report.dart';
 import 'package:kitaza_app/core/errors/app_failure.dart';
 import 'package:kitaza_app/core/storage/preferences_store.dart';
+import 'package:kitaza_app/data/local/dao/error_report_dao.dart';
 import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
+import 'package:kitaza_app/data/remote/diagnostics_api.dart';
 import 'package:kitaza_app/data/remote/sync_api.dart';
 import 'package:kitaza_app/data/repositories/data_revision.dart';
 import 'package:kitaza_app/data/repositories/store_scope.dart';
@@ -62,6 +65,18 @@ class FakeSyncApi implements SyncApi {
   }
 }
 
+/// Stands in for the diagnostics endpoint.
+class FakeDiagnosticsApi implements DiagnosticsApi {
+  final List<ErrorReport> received = [];
+  bool fail = false;
+
+  @override
+  Future<void> upload(List<ErrorReport> reports) async {
+    if (fail) throw const AppFailure.offline();
+    received.addAll(reports);
+  }
+}
+
 const _emptyTables = <String, List<Map<String, dynamic>>>{
   'products': [],
   'sales': [],
@@ -87,6 +102,7 @@ void main() {
   late Database db;
   late FakeSyncApi api;
   late ProviderContainer container;
+  late FakeDiagnosticsApi diagnostics;
 
   Future<ProviderContainer> start({String mode = 'cloud'}) async {
     SharedPreferences.setMockInitialValues({
@@ -100,6 +116,7 @@ void main() {
         databaseProvider.overrideWithValue(db),
         preferencesStoreProvider.overrideWithValue(preferences),
         syncApiProvider.overrideWithValue(api),
+        diagnosticsApiProvider.overrideWithValue(diagnostics),
         connectivityChangesProvider.overrideWithValue(const Stream.empty()),
       ],
     );
@@ -125,6 +142,7 @@ void main() {
   setUp(() async {
     db = await openTestDatabase();
     api = FakeSyncApi();
+    diagnostics = FakeDiagnosticsApi();
   });
 
   tearDown(() => db.close());
@@ -303,6 +321,58 @@ void main() {
       expect(api.pullCursors, isEmpty);
     },
   );
+
+  group('error reports', () {
+    Future<void> recordError(String fingerprint) => ErrorReportDao(db).record(
+      fingerprint: fingerprint,
+      errorType: 'StateError',
+      message: 'boom',
+      stack: null,
+      appVersion: '1.0.0+1',
+      platform: 'android',
+      at: DateTime.utc(2026, 9, 22),
+    );
+
+    test('are sent after a good sync and then forgotten', () async {
+      await recordError('a');
+      await recordError('b');
+
+      container = await start();
+      container.read(syncCoordinatorProvider);
+      await settle();
+
+      expect(
+        diagnostics.received.map((r) => r.fingerprint),
+        unorderedEquals(['a', 'b']),
+      );
+      expect(await ErrorReportDao(db).count(), 0);
+    });
+
+    test(
+      'are kept for next time if sending fails, without failing the sync',
+      () async {
+        await recordError('a');
+        diagnostics.fail = true;
+
+        container = await start();
+        container.read(syncCoordinatorProvider);
+        await settle();
+
+        expect(container.read(syncCoordinatorProvider).phase, SyncPhase.idle);
+        expect(await ErrorReportDao(db).count(), 1);
+      },
+    );
+
+    test('never leave an offline-only phone', () async {
+      await recordError('a');
+
+      container = await start(mode: 'local');
+      container.read(syncCoordinatorProvider);
+      await settle();
+
+      expect(diagnostics.received, isEmpty);
+    });
+  });
 }
 
 Map<String, dynamic> _expense(String id) => {

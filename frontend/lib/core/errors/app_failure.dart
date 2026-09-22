@@ -20,11 +20,16 @@ class AppFailure implements Exception {
   const AppFailure(
     this.message, {
     this.kind = FailureKind.rejected,
+    this.code,
     this.cause,
   });
 
   final String message;
   final FailureKind kind;
+
+  /// The server's machine-readable error code, such as `conflict`, so the
+  /// screen can explain it in the owner's language.
+  final String? code;
   final Object? cause;
 
   /// Whether waiting and trying again could succeed.
@@ -36,11 +41,13 @@ class AppFailure implements Exception {
           'You are offline. Your entry is saved on this device and '
           'will sync when you reconnect.',
       kind = FailureKind.offline,
+      code = null,
       cause = null;
 
   const AppFailure.unauthorized()
     : message = 'Your session expired. Please sign in again.',
       kind = FailureKind.unauthorized,
+      code = null,
       cause = null;
 
   @override

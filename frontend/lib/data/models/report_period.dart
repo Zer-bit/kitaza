@@ -1,12 +1,11 @@
 enum ReportPeriod {
-  today('today', 'Today'),
-  week('week', 'This week'),
-  month('month', 'This month');
+  today('today'),
+  week('week'),
+  month('month');
 
-  const ReportPeriod(this.wireName, this.label);
+  const ReportPeriod(this.wireName);
 
   final String wireName;
-  final String label;
 
   /// Start of the period in the device's local time, which is what an owner
   /// means by "today".

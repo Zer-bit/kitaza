@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../data/models/expense_category.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/expense_repository.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/amount_field.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import '../../shared/widgets/page_body.dart';
@@ -51,19 +52,19 @@ class _RecordExpenseScreenState extends ConsumerState<RecordExpenseScreen> {
       ref.read(dataRevisionProvider.notifier).localWrite();
 
       if (!mounted) return;
-      FeedbackMessenger.success(context, 'Expense recorded.');
+      FeedbackMessenger.success(context, context.l10n.expenseRecorded);
       context.pop();
     } on Object {
       if (!mounted) return;
       setState(() => _saving = false);
-      FeedbackMessenger.error(context, 'Could not save. Please try again.');
+      FeedbackMessenger.error(context, context.l10n.expenseSaveFailed);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add expense')),
+      appBar: AppBar(title: Text(context.l10n.expenseTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           child: PageBody(
@@ -75,7 +76,7 @@ class _RecordExpenseScreenState extends ConsumerState<RecordExpenseScreen> {
                 children: [
                   AmountField(controller: _amount, autofocus: true),
                   AppSpacing.gapXl,
-                  const SectionHeader(title: 'What was it for?'),
+                  SectionHeader(title: context.l10n.expenseWhatFor),
                   CategoryPicker(
                     selected: _category,
                     onChanged: (category) =>
@@ -85,9 +86,9 @@ class _RecordExpenseScreenState extends ConsumerState<RecordExpenseScreen> {
                   TextFormField(
                     controller: _description,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: const InputDecoration(
-                      labelText: 'Note (optional)',
-                      hintText: 'Meralco bill for October',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.commonNoteOptional,
+                      hintText: context.l10n.expenseNoteHint,
                     ),
                   ),
                   AppSpacing.gapXl,
@@ -101,7 +102,7 @@ class _RecordExpenseScreenState extends ConsumerState<RecordExpenseScreen> {
                             dimension: 22,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Save expense'),
+                        : Text(context.l10n.expenseSave),
                   ),
                 ],
               ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/report_models.dart';
+import '../../../l10n/l10n.dart';
 
 class ExpenseBreakdownCard extends StatelessWidget {
   const ExpenseBreakdownCard({super.key, required this.slices});
@@ -23,7 +24,10 @@ class ExpenseBreakdownCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Where your money goes', style: theme.textTheme.titleMedium),
+            Text(
+              context.l10n.reportExpenseBreakdown,
+              style: theme.textTheme.titleMedium,
+            ),
             AppSpacing.gapMd,
             for (final slice in slices)
               Padding(
@@ -32,14 +36,17 @@ class ExpenseBreakdownCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        slice.categoryName,
+                        context.l10n.expenseCategory(slice.category),
                         style: theme.textTheme.bodyLarge,
                       ),
                     ),
                     Text(
                       total == 0
                           ? '0%'
-                          : '${((slice.totalAmount / total) * 100).toStringAsFixed(0)}%',
+                          : context.l10n.commonPercent(
+                              ((slice.totalAmount / total) * 100)
+                                  .toStringAsFixed(0),
+                            ),
                       style: theme.textTheme.bodySmall,
                     ),
                     const SizedBox(width: AppSpacing.md),

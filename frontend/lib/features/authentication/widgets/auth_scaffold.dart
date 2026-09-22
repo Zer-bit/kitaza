@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets/kitaza_logo.dart';
 
 /// Shared chrome for every onboarding screen: the mark, a heading, and a body
@@ -30,7 +31,7 @@ class AuthScaffold extends StatelessWidget {
               leading: IconButton(
                 onPressed: onBack,
                 icon: const Icon(Icons.arrow_back_rounded),
-                tooltip: 'Back',
+                tooltip: context.l10n.commonBack,
               ),
             ),
       body: SafeArea(
@@ -73,7 +74,7 @@ class _BrandMark extends StatelessWidget {
       children: [
         const KitazaLogo(),
         const SizedBox(width: AppSpacing.md),
-        Text('Kitaza', style: theme.textTheme.headlineSmall),
+        Text(context.l10n.appName, style: theme.textTheme.headlineSmall),
       ],
     );
   }

@@ -27,48 +27,46 @@ abstract final class BusinessScoreCalculator {
     if (inputs.salesTotal <= 0) return BusinessHealth.unknown;
 
     var score = 50;
-    final reasons = <String>[];
+    final reasons = <HealthReason>[];
 
     if (inputs.netProfit > 0) {
       score += 25;
-      reasons.add('You earned a profit of ${_peso(inputs.netProfit)}.');
+      reasons.add(ProfitEarned(inputs.netProfit));
     } else {
       score -= 30;
-      reasons.add('You spent ${_peso(-inputs.netProfit)} more than you sold.');
+      reasons.add(SpentMoreThanSold(-inputs.netProfit));
     }
 
     final margin = ((inputs.netProfit / inputs.salesTotal) * 100).round();
     if (margin >= _healthyMarginPercent) {
       score += 15;
-      reasons.add('Healthy margin: $margin% of sales is profit.');
+      reasons.add(HealthyMargin(margin));
     } else if (margin >= _thinMarginPercent) {
-      reasons.add('Thin margin: only $margin% of sales is profit.');
+      reasons.add(ThinMargin(margin));
     } else if (margin > 0) {
       score -= 10;
-      reasons.add('Very thin margin: $margin% of sales is profit.');
+      reasons.add(VeryThinMargin(margin));
     }
 
     if (inputs.previousNetProfit != 0) {
       if (inputs.netProfit > inputs.previousNetProfit) {
         score += 10;
-        reasons.add('Profit is higher than the previous period.');
+        reasons.add(const ProfitUp());
       } else if (inputs.netProfit < inputs.previousNetProfit) {
         score -= 10;
-        reasons.add('Profit is lower than the previous period.');
+        reasons.add(const ProfitDown());
       }
     }
 
     if (inputs.withdrawalsTotal > inputs.netProfit &&
         inputs.withdrawalsTotal > 0) {
       score -= 15;
-      reasons.add(
-        'You withdrew ${_peso(inputs.withdrawalsTotal)}, more than the profit you made.',
-      );
+      reasons.add(WithdrewMoreThanProfit(inputs.withdrawalsTotal));
     }
 
     if (inputs.lowStockCount > 0) {
       score -= 5;
-      reasons.add('${inputs.lowStockCount} product(s) need restocking.');
+      reasons.add(NeedsRestock(inputs.lowStockCount));
     }
 
     final clamped = score.clamp(0, 100);
@@ -78,17 +76,6 @@ abstract final class BusinessScoreCalculator {
       _ => HealthRating.red,
     };
 
-    return BusinessHealth(
-      rating: rating,
-      score: clamped,
-      headline: switch (rating) {
-        HealthRating.green => 'Your store is doing well',
-        HealthRating.yellow => 'Keep an eye on your numbers',
-        HealthRating.red => 'Your store needs attention',
-      },
-      reasons: reasons,
-    );
+    return BusinessHealth(rating: rating, score: clamped, reasons: reasons);
   }
-
-  static String _peso(double amount) => '₱${amount.toStringAsFixed(2)}';
 }

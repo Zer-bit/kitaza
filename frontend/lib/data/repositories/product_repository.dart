@@ -33,7 +33,12 @@ class ProductRepository {
 
   Future<int> lowStockCount() => _products.lowStockCount(_storeId);
 
+  Future<int> count() => _products.count(_storeId);
+
   Future<Product?> find(String productId) => _products.find(productId);
+
+  Future<Product?> findByBarcode(String code) =>
+      _products.findByBarcode(_storeId, code);
 
   Future<Product> save({
     String? id,

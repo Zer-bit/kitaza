@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup check test test-integration test-contract brand fmt lint run-api run-app stack stack-down clean
+.PHONY: help setup check test test-integration test-contract brand backup restore fmt lint run-api run-app stack stack-down clean
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -28,6 +28,16 @@ test-contract: ## Two simulated phones syncing through a running API (CONTRACT_A
 
 brand: ## Regenerate logo, launcher icons and splash from the source glyph
 	cd frontend && ./tool/generate_brand_assets.sh
+
+backup: ## Take a database backup now into ./backups
+	docker compose run --rm backup /scripts/backup.sh
+
+restore: ## Restore a dump over the database: make restore DUMP=backups/<file>
+	@test -n "$(DUMP)" || (echo "usage: make restore DUMP=backups/kitaza-....dump" && exit 2)
+	@# One quoted string: the container's entrypoint is `sh -c`, which runs only
+	@# its first argument, so separate words would never reach the script.
+	docker compose run --rm -v "$(CURDIR)/$(DUMP):/restore.dump:ro" backup \
+		"/scripts/restore.sh /restore.dump postgres://kitaza:kitaza@postgres:5432/kitaza --yes-replace-everything"
 
 lint: ## Analyse and check formatting
 	cd backend && cargo clippy --all-targets --features integration -- -D warnings && cargo fmt --check

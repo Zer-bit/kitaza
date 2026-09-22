@@ -132,8 +132,7 @@ class ReportDao {
     return rows
         .map(
           (row) => ExpenseSlice(
-            categoryName: ExpenseCategory.parse(row['category'] as String?)
-                .label,
+            category: ExpenseCategory.parse(row['category'] as String?),
             totalAmount: Centavos.toPesos(
               (row['total_amount'] as num?)?.toInt() ?? 0,
             ),

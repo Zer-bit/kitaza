@@ -49,9 +49,14 @@ class CartLine {
         unitCost: product.costPrice,
       );
 
+  /// Stored on the sale line as a stable name, never translated: it is
+  /// data that syncs between devices set to different languages. Screens
+  /// swap it for the owner's word when they display it.
+  static const String quickSaleName = 'Quick sale';
+
   /// A sale typed straight into the keypad, with no catalogue entry behind it.
   /// This is how most sari-sari sales get recorded in under five seconds.
-  factory CartLine.quick(double amount, {String label = 'Quick sale'}) =>
+  factory CartLine.quick(double amount, {String label = quickSaleName}) =>
       CartLine(
         key: 'quick-${DateTime.now().microsecondsSinceEpoch}',
         productName: label,

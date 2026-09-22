@@ -11,6 +11,8 @@ class EmptyState extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
   });
 
   final IconData icon;
@@ -18,12 +20,14 @@ class EmptyState extends StatelessWidget {
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Center(
+    final content = Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
         child: Padding(
@@ -59,10 +63,33 @@ class EmptyState extends StatelessWidget {
                 AppSpacing.gapLg,
                 FilledButton(onPressed: onAction, child: Text(actionLabel!)),
               ],
+              if (secondaryActionLabel != null &&
+                  onSecondaryAction != null) ...[
+                AppSpacing.gapSm,
+                TextButton(
+                  onPressed: onSecondaryAction,
+                  child: Text(secondaryActionLabel!),
+                ),
+              ],
             ],
           ),
         ),
       ),
+    );
+
+    // Centred when it fits; scrollable when it does not, which on a small
+    // phone with large text it often will not.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedHeight) return content;
+
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: content,
+          ),
+        );
+      },
     );
   }
 }

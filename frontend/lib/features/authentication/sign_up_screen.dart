@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/errors/app_failure.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import 'auth_controller.dart';
 import 'widgets/auth_scaffold.dart';
@@ -53,16 +53,18 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (error != null) {
       FeedbackMessenger.error(
         context,
-        error is AppFailure ? error.message : 'Could not create your account.',
+        context.l10n.failure(error, fallback: context.l10n.signUpFailed),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AuthScaffold(
-      title: 'Create your account',
-      subtitle: 'Your records stay on this phone and back up to the cloud.',
+      title: l10n.signUpTitle,
+      subtitle: l10n.signUpSubtitle,
       onBack: () => context.pop(),
       children: [
         Form(
@@ -72,18 +74,18 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               TextFormField(
                 controller: _storeName,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Store name'),
+                decoration: InputDecoration(labelText: l10n.commonStoreName),
                 validator: (value) => (value == null || value.trim().length < 2)
-                    ? 'Enter your store name'
+                    ? l10n.commonEnterStoreName
                     : null,
               ),
               AppSpacing.gapLg,
               TextFormField(
                 controller: _fullName,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Your name'),
+                decoration: InputDecoration(labelText: l10n.commonYourName),
                 validator: (value) => (value == null || value.trim().length < 2)
-                    ? 'Enter your name'
+                    ? l10n.commonEnterYourName
                     : null,
               ),
               AppSpacing.gapLg,
@@ -91,9 +93,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(labelText: l10n.commonEmail),
                 validator: (value) => (value == null || !value.contains('@'))
-                    ? 'Enter your email'
+                    ? l10n.commonEnterEmail
                     : null,
               ),
               AppSpacing.gapLg,
@@ -104,8 +106,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
-                  labelText: 'Password',
-                  helperText: 'At least 8 characters',
+                  labelText: l10n.commonPassword,
+                  helperText: l10n.commonPasswordHint,
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _obscure = !_obscure),
                     icon: Icon(
@@ -113,11 +115,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           ? Icons.visibility_rounded
                           : Icons.visibility_off_rounded,
                     ),
-                    tooltip: _obscure ? 'Show password' : 'Hide password',
+                    tooltip: _obscure
+                        ? l10n.commonShowPassword
+                        : l10n.commonHidePassword,
                   ),
                 ),
                 validator: (value) => (value == null || value.length < 8)
-                    ? 'Use at least 8 characters'
+                    ? l10n.commonPasswordTooShort
                     : null,
               ),
             ],
@@ -131,7 +135,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   dimension: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Create account'),
+              : Text(l10n.signUpSubmit),
         ),
       ],
     );

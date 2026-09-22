@@ -20,6 +20,9 @@ class PageBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
+      // Wraps its content vertically. Without this it fills whatever height
+      // it is offered, which in a bottom bar means the whole screen.
+      heightFactor: 1,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(padding: padding, child: child),

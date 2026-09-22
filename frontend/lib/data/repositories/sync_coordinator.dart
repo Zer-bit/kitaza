@@ -7,7 +7,9 @@ import 'package:sqflite/sqflite.dart';
 import '../../core/config/app_config.dart';
 import '../../core/errors/app_failure.dart';
 import '../../core/storage/preferences_store.dart';
+import '../local/dao/error_report_dao.dart';
 import '../local/dao/sync_queue_dao.dart';
+import '../remote/diagnostics_api.dart';
 import '../remote/sync_api.dart';
 import 'data_revision.dart';
 import 'store_scope.dart';
@@ -151,6 +153,7 @@ class SyncCoordinator extends Notifier<SyncStatus> {
       _consecutiveFailures = 0;
       _retryAfter = null;
       if (pulledAnything) ref.read(dataRevisionProvider.notifier).bump();
+      await _uploadErrorReports();
 
       state = state.copyWith(
         phase: SyncPhase.idle,
@@ -184,6 +187,22 @@ class SyncCoordinator extends Notifier<SyncStatus> {
   Future<void> discardParked(int rowId) async {
     await SyncQueueDao(ref.read(databaseProvider)).drop(rowId);
     await refreshCounts();
+  }
+
+  /// Sends this phone's error reports while the connection is known to be
+  /// good. Best effort: a report that fails to send is simply kept for the
+  /// next sync, and never turns a successful sync into a failed one.
+  Future<void> _uploadErrorReports() async {
+    try {
+      final reports = ErrorReportDao(ref.read(databaseProvider));
+      final pending = await reports.pending();
+      if (pending.isEmpty) return;
+
+      await ref.read(diagnosticsApiProvider).upload(pending);
+      await reports.remove(pending.map((report) => report.id));
+    } on Object {
+      // Kept for next time.
+    }
   }
 
   static Duration _backoffFor(int failures) {

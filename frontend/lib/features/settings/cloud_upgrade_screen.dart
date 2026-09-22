@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/errors/app_failure.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/repositories/sync_coordinator.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import '../../shared/widgets/page_body.dart';
 import '../authentication/auth_controller.dart';
@@ -49,18 +49,14 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
       await ref.read(syncCoordinatorProvider.notifier).syncNow(force: true);
 
       if (!mounted) return;
-      FeedbackMessenger.success(context, 'Your store is now backed up.');
+      FeedbackMessenger.success(context, context.l10n.upgradeDone);
       context.pop();
-    } on AppFailure catch (failure) {
-      if (!mounted) return;
-      setState(() => _working = false);
-      FeedbackMessenger.error(context, failure.message);
-    } on Object {
+    } on Object catch (error) {
       if (!mounted) return;
       setState(() => _working = false);
       FeedbackMessenger.error(
         context,
-        'Could not back up right now. Nothing was changed.',
+        context.l10n.failure(error, fallback: context.l10n.upgradeFailed),
       );
     }
   }
@@ -68,9 +64,10 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Back up to the cloud')),
+      appBar: AppBar(title: Text(l10n.upgradeTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           child: PageBody(
@@ -80,17 +77,18 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Everything you have recorded on this phone stays, and is '
-                    'copied to your account. The app keeps working offline '
-                    'exactly as before.',
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text(l10n.upgradeIntro, style: theme.textTheme.bodyMedium),
                   AppSpacing.gapXl,
                   SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment(value: true, label: Text('New account')),
-                      ButtonSegment(value: false, label: Text('I have one')),
+                    segments: [
+                      ButtonSegment(
+                        value: true,
+                        label: Text(l10n.upgradeNewAccount),
+                      ),
+                      ButtonSegment(
+                        value: false,
+                        label: Text(l10n.upgradeExistingAccount),
+                      ),
                     ],
                     selected: {_createAccount},
                     showSelectedIcon: false,
@@ -100,8 +98,7 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
                   AppSpacing.gapLg,
                   if (!_createAccount) ...[
                     Text(
-                      'This phone\'s records will be added to the store on '
-                      'that account.',
+                      l10n.upgradeExistingNote,
                       style: theme.textTheme.bodySmall,
                     ),
                     AppSpacing.gapLg,
@@ -110,10 +107,10 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
                     autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(labelText: l10n.commonEmail),
                     validator: (value) =>
                         (value == null || !value.contains('@'))
-                        ? 'Enter your email'
+                        ? l10n.commonEnterEmail
                         : null,
                   ),
                   AppSpacing.gapLg,
@@ -128,9 +125,9 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: l10n.commonPassword,
                       helperText: _createAccount
-                          ? 'At least 8 characters'
+                          ? l10n.commonPasswordHint
                           : null,
                       suffixIcon: IconButton(
                         onPressed: () => setState(() => _obscure = !_obscure),
@@ -139,15 +136,17 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
                               ? Icons.visibility_rounded
                               : Icons.visibility_off_rounded,
                         ),
-                        tooltip: _obscure ? 'Show password' : 'Hide password',
+                        tooltip: _obscure
+                            ? l10n.commonShowPassword
+                            : l10n.commonHidePassword,
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter a password';
+                        return l10n.commonEnterPassword;
                       }
                       if (_createAccount && value.length < 8) {
-                        return 'Use at least 8 characters';
+                        return l10n.commonPasswordTooShort;
                       }
                       return null;
                     },
@@ -162,8 +161,8 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
                           )
                         : Text(
                             _createAccount
-                                ? 'Create account and back up'
-                                : 'Sign in and back up',
+                                ? l10n.upgradeCreateSubmit
+                                : l10n.upgradeSignInSubmit,
                           ),
                   ),
                 ],

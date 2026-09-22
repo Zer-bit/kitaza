@@ -162,6 +162,35 @@ Omit `cursor` for a full download. Keep pulling with the returned cursor while
   transaction starts, not when it commits; without the margin, a slow
   transaction could commit behind a cursor that has already moved past it.
 
+## Diagnostics
+
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/diagnostics/errors` | Error reports from a signed-in phone. |
+
+```json
+{
+  "reports": [{
+    "fingerprint": "3f9a1c7e",
+    "error_type": "StateError",
+    "message": "Bad state: No element",
+    "stack": "#0 ...",
+    "occurrences": 3,
+    "first_seen": "2026-09-22T01:00:00Z",
+    "last_seen": "2026-09-22T04:10:00Z",
+    "app_version": "1.0.0+1",
+    "platform": "android 14"
+  }]
+}
+```
+
+Returns `202 {"accepted": n}`. One to twenty reports per request; the message
+is capped at 2,000 characters and the stack at 16,000. A report for a
+fingerprint and app version the owner has sent before adds to the existing
+count rather than creating a new row, so a retried upload is harmless. Rate
+limited per owner (30 requests an hour), separately from sign-in, so a phone
+in a crash loop cannot lock its owner out.
+
 ## WebSocket
 
 ```

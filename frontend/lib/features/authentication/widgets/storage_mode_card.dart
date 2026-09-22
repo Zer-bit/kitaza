@@ -12,7 +12,7 @@ class StorageModeCard extends StatelessWidget {
     required this.description,
     required this.bullets,
     required this.onTap,
-    this.isRecommended = false,
+    this.badge,
   });
 
   final IconData icon;
@@ -20,7 +20,9 @@ class StorageModeCard extends StatelessWidget {
   final String description;
   final List<String> bullets;
   final VoidCallback onTap;
-  final bool isRecommended;
+
+  /// A short tag such as "Start here"; shown only on the suggested option.
+  final String? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,7 @@ class StorageModeCard extends StatelessWidget {
                   Expanded(
                     child: Text(title, style: theme.textTheme.titleLarge),
                   ),
-                  if (isRecommended)
+                  if (badge != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
@@ -53,7 +55,7 @@ class StorageModeCard extends StatelessWidget {
                         borderRadius: AppRadius.pillAll,
                       ),
                       child: Text(
-                        'Start here',
+                        badge!,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer,
                         ),

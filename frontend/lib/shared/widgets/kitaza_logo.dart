@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
+
 /// The Kitaza mark. Rendered from the same PNG the launcher icon and splash are
 /// generated from, so every appearance of the logo stays identical when the
 /// placeholder is replaced.
@@ -20,7 +22,7 @@ class KitazaLogo extends StatelessWidget {
         width: size,
         height: size,
         filterQuality: FilterQuality.medium,
-        semanticLabel: 'Kitaza',
+        semanticLabel: context.l10n.appName,
       ),
     );
   }

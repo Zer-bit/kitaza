@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/route_paths.dart';
-import '../../../core/formatting/day_formatter.dart';
 import '../../../data/repositories/sync_coordinator.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets/feedback_messenger.dart';
 import '../../authentication/auth_controller.dart';
 
@@ -16,20 +16,21 @@ class StorageStatusCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!ref.watch(isCloudModeProvider)) return const _LocalOnly();
-
     final status = ref.watch(syncCoordinatorProvider);
     final theme = Theme.of(context);
-
+    final l10n = context.l10n;
     return Card(
       child: Column(
         children: [
           ListTile(
             leading: const Icon(Icons.cloud_done_outlined),
-            title: const Text('Backed up to the cloud'),
+            title: Text(l10n.storageCloudTitle),
             subtitle: Text(
               status.lastSyncedAt == null
-                  ? 'Not synced yet'
-                  : 'Last synced ${DayFormatter.relative(status.lastSyncedAt!)}',
+                  ? l10n.storageNotSynced
+                  : l10n.storageLastSynced(
+                      l10n.relativeDay(status.lastSyncedAt!),
+                    ),
             ),
           ),
           if (status.hasPendingWork) ...[
@@ -39,8 +40,8 @@ class StorageStatusCard extends ConsumerWidget {
                 Icons.cloud_upload_outlined,
                 color: theme.colorScheme.secondary,
               ),
-              title: Text('${status.pendingCount} waiting to upload'),
-              subtitle: const Text('These go up as soon as you have signal.'),
+              title: Text(l10n.storagePending(status.pendingCount)),
+              subtitle: Text(l10n.storagePendingHint),
             ),
           ],
           if (status.needsAttention) ...[
@@ -51,10 +52,10 @@ class StorageStatusCard extends ConsumerWidget {
                 color: theme.colorScheme.error,
               ),
               title: Text(
-                '${status.parkedCount} could not be saved',
+                l10n.storageParked(status.parkedCount),
                 style: TextStyle(color: theme.colorScheme.error),
               ),
-              subtitle: const Text('Tap to see why and decide what to do'),
+              subtitle: Text(l10n.storageParkedHint),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(RoutePaths.syncProblems),
             ),
@@ -62,7 +63,7 @@ class StorageStatusCard extends ConsumerWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.sync_rounded),
-            title: const Text('Sync now'),
+            title: Text(l10n.storageSyncNow),
             onTap: () async {
               final coordinator = ref.read(syncCoordinatorProvider.notifier);
               await coordinator.syncNow(force: true);
@@ -70,13 +71,9 @@ class StorageStatusCard extends ConsumerWidget {
 
               final after = ref.read(syncCoordinatorProvider);
               if (after.phase == SyncPhase.idle) {
-                FeedbackMessenger.success(context, 'Everything is up to date.');
+                FeedbackMessenger.success(context, l10n.storageUpToDate);
               } else {
-                FeedbackMessenger.warn(
-                  context,
-                  after.lastError ??
-                      'Could not reach the cloud. Will try again.',
-                );
+                FeedbackMessenger.warn(context, l10n.storageUnreachable);
               }
             },
           ),
@@ -91,21 +88,21 @@ class _LocalOnly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Card(
       child: Column(
         children: [
-          const ListTile(
-            leading: Icon(Icons.phone_android_rounded),
-            title: Text('Saved on this phone only'),
-            subtitle: Text(
-              'If this phone is lost or broken, your records go with it.',
-            ),
+          ListTile(
+            leading: const Icon(Icons.phone_android_rounded),
+            title: Text(l10n.storageLocalTitle),
+            subtitle: Text(l10n.storageLocalRisk),
           ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.cloud_upload_outlined),
-            title: const Text('Back up to the cloud'),
-            subtitle: const Text('Keeps everything you have recorded so far'),
+            title: Text(l10n.storageBackUp),
+            subtitle: Text(l10n.storageBackUpHint),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(RoutePaths.cloudUpgrade),
           ),

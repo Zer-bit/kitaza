@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/route_paths.dart';
 import '../../../core/config/storage_mode.dart';
 import '../../../data/repositories/sync_coordinator.dart';
+import '../../../l10n/l10n.dart';
 import '../../authentication/auth_controller.dart';
 
 /// A small, honest status light. In local mode it says so rather than showing
@@ -16,9 +17,9 @@ class SyncIndicator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(currentSessionProvider);
     if (session == null || session.mode == StorageMode.local) {
-      return const _Chip(
+      return _Chip(
         icon: Icons.phone_android_rounded,
-        tooltip: 'Saved on this phone',
+        tooltip: context.l10n.syncSavedOnPhone,
       );
     }
 
@@ -28,7 +29,7 @@ class SyncIndicator extends ConsumerWidget {
     if (status.needsAttention) {
       return IconButton(
         onPressed: () => context.push(RoutePaths.syncProblems),
-        tooltip: '${status.parkedCount} could not be saved',
+        tooltip: context.l10n.storageParked(status.parkedCount),
         icon: Icon(
           Icons.sync_problem_rounded,
           size: 20,
@@ -38,28 +39,28 @@ class SyncIndicator extends ConsumerWidget {
     }
 
     return switch (status.phase) {
-      SyncPhase.syncing => const _Chip(
+      SyncPhase.syncing => _Chip(
         icon: Icons.sync_rounded,
-        tooltip: 'Syncing',
+        tooltip: context.l10n.syncSyncing,
         spinning: true,
       ),
       SyncPhase.offline => _Chip(
         icon: Icons.cloud_off_rounded,
         tooltip: status.hasPendingWork
-            ? '${status.pendingCount} waiting to sync'
-            : 'Offline',
+            ? context.l10n.syncWaiting(status.pendingCount)
+            : context.l10n.syncOffline,
       ),
-      SyncPhase.failed => const _Chip(
+      SyncPhase.failed => _Chip(
         icon: Icons.error_outline_rounded,
-        tooltip: 'Sync problem',
+        tooltip: context.l10n.syncProblem,
       ),
       SyncPhase.idle => _Chip(
         icon: status.hasPendingWork
             ? Icons.cloud_upload_outlined
             : Icons.cloud_done_outlined,
         tooltip: status.hasPendingWork
-            ? '${status.pendingCount} waiting to sync'
-            : 'Backed up',
+            ? context.l10n.syncWaiting(status.pendingCount)
+            : context.l10n.syncBackedUp,
       ),
     };
   }

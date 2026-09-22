@@ -2,12 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kitaza_app/data/local/dao/dashboard_dao.dart';
 import 'package:kitaza_app/data/local/dao/product_dao.dart';
 import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
+import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:kitaza_app/data/models/payment_method.dart';
 import 'package:kitaza_app/data/models/product.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
 import 'package:kitaza_app/data/repositories/sale_repository.dart';
 import 'package:kitaza_app/data/repositories/withdrawal_repository.dart';
-import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../support/in_memory_database.dart';

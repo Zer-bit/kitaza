@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/repositories/sale_repository.dart';
+import '../../../l10n/l10n.dart';
 
 class CartLineTile extends StatelessWidget {
   const CartLineTile({
@@ -44,9 +45,12 @@ class CartLineTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(line.productName, style: theme.textTheme.titleMedium),
                   Text(
-                    '${PesoFormatter.format(line.unitPrice)} each',
+                    context.l10n.displayProductName(line.productName),
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  Text(
+                    context.l10n.saleEach(PesoFormatter.format(line.unitPrice)),
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -97,7 +101,7 @@ class _QuantityStepper extends StatelessWidget {
             onPressed: () => onChanged(quantity - 1),
             icon: const Icon(Icons.remove_rounded, size: 20),
             visualDensity: VisualDensity.compact,
-            tooltip: 'Less',
+            tooltip: context.l10n.saleLess,
           ),
           SizedBox(
             width: 28,
@@ -111,7 +115,7 @@ class _QuantityStepper extends StatelessWidget {
             onPressed: () => onChanged(quantity + 1),
             icon: const Icon(Icons.add_rounded, size: 20),
             visualDensity: VisualDensity.compact,
-            tooltip: 'More',
+            tooltip: context.l10n.saleMore,
           ),
         ],
       ),

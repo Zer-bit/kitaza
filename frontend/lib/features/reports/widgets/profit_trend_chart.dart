@@ -5,6 +5,7 @@ import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/report_models.dart';
+import '../../../l10n/l10n.dart';
 
 /// Daily net profit for the last two weeks.
 ///
@@ -48,32 +49,37 @@ class _ProfitTrendChartState extends State<ProfitTrendChart> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Daily profit, last 14 days',
+              context.l10n.reportTrendTitle,
               style: theme.textTheme.titleMedium,
             ),
             AppSpacing.gapXs,
             Text(
               focused == null
-                  ? 'Tap a bar to see that day'
-                  : '${DayFormatter.dayMonth(focused.day)} · '
-                        '${PesoFormatter.signed(focused.netProfit)}',
+                  ? context.l10n.reportTrendHint
+                  : context.l10n.commonSeparator(
+                      DayFormatter.dayMonth(focused.day),
+                      PesoFormatter.signed(focused.netProfit),
+                    ),
               style: theme.textTheme.bodySmall,
             ),
             AppSpacing.gapLg,
-            SizedBox(
-              height: 168,
-              child: LayoutBuilder(
-                builder: (context, constraints) => GestureDetector(
-                  onTapDown: (details) => _focusBar(details, constraints),
-                  child: CustomPaint(
-                    size: Size(constraints.maxWidth, constraints.maxHeight),
-                    painter: _TrendPainter(
-                      points: widget.points,
-                      profitColor: profitColor,
-                      lossColor: lossColor,
-                      axisColor: theme.colorScheme.outline,
-                      labelStyle: theme.textTheme.labelSmall!,
-                      focusedIndex: _focusedIndex,
+            Semantics(
+              label: _spokenSummary(context),
+              child: SizedBox(
+                height: 168,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => GestureDetector(
+                    onTapDown: (details) => _focusBar(details, constraints),
+                    child: CustomPaint(
+                      size: Size(constraints.maxWidth, constraints.maxHeight),
+                      painter: _TrendPainter(
+                        points: widget.points,
+                        profitColor: profitColor,
+                        lossColor: lossColor,
+                        axisColor: theme.colorScheme.outline,
+                        labelStyle: theme.textTheme.labelSmall!,
+                        focusedIndex: _focusedIndex,
+                      ),
                     ),
                   ),
                 ),
@@ -82,6 +88,29 @@ class _ProfitTrendChartState extends State<ProfitTrendChart> {
           ],
         ),
       ),
+    );
+  }
+
+  /// What a screen reader says instead of drawing bars: the span, and the
+  /// best and worst days, which is what a sighted owner takes from the chart
+  /// at a glance.
+  String _spokenSummary(BuildContext context) {
+    final l10n = context.l10n;
+    if (widget.points.isEmpty) return l10n.reportTrendTitle;
+
+    final best = widget.points.reduce(
+      (a, b) => a.netProfit >= b.netProfit ? a : b,
+    );
+    final worst = widget.points.reduce(
+      (a, b) => a.netProfit <= b.netProfit ? a : b,
+    );
+
+    return l10n.reportTrendSummary(
+      widget.points.length,
+      DayFormatter.dayMonth(best.day),
+      PesoFormatter.signed(best.netProfit),
+      DayFormatter.dayMonth(worst.day),
+      PesoFormatter.signed(worst.netProfit),
     );
   }
 

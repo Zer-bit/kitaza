@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/l10n.dart';
 
 /// The three buttons the whole product is built around: Add Sale, Add Expense,
 /// Check Profit. They are the largest tap targets on the screen and never move.
@@ -24,7 +25,7 @@ class QuickActionBar extends StatelessWidget {
           flex: 2,
           child: _PrimaryAction(
             icon: Icons.add_shopping_cart_rounded,
-            label: 'Add sale',
+            label: context.l10n.actionAddSale,
             onPressed: onRecordSale,
           ),
         ),
@@ -32,7 +33,7 @@ class QuickActionBar extends StatelessWidget {
         Expanded(
           child: _SecondaryAction(
             icon: Icons.remove_circle_outline_rounded,
-            label: 'Expense',
+            label: context.l10n.actionExpense,
             onPressed: onRecordExpense,
           ),
         ),
@@ -40,7 +41,7 @@ class QuickActionBar extends StatelessWidget {
         Expanded(
           child: _SecondaryAction(
             icon: Icons.insights_rounded,
-            label: 'Profit',
+            label: context.l10n.actionProfit,
             onPressed: onViewReports,
           ),
         ),

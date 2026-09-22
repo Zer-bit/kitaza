@@ -25,14 +25,6 @@ class Sale {
 
   double get profitAmount => totalAmount - costAmount;
 
-  /// A one-line description for history rows: the product when there is only
-  /// one, otherwise a count.
-  String get summaryLabel => switch (lines.length) {
-    0 => 'Sale',
-    1 => lines.first.productName,
-    final count => '$count items',
-  };
-
   Sale withLines(List<SaleLine> value) => Sale(
     id: id,
     paymentMethod: paymentMethod,

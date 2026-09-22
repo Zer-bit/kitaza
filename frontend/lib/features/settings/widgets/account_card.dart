@@ -5,6 +5,7 @@ import '../../../data/local/dao/sync_queue_dao.dart';
 import '../../../data/models/auth_session.dart';
 import '../../../data/repositories/store_scope.dart';
 import '../../../data/repositories/sync_coordinator.dart';
+import '../../../l10n/l10n.dart';
 import '../../authentication/auth_controller.dart';
 
 class AccountCard extends ConsumerWidget {
@@ -20,12 +21,14 @@ class AccountCard extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.person_outline_rounded),
             title: Text(session.owner.fullName),
-            subtitle: Text(session.owner.email ?? 'Offline profile'),
+            subtitle: Text(
+              session.owner.email ?? context.l10n.accountOfflineProfile,
+            ),
           ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout_rounded),
-            title: const Text('Sign out'),
+            title: Text(context.l10n.accountSignOut),
             onTap: () => _signOut(context, ref),
           ),
         ],
@@ -46,14 +49,11 @@ class AccountCard extends ConsumerWidget {
           await SyncQueueDao(ref.read(databaseProvider)).parkedCount();
     }
     if (!context.mounted) return;
-
+    final l10n = context.l10n;
     final message = switch ((session.isCloud, unsent)) {
-      (false, _) => 'Your records are only on this phone. Signing out erases them for good.',
-      (true, 0) => 'Everything is backed up. Sign back in on any phone to pick up where you left off.',
-      (true, final count) =>
-        '$count change${count == 1 ? " has" : "s have"} not reached the cloud '
-            'yet, and will be lost if you sign out now. Try again when you '
-            'have signal.',
+      (false, _) => l10n.accountSignOutLocal,
+      (true, 0) => l10n.accountSignOutClean,
+      (true, final count) => l10n.accountSignOutUnsent(count),
     };
 
     final destructive = !session.isCloud || unsent > 0;
@@ -61,12 +61,12 @@ class AccountCard extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Sign out?'),
+        title: Text(l10n.accountSignOutTitle),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             style: destructive
@@ -78,7 +78,9 @@ class AccountCard extends ConsumerWidget {
                   )
                 : null,
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(destructive ? 'Erase and sign out' : 'Sign out'),
+            child: Text(
+              destructive ? l10n.accountEraseAndSignOut : l10n.accountSignOut,
+            ),
           ),
         ],
       ),

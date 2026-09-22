@@ -1,6 +1,7 @@
 use crate::config::AppSettings;
 use crate::features::authentication::{AuthService, TokenIssuer};
 use crate::features::dashboard::{DashboardRepository, DashboardService};
+use crate::features::diagnostics::{DiagnosticsRepository, DiagnosticsService};
 use crate::features::expenses::{ExpenseRepository, ExpenseService};
 use crate::features::inventory::{InventoryService, StockRepository};
 use crate::features::products::{ProductRepository, ProductService};
@@ -31,6 +32,7 @@ pub struct AppState {
     pub dashboard_service: DashboardService,
     pub report_service: ReportService,
     pub sync_service: SyncService,
+    pub diagnostics_service: DiagnosticsService,
 }
 
 impl AppState {
@@ -86,8 +88,16 @@ impl AppState {
             },
         );
 
+        // Separate from login throttling: a phone in a crash loop must not
+        // be able to lock its owner out of signing in.
+        let diagnostics_service = DiagnosticsService::new(
+            DiagnosticsRepository::new(pool.clone()),
+            RateLimiter::new(cache.clone(), 30, 3600),
+        );
+
         Self {
             cache_enabled: cache.is_enabled(),
+            diagnostics_service,
             auth_service: AuthService::new(
                 crate::features::authentication::AuthRepository::new(pool.clone()),
                 token_issuer.clone(),

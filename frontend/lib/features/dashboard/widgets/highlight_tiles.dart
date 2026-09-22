@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/formatting/peso_formatter.dart';
+import '../../../core/formatting/quantity_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/dashboard_summary.dart';
+import '../../../l10n/l10n.dart';
 
 class BestSellerTile extends StatelessWidget {
   const BestSellerTile({super.key, required this.bestSeller});
@@ -26,19 +28,20 @@ class BestSellerTile extends StatelessWidget {
             color: theme.colorScheme.onSecondaryContainer,
           ),
         ),
-        title: Text(bestSeller.productName),
+        title: Text(context.l10n.displayProductName(bestSeller.productName)),
         subtitle: Text(
-          '${_quantity(bestSeller.quantitySold)} sold · '
-          '${PesoFormatter.format(bestSeller.revenue)}',
+          context.l10n.dashboardSoldSummary(
+            QuantityFormatter.exact(bestSeller.quantitySold),
+            PesoFormatter.format(bestSeller.revenue),
+          ),
         ),
-        trailing: Text('Top seller', style: theme.textTheme.labelMedium),
+        trailing: Text(
+          context.l10n.dashboardTopSeller,
+          style: theme.textTheme.labelMedium,
+        ),
       ),
     );
   }
-
-  String _quantity(double value) => value == value.roundToDouble()
-      ? value.toInt().toString()
-      : value.toStringAsFixed(2);
 }
 
 class LowStockTile extends StatelessWidget {
@@ -65,8 +68,8 @@ class LowStockTile extends StatelessWidget {
             color: theme.colorScheme.onErrorContainer,
           ),
         ),
-        title: Text('$count product${count == 1 ? '' : 's'} running low'),
-        subtitle: const Text('Tap to see what needs restocking'),
+        title: Text(context.l10n.dashboardLowStock(count)),
+        subtitle: Text(context.l10n.dashboardLowStockHint),
         trailing: const Icon(Icons.chevron_right_rounded),
       ),
     );

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/route_paths.dart';
-import '../../core/errors/app_failure.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import 'auth_controller.dart';
 import 'widgets/auth_scaffold.dart';
@@ -45,16 +45,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     if (error != null) {
       FeedbackMessenger.error(
         context,
-        error is AppFailure ? error.message : 'Could not sign in.',
+        context.l10n.failure(error, fallback: context.l10n.signInFailed),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AuthScaffold(
-      title: 'Welcome back',
-      subtitle: 'Sign in once. This device will remember you.',
+      title: l10n.signInTitle,
+      subtitle: l10n.signInSubtitle,
       onBack: () => context.pop(),
       children: [
         Form(
@@ -65,9 +67,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(labelText: l10n.commonEmail),
                 validator: (value) => (value == null || !value.contains('@'))
-                    ? 'Enter your email'
+                    ? l10n.commonEnterEmail
                     : null,
               ),
               AppSpacing.gapLg,
@@ -78,7 +80,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: l10n.commonPassword,
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _obscure = !_obscure),
                     icon: Icon(
@@ -86,11 +88,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ? Icons.visibility_rounded
                           : Icons.visibility_off_rounded,
                     ),
-                    tooltip: _obscure ? 'Show password' : 'Hide password',
+                    tooltip: _obscure
+                        ? l10n.commonShowPassword
+                        : l10n.commonHidePassword,
                   ),
                 ),
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'Enter your password'
+                    ? l10n.commonEnterPassword
                     : null,
               ),
             ],
@@ -104,12 +108,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   dimension: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Sign in'),
+              : Text(l10n.signInSubmit),
         ),
         AppSpacing.gapMd,
         TextButton(
           onPressed: () => context.push(RoutePaths.signUp),
-          child: const Text('Create a new account'),
+          child: Text(l10n.signInCreateAccount),
         ),
       ],
     );

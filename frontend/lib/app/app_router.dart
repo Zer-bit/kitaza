@@ -116,8 +116,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RoutePaths.productEditor,
-        builder: (context, state) =>
-            ProductEditorScreen(productId: state.uri.queryParameters['id']),
+        builder: (context, state) => ProductEditorScreen(
+          productId: state.uri.queryParameters['id'],
+          initialBarcode: state.uri.queryParameters['barcode'],
+        ),
       ),
       GoRoute(
         path: RoutePaths.withdrawals,

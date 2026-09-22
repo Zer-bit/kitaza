@@ -70,6 +70,25 @@ class ProductDao {
     return rows.isEmpty ? null : Product.fromRow(rows.first);
   }
 
+  /// Exact match only: a scanned code either is a product or is not.
+  Future<Product?> findByBarcode(String storeId, String barcode) async {
+    final rows = await _db.query(
+      'products',
+      where: 'store_id = ? AND barcode = ? AND deleted_at IS NULL',
+      whereArgs: [storeId, barcode.trim()],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : Product.fromRow(rows.first);
+  }
+
+  Future<int> count(String storeId) async {
+    final result = await _db.rawQuery(
+      'SELECT COUNT(*) AS total FROM products WHERE store_id = ? AND deleted_at IS NULL',
+      [storeId],
+    );
+    return (result.first['total'] as int?) ?? 0;
+  }
+
   Future<int> lowStockCount(String storeId) async {
     final result = await _db.rawQuery(
       '''

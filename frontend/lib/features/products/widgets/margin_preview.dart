@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/l10n.dart';
 
 /// Shows the profit per unit as the owner types the two prices. Catching a
 /// losing price here is far better than discovering it in a monthly report.
@@ -41,9 +42,13 @@ class MarginPreview extends StatelessWidget {
           Expanded(
             child: Text(
               isLoss
-                  ? 'You would lose ${PesoFormatter.format(margin.abs())} per sale'
-                  : 'You earn ${PesoFormatter.format(margin)} '
-                        '(${percent.toStringAsFixed(0)}%) per sale',
+                  ? context.l10n.productWouldLose(
+                      PesoFormatter.format(margin.abs()),
+                    )
+                  : context.l10n.productEarns(
+                      PesoFormatter.format(margin),
+                      percent.toStringAsFixed(0),
+                    ),
               style: theme.textTheme.bodyMedium?.copyWith(color: color),
             ),
           ),

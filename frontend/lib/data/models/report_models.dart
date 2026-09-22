@@ -1,3 +1,5 @@
+import 'expense_category.dart';
+
 class DailyProfitPoint {
   const DailyProfitPoint({
     required this.day,
@@ -28,12 +30,12 @@ class ProductPerformance {
 
 class ExpenseSlice {
   const ExpenseSlice({
-    required this.categoryName,
+    required this.category,
     required this.totalAmount,
     required this.entryCount,
   });
 
-  final String categoryName;
+  final ExpenseCategory category;
   final double totalAmount;
   final int entryCount;
 }
@@ -41,14 +43,16 @@ class ExpenseSlice {
 /// An expense well outside the store's own normal range for its category.
 class UnusualExpense {
   const UnusualExpense({
-    required this.label,
+    required this.category,
+    this.description,
     required this.amount,
     required this.categoryAverage,
     required this.timesAboveAverage,
     required this.occurredAt,
   });
 
-  final String label;
+  final ExpenseCategory category;
+  final String? description;
   final double amount;
   final double categoryAverage;
   final double timesAboveAverage;

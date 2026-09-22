@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/errors/app_failure.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/l10n.dart';
 
 /// One place that decides how loading and failure look, so every screen
 /// handles them the same way.
@@ -30,9 +30,7 @@ class AsyncContent<T> extends StatelessWidget {
         ),
         AsyncError(:final error) => _FailureView(
           key: const ValueKey('error'),
-          message: error is AppFailure
-              ? error.message
-              : 'Something went wrong. Please try again.',
+          message: context.l10n.failure(error),
           onRetry: onRetry,
         ),
         _ => const Center(
@@ -79,7 +77,7 @@ class _FailureView extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try again'),
+                label: Text(context.l10n.commonTryAgain),
               ),
             ],
           ],

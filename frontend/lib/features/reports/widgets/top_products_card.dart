@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/report_models.dart';
+import '../../../l10n/l10n.dart';
 
 /// Ranked by profit, not revenue. The item that sells most is often not the
 /// item that earns most, and that gap is the most useful thing this screen
@@ -26,7 +27,7 @@ class TopProductsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Where your profit comes from',
+              context.l10n.reportTopProducts,
               style: theme.textTheme.titleMedium,
             ),
             AppSpacing.gapMd,
@@ -59,7 +60,7 @@ class _ProductRow extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  product.productName,
+                  context.l10n.displayProductName(product.productName),
                   style: theme.textTheme.bodyLarge,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

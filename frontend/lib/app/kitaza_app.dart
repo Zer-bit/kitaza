@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../core/config/app_config.dart';
+import '../core/localization/locale_controller.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
+import '../l10n/l10n.dart';
 import 'app_router.dart';
 
 class KitazaApp extends ConsumerWidget {
@@ -11,8 +15,20 @@ class KitazaApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final chosenLocale = ref.watch(localeControllerProvider);
+
     return MaterialApp.router(
       title: AppConfig.appName,
+      locale: chosenLocale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      localeListResolutionCallback: (preferred, _) =>
+          chosenLocale ?? LocaleController.resolve(preferred),
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(appRouterProvider),
       theme: AppTheme.light(),
@@ -23,6 +39,9 @@ class KitazaApp extends ConsumerWidget {
       themeAnimationDuration: const Duration(milliseconds: 280),
       themeAnimationCurve: Curves.easeOutCubic,
       builder: (context, child) {
+        // Dates and month names outside Material widgets follow this.
+        Intl.defaultLocale = Localizations.localeOf(context).toLanguageTag();
+
         // Honour the system font size, but stop at a scale that would break
         // the money layouts.
         final scale = MediaQuery.textScalerOf(context)

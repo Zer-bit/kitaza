@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/utils/responsive.dart';
+import '../../data/local/backup/automatic_backup.dart';
 import '../../data/repositories/realtime_connection.dart';
 import '../../data/repositories/sync_coordinator.dart';
+import '../../l10n/l10n.dart';
 import 'navigation_destinations.dart';
 
 /// Holds the persistent navigation around every signed-in screen. A bottom bar
@@ -23,6 +25,7 @@ class HomeShell extends ConsumerWidget {
     // reason to rebuild the navigation.
     ref.listen(syncCoordinatorProvider, (_, _) {});
     ref.watch(realtimeConnectionProvider);
+    ref.listen(automaticBackupProvider, (_, _) {});
 
     final index = _indexFor(GoRouterState.of(context).matchedLocation);
 
@@ -37,7 +40,7 @@ class HomeShell extends ConsumerWidget {
               NavigationDestination(
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.selectedIcon),
-                label: destination.label,
+                label: destination.label(context.l10n),
               ),
           ],
         ),
@@ -58,7 +61,7 @@ class HomeShell extends ConsumerWidget {
                 NavigationRailDestination(
                   icon: Icon(destination.icon),
                   selectedIcon: Icon(destination.selectedIcon),
-                  label: Text(destination.label),
+                  label: Text(destination.label(context.l10n)),
                 ),
             ],
           ),

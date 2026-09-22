@@ -16,7 +16,7 @@ void main() {
       );
 
       expect(health.rating, HealthRating.yellow);
-      expect(health.headline, contains('No sales'));
+      expect(health.hasSales, isFalse);
     });
 
     test('a profitable, improving store rates green', () {
@@ -46,10 +46,7 @@ void main() {
       );
 
       expect(health.rating, HealthRating.red);
-      expect(
-        health.reasons.any((reason) => reason.contains('more than you sold')),
-        isTrue,
-      );
+      expect(health.reasons.whereType<SpentMoreThanSold>().single.amount, 1200);
     });
 
     test('withdrawing more than the profit is called out', () {
@@ -64,8 +61,8 @@ void main() {
       );
 
       expect(
-        health.reasons.any((reason) => reason.contains('withdrew')),
-        isTrue,
+        health.reasons.whereType<WithdrewMoreThanProfit>().single.amount,
+        3000,
       );
     });
 

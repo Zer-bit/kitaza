@@ -53,21 +53,37 @@ class ApiClient {
   }
 
   AppFailure _translate(DioException error) {
+    final status = error.response?.statusCode;
+    // Sign-in and sign-up send no token, so a 401 there means "wrong
+    // password", not "your session expired".
+    final anonymous = error.requestOptions.extra['skipAuth'] == true;
+
     return switch (error.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout ||
       DioExceptionType.connectionError => const AppFailure.offline(),
-      _ => switch (error.response?.statusCode) {
-        401 => const AppFailure.unauthorized(),
-        final int status when status >= 500 => AppFailure(
-          'The Kitaza server is having trouble. Your data is safe on this device.',
-          kind: FailureKind.server,
-          cause: error,
-        ),
-        _ => AppFailure(_messageFrom(error), cause: error),
-      },
+      _ when status == 401 && !anonymous => const AppFailure.unauthorized(),
+      _ when status != null && status >= 500 => AppFailure(
+        'The Kitaza server is having trouble.',
+        kind: FailureKind.server,
+        cause: error,
+      ),
+      _ => AppFailure(
+        _messageFrom(error),
+        code: _codeFrom(error),
+        cause: error,
+      ),
     };
+  }
+
+  String? _codeFrom(DioException error) {
+    final body = error.response?.data;
+    if (body is Map && body['error'] is Map) {
+      final code = (body['error'] as Map)['code'];
+      if (code is String) return code;
+    }
+    return null;
   }
 
   String _messageFrom(DioException error) {

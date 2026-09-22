@@ -25,6 +25,11 @@ take about five seconds each.
 | **Inventory** | Stock in and out, automatic deduction on sale, low-stock warnings. |
 | **Reports** | Profit trend, which products earn, where money goes, unusual spending. |
 | **Offline or cloud** | Chosen at setup. Both are fully usable with no signal. |
+| **English and Filipino** | Follows the phone, or chosen in Settings. |
+| **Barcode scanning** | Camera checkout scanning, or a USB/Bluetooth barcode gun. |
+| **Receipts** | Shared by Messenger/Viber/SMS, or printed on a Bluetooth thermal printer. |
+| **Backups** | Daily copies on the phone, an exportable backup file, and restore onto a new phone. |
+| **Starter catalogue** | 23 common sari-sari items to pick from on day one. |
 
 ## The three things that shape the whole design
 
@@ -68,8 +73,11 @@ kitaza/
 │       └── shared/         Reusable widgets
 ├── docs/
 │   ├── IMPLEMENTATION_PLAN.md   Phased build plan
-│   └── ARCHITECTURE.md          How the pieces fit and why
-└── docker-compose.yml  Postgres + Redis + API
+│   ├── ARCHITECTURE.md          How the pieces fit and why
+│   ├── API.md                   HTTP and WebSocket reference
+│   └── OPERATIONS.md            Backups, restores, error reports
+├── infra/backup/       Scheduled pg_dump and a guarded restore
+└── docker-compose.yml  Postgres + Redis + API + daily backups
 ```
 
 Both codebases are organised **by feature, not by layer**, and every feature
@@ -141,9 +149,13 @@ make test-contract      # two simulated phones syncing through a running API
 | Suite | Tests | Needs |
 |---|---|---|
 | Rust unit | 22 | nothing |
-| Rust integration | 15 | Postgres (`TEST_DATABASE_URL`, defaults to the compose one) |
-| Flutter | 62 | nothing — SQLite runs in memory |
+| Rust integration | 19 | Postgres (`TEST_DATABASE_URL`, defaults to the compose one) |
+| Flutter | 241 | nothing — SQLite runs in memory or in a temp folder |
 | Sync contract | 1 | a running API (`CONTRACT_API`) |
+
+The Flutter suite includes an accessibility audit: every main screen on a small
+phone at 1.4× text, light and dark, English and Filipino, empty and busy,
+against Flutter's tap-target, labelling and contrast guidelines.
 
 The integration and contract suites are what prove sync works: pushes replay
 safely, stock counts converge across devices, and a new device receives every

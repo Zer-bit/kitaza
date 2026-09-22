@@ -16,10 +16,6 @@ class Expense {
   final double amount;
   final DateTime occurredAt;
 
-  String get displayLabel => (description == null || description!.isEmpty)
-      ? category.label
-      : description!;
-
   Map<String, Object?> toRow() => {
     'id': id,
     'category': category.wireName,

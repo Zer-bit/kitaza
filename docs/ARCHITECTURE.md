@@ -237,6 +237,88 @@ floating-point traps.
 
 ---
 
+## Languages
+
+English and Filipino, from ARB files in `frontend/lib/l10n/`, reached through
+`context.l10n`. Two rules keep it honest:
+
+- **The data layer never produces display text.** A health reason is a typed
+  value (`SpentMoreThanSold(1200)`), an expense category an enum, and the
+  words are chosen at the screen. The alternative — English sentences built
+  deep in the data layer — cannot be translated.
+- **Stored data is never translated.** A keypad sale is saved as the fixed
+  name `Quick sale` and shown as *Mabilisang benta* to a Filipino reader,
+  because the same row syncs to devices set to different languages.
+
+Server errors reach the owner through their machine-readable `code`
+(`conflict`, `too_many_requests`...), mapped to translated text on the phone.
+
+One trap worth knowing: in Filipino grammar the plural category *one* covers
+1, 2, 3, 5, 7, 8, 11, 23… So an ICU branch written as `=1{1 benta}` displays
+"1" for most counts. Filipino messages use only `other{{count} …}`, and a test
+renders every count message for 1–30 in both languages.
+
+---
+
+## Schema migrations (phone)
+
+`SchemaMigrations` holds every change since version 1 as a numbered step. A
+new install builds version 1 and runs the same steps an upgrading phone runs,
+so the two can never diverge — a test compares a fresh schema with an upgraded
+one statement by statement. Released steps are never edited.
+
+---
+
+## Backups
+
+The phone copies its own database: daily (a week kept), on demand for export,
+and back in on restore.
+
+- **Checkpoint, copy, verify.** `VACUUM INTO` needs SQLite 3.27 and Android 10
+  ships 3.22, so the write-ahead log is folded into the main file, the file is
+  copied, and the copy must pass `integrity_check`. A test proves the
+  checkpoint matters: without it, copies miss recent writes and even whole
+  tables.
+- **Inspect before replacing.** A candidate file is opened read-only from a
+  scratch copy and must have Kitaza's tables, a schema version this app can
+  read, and a clean integrity check. The owner sees the store name, sale count
+  and last entry before confirming.
+- **Restore by restart.** Every provider holds the open database, so rather
+  than patch each one, `AppRestarter` closes it, swaps the file, reopens and
+  rebuilds the app from scratch — the same path as a fresh launch.
+
+The server side is `pg_dump` on a schedule; see `OPERATIONS.md`.
+
+---
+
+## Error reports
+
+`ErrorReporter` takes over Flutter's and the platform's uncaught-error hooks.
+It must never throw and never recurse, so every write is guarded and a failure
+to record is dropped. Reports are fingerprinted by error type plus the app's
+own top stack frames (frame numbers stripped, so async gaps do not split one
+bug in two), repeats increment a counter, and at most fifty are kept. Cloud
+phones upload after a successful sync and delete only what the server
+accepted; the endpoint upserts on fingerprint and version, so retries are
+harmless.
+
+---
+
+## Receipts and scanning
+
+A receipt is laid out once, as fixed-width lines, and both outputs start from
+that layout: shared text keeps the ₱ sign; the printer path swaps it for "P"
+and transliterates to ASCII, because thermal printers use single-byte
+character sets. The ESC/POS encoder uses only the commands every printer
+supports, and the exact bytes are tested.
+
+The camera and the Bluetooth printer sit behind providers
+(`barcodeScannerProvider`, `receiptPrinterProvider`), so every flow around them
+is tested with fakes. The hardware links themselves are the only untested
+parts.
+
+---
+
 ## Theme and accessibility
 
 One description generates both themes, so light and dark cannot drift apart.
@@ -246,6 +328,13 @@ trustworthy and survives daylight, with a warm amber accent. Body text starts
 at 16pt and money never drops below 20pt, because small type is the most
 common reason an owner hands the phone to someone younger. Tap targets have a
 52px floor. System text scaling is honoured up to 1.4×.
+
+The audit is automated: every main screen is rendered on a 360×640 phone at
+1.4× text, in both themes and both languages, empty and full of data, and
+checked against Flutter's tap-target, labelling and text-contrast guidelines.
+A separate test measures the contrast ratio of every text/background pair in
+the palette. Taps in tests that land on nothing fail the test outright, so a
+button scrolled off screen can never pass by accident.
 
 **Colour is never the only signal.** The health rating ships with an icon, the
 word Good / Average / Warning, a numeric score and written reasons.

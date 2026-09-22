@@ -7,3 +7,8 @@ analyzer:
     - ios/**
     - web/**
     - linux/**
+
+linter:
+  rules:
+    # Imports grouped and sorted the same way in every file.
+    directives_ordering: true

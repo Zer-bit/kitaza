@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kitaza_app/core/diagnostics/error_reporter.dart';
 import 'package:kitaza_app/core/storage/preferences_store.dart';
 import 'package:kitaza_app/data/local/dao/dashboard_dao.dart';
+import 'package:kitaza_app/data/local/dao/error_report_dao.dart';
 import 'package:kitaza_app/data/local/dao/product_dao.dart';
 import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:kitaza_app/data/remote/api_client.dart';
-import 'package:kitaza_app/data/remote/sync_api.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
 import 'package:kitaza_app/data/repositories/product_repository.dart';
 import 'package:kitaza_app/data/repositories/sale_repository.dart';
@@ -61,7 +62,8 @@ class Device {
       overrides: [
         databaseProvider.overrideWithValue(db),
         preferencesStoreProvider.overrideWithValue(preferences),
-        syncApiProvider.overrideWithValue(SyncApi(ApiClient(dio))),
+        // One client for every API, as in the real app.
+        apiClientProvider.overrideWithValue(ApiClient(dio)),
         connectivityChangesProvider.overrideWithValue(const Stream.empty()),
       ],
     );
@@ -168,10 +170,18 @@ void main() {
         reorderLevel: 6,
       );
 
+      // The tablet also hit a bug along the way.
+      await ErrorReporter(appVersion: '1.0.0+1', platform: 'contract-test')
+          .let((reporter) => reporter..attach(counter.db))
+          .record(StateError('contract test error'), StackTrace.current);
+
       final uploaded = await counter.sync();
       expect(uploaded.phase, SyncPhase.idle, reason: uploaded.lastError);
       expect(await SyncQueueDao(counter.db).pendingCount(), 0);
       expect(await SyncQueueDao(counter.db).parkedCount(), 0);
+      // Reports are only deleted once the server has accepted them, so an
+      // empty table proves the real endpoint took the phone's format.
+      expect(await ErrorReportDao(counter.db).count(), 0);
 
       await _outlastSettleWindow();
 
@@ -212,4 +222,8 @@ void main() {
         : false,
     timeout: const Timeout(Duration(minutes: 2)),
   );
+}
+
+extension<T> on T {
+  R let<R>(R Function(T) block) => block(this);
 }

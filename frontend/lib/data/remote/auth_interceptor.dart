@@ -43,8 +43,12 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final isUnauthorized = err.response?.statusCode == 401;
     final alreadyRetried = err.requestOptions.extra['retried'] == true;
+    // A rejected sign-in is a wrong password. Trying to refresh a session
+    // there would, at best, waste a request and, at worst, clear the tokens
+    // of an owner who is still signed in on this device.
+    final anonymous = err.requestOptions.extra['skipAuth'] == true;
 
-    if (!isUnauthorized || alreadyRetried) {
+    if (!isUnauthorized || alreadyRetried || anonymous) {
       return handler.next(err);
     }
 

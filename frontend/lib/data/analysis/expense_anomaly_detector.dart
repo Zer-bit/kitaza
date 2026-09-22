@@ -28,7 +28,7 @@ abstract final class ExpenseAnomalyDetector {
           entries.length;
       if (average <= 0) return;
 
-      final label = ExpenseCategory.parse(category).label;
+      final kind = ExpenseCategory.parse(category);
 
       for (final (amount, at, description) in entries) {
         final ratio = amount / average;
@@ -36,7 +36,8 @@ abstract final class ExpenseAnomalyDetector {
 
         flagged.add(
           UnusualExpense(
-            label: description?.isNotEmpty == true ? description! : label,
+            category: kind,
+            description: description?.isNotEmpty == true ? description : null,
             amount: amount,
             categoryAverage: average,
             timesAboveAverage: double.parse(ratio.toStringAsFixed(1)),

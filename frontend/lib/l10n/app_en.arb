@@ -1,0 +1,646 @@
+{
+  "@@locale": "en",
+  "appName": "Kitaza",
+  "tagline": "Know where every peso goes",
+  "commonCancel": "Cancel",
+  "commonBack": "Back",
+  "commonTryAgain": "Try again",
+  "commonSave": "Save",
+  "commonAmount": "Amount",
+  "commonEnterAmount": "Enter an amount",
+  "commonEmail": "Email",
+  "commonEnterEmail": "Enter your email",
+  "commonPassword": "Password",
+  "commonEnterPassword": "Enter your password",
+  "commonPasswordHint": "At least 8 characters",
+  "commonPasswordTooShort": "Use at least 8 characters",
+  "commonShowPassword": "Show password",
+  "commonHidePassword": "Hide password",
+  "commonStoreName": "Store name",
+  "commonEnterStoreName": "Enter your store name",
+  "commonYourName": "Your name",
+  "commonEnterYourName": "Enter your name",
+  "commonEnterName": "Enter a name",
+  "commonNoteOptional": "Note (optional)",
+  "commonSettings": "Settings",
+  "commonToday": "Today",
+  "commonYesterday": "Yesterday",
+  "commonDayAtTime": "{day}, {time}",
+  "@commonDayAtTime": {
+    "placeholders": {
+      "day": {},
+      "time": {}
+    }
+  },
+  "commonSeparator": "{first} · {second}",
+  "@commonSeparator": {
+    "placeholders": {
+      "first": {},
+      "second": {}
+    }
+  },
+  "commonPercent": "{value}%",
+  "@commonPercent": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "errorOffline": "You are offline. Your entry is saved on this device and will sync when you reconnect.",
+  "errorSessionExpired": "Your session expired. Please sign in again.",
+  "errorServer": "The Kitaza server is having trouble. Your data is safe on this device.",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "errorWrongCredentials": "Email or password is incorrect.",
+  "errorEmailTaken": "An account already uses this email address.",
+  "errorTooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
+  "navHome": "Home",
+  "navSales": "Sales",
+  "navExpenses": "Expenses",
+  "navProducts": "Products",
+  "navReports": "Reports",
+  "periodToday": "Today",
+  "periodWeek": "This week",
+  "periodMonth": "This month",
+  "paymentCash": "Cash",
+  "paymentGcash": "GCash",
+  "paymentMaya": "Maya",
+  "paymentBankTransfer": "Bank transfer",
+  "paymentUtang": "Utang (credit)",
+  "categoryInventory": "Stock / Puhunan",
+  "categoryUtilities": "Utilities",
+  "categorySalary": "Salary",
+  "categoryTransportation": "Transport",
+  "categoryRent": "Rent",
+  "categorySupplies": "Supplies",
+  "categoryRepairs": "Repairs",
+  "categoryTaxesPermits": "Taxes & permits",
+  "categoryOther": "Other",
+  "welcomeSubtitle": "Pick how you want to keep your records. You can change this later.",
+  "welcomeLocalTitle": "Just this phone",
+  "welcomeLocalDescription": "Everything stays on this device. No account needed.",
+  "welcomeLocalPoint1": "Works with no load and no signal",
+  "welcomeLocalPoint2": "Nothing to pay, nothing to sign up for",
+  "welcomeLocalPoint3": "Only this device can see your records",
+  "welcomeCloudTitle": "Save to the cloud",
+  "welcomeCloudDescription": "Still works offline, and backs up so you never lose your history.",
+  "welcomeCloudPoint1": "Use the same store on your phone and tablet",
+  "welcomeCloudPoint2": "Safe if your phone is lost or broken",
+  "welcomeCloudPoint3": "Your helper can record sales while you are out",
+  "welcomeHaveAccount": "I already have an account",
+  "welcomeStartHere": "Start here",
+  "setupTitle": "Set up your store",
+  "setupSubtitle": "This takes about ten seconds.",
+  "setupStoreHint": "Aling Nena Sari-Sari Store",
+  "setupNameHint": "Nena Reyes",
+  "setupSubmit": "Start using Kitaza",
+  "setupFailed": "Could not set up. Please try again.",
+  "signInTitle": "Welcome back",
+  "signInSubtitle": "Sign in once. This device will remember you.",
+  "signInSubmit": "Sign in",
+  "signInCreateAccount": "Create a new account",
+  "signInFailed": "Could not sign in.",
+  "signUpTitle": "Create your account",
+  "signUpSubtitle": "Your records stay on this phone and back up to the cloud.",
+  "signUpSubmit": "Create account",
+  "signUpFailed": "Could not create your account.",
+  "dashboardYourStore": "Your store",
+  "dashboardGoodMorning": "Good morning",
+  "dashboardGoodAfternoon": "Good afternoon",
+  "dashboardGoodEvening": "Good evening",
+  "dashboardMoneyThisPeriod": "Money this period",
+  "dashboardEmptyTitle": "Nothing recorded yet",
+  "dashboardEmptyMessage": "Tap \"Add sale\" after your next customer. It takes about five seconds and everything else fills in from there.",
+  "dashboardSales": "Sales",
+  "dashboardSaleCount": "{count, plural, =1{1 sale} other{{count} sales}}",
+  "@dashboardSaleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExpenses": "Expenses",
+  "dashboardCostOfGoods": "Cost of goods {amount}",
+  "@dashboardCostOfGoods": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "dashboardProfit": "Profit",
+  "dashboardMarginOfSales": "{percent}% of sales",
+  "@dashboardMarginOfSales": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "dashboardCashKept": "Cash kept",
+  "dashboardAfterWithdrawals": "After your withdrawals",
+  "dashboardWithdrawalsTitle": "Owner withdrawals",
+  "dashboardWithdrawalsTaken": "You took out {amount} this period",
+  "@dashboardWithdrawalsTaken": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "dashboardWithdrawalsPrompt": "Record money you take for personal use",
+  "dashboardTopSeller": "Top seller",
+  "dashboardSoldSummary": "{quantity} sold · {revenue}",
+  "@dashboardSoldSummary": {
+    "placeholders": {
+      "quantity": {},
+      "revenue": {}
+    }
+  },
+  "dashboardLowStock": "{count, plural, =1{1 product running low} other{{count} products running low}}",
+  "@dashboardLowStock": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardLowStockHint": "Tap to see what needs restocking",
+  "actionAddSale": "Add sale",
+  "actionExpense": "Expense",
+  "actionProfit": "Profit",
+  "healthGood": "Good",
+  "healthAverage": "Average",
+  "healthWarning": "Warning",
+  "healthHeadlineGreen": "Your store is doing well",
+  "healthHeadlineYellow": "Keep an eye on your numbers",
+  "healthHeadlineRed": "Your store needs attention",
+  "healthHeadlineNoSales": "No sales recorded yet",
+  "healthRatingChip": "{rating} · {score}",
+  "@healthRatingChip": {
+    "placeholders": {
+      "rating": {},
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "healthReasonNoSales": "Record your first sale to see how your store is doing.",
+  "healthReasonProfit": "You earned a profit of {amount}.",
+  "@healthReasonProfit": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "healthReasonLoss": "You spent {amount} more than you sold.",
+  "@healthReasonLoss": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "healthReasonHealthyMargin": "Healthy margin: {percent}% of sales is profit.",
+  "@healthReasonHealthyMargin": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "healthReasonThinMargin": "Thin margin: only {percent}% of sales is profit.",
+  "@healthReasonThinMargin": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "healthReasonVeryThinMargin": "Very thin margin: {percent}% of sales is profit.",
+  "@healthReasonVeryThinMargin": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "healthReasonProfitUp": "Profit is higher than the previous period.",
+  "healthReasonProfitDown": "Profit is lower than the previous period.",
+  "healthReasonOverWithdrawn": "You withdrew {amount}, more than the profit you made.",
+  "@healthReasonOverWithdrawn": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "healthReasonRestock": "{count, plural, =1{1 product needs restocking.} other{{count} products need restocking.}}",
+  "@healthReasonRestock": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "saleTitle": "Add sale",
+  "saleProduct": "Product",
+  "saleTotal": "Total",
+  "saleTyping": "Typing {amount}",
+  "@saleTyping": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "saleSaveAmount": "Save {amount}",
+  "@saleSaveAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "saleNeedsSomething": "Enter an amount or pick a product first.",
+  "saleRecorded": "Sale recorded.",
+  "saleSaveFailed": "Could not save the sale. Please try again.",
+  "saleProductAdded": "{name} added.",
+  "@saleProductAdded": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "saleEach": "{price} each",
+  "@saleEach": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "saleLess": "Less",
+  "saleMore": "More",
+  "saleQuickSale": "Quick sale",
+  "saleItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@saleItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "saleGeneric": "Sale",
+  "saleHistoryEmptyTitle": "No sales in this period",
+  "saleHistoryEmptyMessage": "Every sale you record shows up here with its profit.",
+  "saleHistoryEmptyAction": "Add a sale",
+  "saleProfitAmount": "{amount} profit",
+  "@saleProfitAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "saleVoidTitle": "Void this sale?",
+  "saleVoidMessage": "The amount is removed from your totals and any stock is put back.",
+  "saleVoidKeep": "Keep it",
+  "saleVoidConfirm": "Void sale",
+  "saleVoided": "Sale voided.",
+  "salePickerSearch": "Search product or scan code",
+  "salePickerEmptyTitle": "No products yet",
+  "salePickerEmptyMessage": "You can still record the sale by typing the amount on the keypad.",
+  "saleOutOfStock": "Out of stock",
+  "saleStockLeft": "{quantity} {unit} left",
+  "@saleStockLeft": {
+    "placeholders": {
+      "quantity": {},
+      "unit": {}
+    }
+  },
+  "keypadBackspace": "Delete last digit",
+  "keypadBackspaceHint": "Hold to clear",
+  "keypadDecimal": "Decimal point",
+  "expenseTitle": "Add expense",
+  "expenseWhatFor": "What was it for?",
+  "expenseNoteHint": "Meralco bill for October",
+  "expenseSave": "Save expense",
+  "expenseRecorded": "Expense recorded.",
+  "expenseSaveFailed": "Could not save. Please try again.",
+  "expenseHistoryEmptyTitle": "No expenses recorded",
+  "expenseHistoryEmptyMessage": "Track what you spend on stock, load, transport and bills so your profit is real.",
+  "expenseHistoryEmptyAction": "Add an expense",
+  "productAdd": "Add product",
+  "productEdit": "Edit product",
+  "productName": "Product name",
+  "productNameHint": "Lucky Me Pancit Canton",
+  "productCost": "Cost (puhunan)",
+  "productPrice": "Selling price",
+  "productStock": "Stock on hand",
+  "productReorder": "Warn me below",
+  "productSave": "Save product",
+  "productSaved": "Product saved.",
+  "productSaveFailed": "Could not save the product.",
+  "productSearch": "Search products",
+  "productEmptyTitle": "No products yet",
+  "productEmptyMessage": "Adding your regular items makes each sale one tap, and lets Kitaza tell you which ones actually earn.",
+  "productEmptyAction": "Add your first product",
+  "productMargin": "{percent}% margin",
+  "@productMargin": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "productRestock": "Restock",
+  "productStockUnits": "{quantity} {unit}",
+  "@productStockUnits": {
+    "placeholders": {
+      "quantity": {},
+      "unit": {}
+    }
+  },
+  "productWouldLose": "You would lose {amount} per sale",
+  "@productWouldLose": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "productEarns": "You earn {amount} ({percent}%) per sale",
+  "@productEarns": {
+    "placeholders": {
+      "amount": {},
+      "percent": {}
+    }
+  },
+  "withdrawalTitle": "Owner withdrawals",
+  "withdrawalRecord": "Record",
+  "withdrawalEmptyTitle": "No withdrawals recorded",
+  "withdrawalEmptyMessage": "When you take money from the store for personal use, record it here so your profit stays accurate.",
+  "withdrawalExplainer": "Money you take home is not a business expense. Recording it here keeps your profit honest and shows what is really left.",
+  "withdrawalDefaultReason": "Personal withdrawal",
+  "withdrawalRecorded": "Withdrawal recorded.",
+  "withdrawalSheetTitle": "Money taken out",
+  "withdrawalReason": "What for? (optional)",
+  "withdrawalReasonHint": "Grocery, tuition, allowance",
+  "withdrawalSubmit": "Record withdrawal",
+  "reportTitle": "Reports",
+  "reportEmptyTitle": "Nothing to report yet",
+  "reportEmptyMessage": "Record a few sales and expenses and this screen will show which products earn, where your money goes, and how your profit is trending.",
+  "reportTrendTitle": "Daily profit, last 14 days",
+  "reportTrendHint": "Tap a bar to see that day",
+  "reportTrendSummary": "Daily profit over the last {days} days. Best day {bestDay}, {bestAmount}. Worst day {worstDay}, {worstAmount}.",
+  "@reportTrendSummary": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "bestDay": {},
+      "bestAmount": {},
+      "worstDay": {},
+      "worstAmount": {}
+    }
+  },
+  "reportTopProducts": "Where your profit comes from",
+  "reportExpenseBreakdown": "Where your money goes",
+  "reportUnusual": "Worth a second look",
+  "reportUnusualDetail": "{times}x your usual {average} · {date}",
+  "@reportUnusualDetail": {
+    "placeholders": {
+      "times": {},
+      "average": {},
+      "date": {}
+    }
+  },
+  "settingsAppearance": "Appearance",
+  "settingsAppearanceHint": "Dark mode is easier at night; Auto follows your phone.",
+  "settingsThemeLight": "Light",
+  "settingsThemeAuto": "Auto",
+  "settingsThemeDark": "Dark",
+  "settingsLanguage": "Language",
+  "settingsLanguageAuto": "Auto",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageFilipino": "Filipino",
+  "settingsYourData": "Your data",
+  "settingsAccount": "Account",
+  "storageLocalTitle": "Saved on this phone only",
+  "storageLocalRisk": "If this phone is lost or broken, your records go with it.",
+  "storageBackUp": "Back up to the cloud",
+  "storageBackUpHint": "Keeps everything you have recorded so far",
+  "storageCloudTitle": "Backed up to the cloud",
+  "storageNotSynced": "Not synced yet",
+  "storageLastSynced": "Last synced {when}",
+  "@storageLastSynced": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "storagePending": "{count, plural, =1{1 waiting to upload} other{{count} waiting to upload}}",
+  "@storagePending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storagePendingHint": "These go up as soon as you have signal.",
+  "storageParked": "{count, plural, =1{1 could not be saved} other{{count} could not be saved}}",
+  "@storageParked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageParkedHint": "Tap to see why and decide what to do",
+  "storageSyncNow": "Sync now",
+  "storageUpToDate": "Everything is up to date.",
+  "storageUnreachable": "Could not reach the cloud. Will try again.",
+  "syncSavedOnPhone": "Saved on this phone",
+  "syncSyncing": "Syncing",
+  "syncOffline": "Offline",
+  "syncBackedUp": "Backed up",
+  "syncProblem": "Sync problem",
+  "syncWaiting": "{count, plural, =1{1 waiting to sync} other{{count} waiting to sync}}",
+  "@syncWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "problemsTitle": "Sync problems",
+  "problemsEmptyTitle": "Nothing is stuck",
+  "problemsEmptyMessage": "Every entry has reached the cloud or is waiting its turn.",
+  "problemsRefused": "Refused by the server",
+  "problemsStopped": "Stopped retrying after {count} attempts.",
+  "@problemsStopped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "problemsWillRetry": "{count, plural, =1{Tried once; will retry.} other{Tried {count} times; will retry.}}",
+  "@problemsWillRetry": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "problemsKeepLocal": "Keep on phone only",
+  "problemsDiscardTitle": "Stop uploading this?",
+  "problemsDiscardMessage": "It stays in your records on this phone, but other devices and the cloud backup will not have it.",
+  "problemsSale": "Sale",
+  "problemsExpense": "Expense: {detail}",
+  "@problemsExpense": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "problemsWithdrawal": "Withdrawal",
+  "problemsProduct": "Product: {name}",
+  "@problemsProduct": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "problemsStockChange": "Stock change",
+  "problemsRemoval": "Removal of a {entity}",
+  "@problemsRemoval": {
+    "placeholders": {
+      "entity": {}
+    }
+  },
+  "problemsChange": "Change",
+  "upgradeTitle": "Back up to the cloud",
+  "upgradeIntro": "Everything you have recorded on this phone stays, and is copied to your account. The app keeps working offline exactly as before.",
+  "upgradeNewAccount": "New account",
+  "upgradeExistingAccount": "I have one",
+  "upgradeExistingNote": "This phone's records will be added to the store on that account.",
+  "upgradeCreateSubmit": "Create account and back up",
+  "upgradeSignInSubmit": "Sign in and back up",
+  "upgradeDone": "Your store is now backed up.",
+  "upgradeFailed": "Could not back up right now. Nothing was changed.",
+  "accountOfflineProfile": "Offline profile",
+  "accountSignOut": "Sign out",
+  "accountSignOutTitle": "Sign out?",
+  "accountSignOutLocal": "Your records are only on this phone. Signing out erases them for good.",
+  "accountSignOutClean": "Everything is backed up. Sign back in on any phone to pick up where you left off.",
+  "accountSignOutUnsent": "{count, plural, =1{1 change has not reached the cloud yet, and will be lost if you sign out now. Try again when you have signal.} other{{count} changes have not reached the cloud yet, and will be lost if you sign out now. Try again when you have signal.}}",
+  "@accountSignOutUnsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountEraseAndSignOut": "Erase and sign out",
+  "starterTitle": "Start with common products",
+  "starterIntro": "Tick what you sell. You can change names and prices any time.",
+  "starterPricesNotice": "These are typical prices, not yours. Check each item's cost and price so your profit figures are right.",
+  "starterAdd": "{count, plural, =0{Pick at least one} =1{Add 1 product} other{Add {count} products}}",
+  "@starterAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "starterAdded": "{count, plural, =1{1 product added. Check its price when you can.} other{{count} products added. Check their prices when you can.}}",
+  "@starterAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "starterAll": "All",
+  "starterOffer": "Add common sari-sari items",
+  "starterPromptTitle": "Your product list is empty",
+  "starterPromptMessage": "Start with the usual sari-sari items, then each sale is one tap.",
+  "backupSection": "Backups",
+  "backupAutoNone": "No automatic copy yet. One is made each day you open the app.",
+  "backupAutoLast": "A copy is saved on this phone each day. Last copy: {when}",
+  "@backupAutoLast": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "backupCloudNote": "Your records are also kept in the cloud.",
+  "backupExport": "Save a backup copy",
+  "backupExportHint": "Send it to yourself on Messenger, Drive or email so it survives if this phone is lost.",
+  "backupExportText": "Kitaza backup for {store}. Keep this file somewhere safe.",
+  "@backupExportText": {
+    "placeholders": {
+      "store": {}
+    }
+  },
+  "backupExportFailed": "Could not create a backup copy.",
+  "backupRestore": "Restore from a backup file",
+  "backupRestoreHint": "Replaces everything on this phone with the records in the file.",
+  "backupConfirmTitle": "Restore this backup?",
+  "backupConfirmSummary": "{store}: {sales, plural, =1{1 sale} other{{sales} sales}} and {products, plural, =1{1 product} other{{products} products}}.",
+  "@backupConfirmSummary": {
+    "placeholders": {
+      "store": {},
+      "sales": {
+        "type": "int"
+      },
+      "products": {
+        "type": "int"
+      }
+    }
+  },
+  "backupConfirmLastEntry": "Last entry: {when}.",
+  "@backupConfirmLastEntry": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "backupConfirmWarning": "Everything currently on this phone will be replaced.",
+  "backupConfirmAction": "Replace and restore",
+  "backupProblemNotABackup": "That file is not a Kitaza backup.",
+  "backupProblemTooNew": "This backup was made by a newer version of Kitaza. Update the app, then try again.",
+  "backupProblemDamaged": "This backup file is damaged and cannot be restored.",
+  "reportsTitle": "{count, plural, =1{1 problem report} other{{count} problem reports}}",
+  "@reportsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsCloudHint": "Sent to the Kitaza team automatically when you sync.",
+  "reportsLocalHint": "Tap to send them to the Kitaza team. They hold no sales or customer details.",
+  "reportsShareIntro": "Kitaza problem reports. They hold no sales or customer details.",
+  "scanAction": "Scan",
+  "scanTitle": "Scan barcode",
+  "scanHint": "Point the camera at the barcode",
+  "scanLight": "Light",
+  "scanDone": "Done",
+  "scanAdded": "{name} added",
+  "@scanAdded": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "scanUnknownTitle": "No product has this code yet",
+  "scanUnknownMessage": "Code {code}. Add it as a new product so the next scan finds it.",
+  "@scanUnknownMessage": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "scanAddProduct": "Add as new product",
+  "scanNoCamera": "Kitaza needs the camera to scan barcodes. Allow it in your phone's settings.",
+  "productBarcode": "Barcode (optional)",
+  "receiptTitle": "Receipt",
+  "receiptSubtotal": "Subtotal",
+  "receiptDiscount": "Discount",
+  "receiptTotal": "TOTAL",
+  "receiptPaidBy": "Paid by",
+  "receiptReference": "Ref {code}",
+  "@receiptReference": {
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "receiptThanks": "Thank you!",
+  "receiptShare": "Share",
+  "receiptPrint": "Print",
+  "receiptPrinted": "Receipt printed.",
+  "receiptNoPrinter": "No receipt printer yet. Set one up in Settings.",
+  "printerSection": "Receipt printer",
+  "printerNone": "None chosen",
+  "printerChoose": "Choose printer",
+  "printerChooseHint": "Pair the printer in your phone's Bluetooth settings first, then pick it here.",
+  "printerNoneFound": "No paired Bluetooth devices. Pair your printer in your phone's Bluetooth settings first.",
+  "printerPaper": "Paper width",
+  "printerTest": "Print a test receipt",
+  "printerTestLine": "Printer test - if you can read this, it works.",
+  "printerBluetoothOff": "Bluetooth is off. Turn it on and try again.",
+  "printerNoPermission": "Kitaza needs Bluetooth permission to print. Allow it in your phone's settings.",
+  "printerCouldNotConnect": "Could not connect to the printer. Check that it is on and nearby.",
+  "printerFailed": "The printer did not accept the receipt. Try again."
+}

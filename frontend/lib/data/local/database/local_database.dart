@@ -7,20 +7,28 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../../../core/config/app_config.dart';
+import 'schema_migrations.dart';
 import 'schema_statements.dart';
 
 /// Opens and configures the on-device SQLite database. Every read and write in
 /// the app goes through here, online or not.
 class LocalDatabase {
-  LocalDatabase._(this.db);
+  LocalDatabase._(this.db, this.path);
 
   final Database db;
+
+  /// Where the database file lives, for backups.
+  final String path;
+
+  static Future<String> defaultPath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return p.join(directory.path, AppConfig.databaseFile);
+  }
 
   static Future<LocalDatabase> open() async {
     _initialiseDesktopSupport();
 
-    final directory = await getApplicationDocumentsDirectory();
-    final path = p.join(directory.path, AppConfig.databaseFile);
+    final path = await defaultPath();
 
     final database = await openDatabase(
       path,
@@ -30,7 +38,7 @@ class LocalDatabase {
       onUpgrade: _upgrade,
     );
 
-    return LocalDatabase._(database);
+    return LocalDatabase._(database, path);
   }
 
   static Future<void> _configure(Database db) async {
@@ -42,11 +50,20 @@ class LocalDatabase {
     await db.execute('PRAGMA temp_store = MEMORY');
   }
 
-  static Future<void> _create(Database db, int version) => applySchema(db);
+  static Future<void> _create(Database db, int version) async {
+    await _applyBaseSchema(db);
+    await SchemaMigrations.migrate(db, 1, version);
+  }
 
-  /// Creates the full schema on an already-open database. Public so tests can
-  /// build the same structure against an in-memory database.
+  /// Creates the latest schema on an already-open database. Public so tests
+  /// build exactly what a new install builds.
   static Future<void> applySchema(Database db) async {
+    await _applyBaseSchema(db);
+    await SchemaMigrations.migrate(db, 1, SchemaMigrations.latestVersion);
+  }
+
+  /// The original version 1 schema, never changed after release.
+  static Future<void> _applyBaseSchema(Database db) async {
     final batch = db.batch();
     for (final statement in SchemaStatements.createTables) {
       batch.execute(statement);
@@ -57,9 +74,9 @@ class LocalDatabase {
     await batch.commit(noResult: true);
   }
 
-  /// No migrations yet. Each future schema change adds one numbered step here
-  /// rather than rebuilding the file, so nobody loses their history.
-  static Future<void> _upgrade(Database db, int from, int to) async {}
+  /// Brings an existing phone's database forward without touching its data.
+  static Future<void> _upgrade(Database db, int from, int to) =>
+      SchemaMigrations.migrate(db, from, to);
 
   static void _initialiseDesktopSupport() {
     if (kIsWeb) return;

@@ -7,16 +7,21 @@ import '../../core/theme/app_spacing.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/product_repository.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import '../../shared/widgets/page_body.dart';
+import '../scanning/barcode_scanner.dart';
 import 'product_controller.dart';
 import 'widgets/margin_preview.dart';
 
 /// One screen for both new and existing products. `productId` decides which.
 class ProductEditorScreen extends ConsumerStatefulWidget {
-  const ProductEditorScreen({super.key, this.productId});
+  const ProductEditorScreen({super.key, this.productId, this.initialBarcode});
 
   final String? productId;
+
+  /// Pre-filled when the owner arrives here from scanning an unknown code.
+  final String? initialBarcode;
 
   @override
   ConsumerState<ProductEditorScreen> createState() =>
@@ -26,17 +31,23 @@ class ProductEditorScreen extends ConsumerStatefulWidget {
 class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
+  late final _barcode = TextEditingController(text: widget.initialBarcode);
   final _cost = TextEditingController();
   final _price = TextEditingController();
   final _stock = TextEditingController(text: '0');
   final _reorder = TextEditingController(text: '0');
 
   bool _loaded = false;
+
+  /// Carried over unchanged when editing. Saving used to reset it to "pc",
+  /// quietly turning a per-kilo product into a per-piece one.
+  String _unitLabel = 'pc';
   bool _saving = false;
 
   @override
   void dispose() {
     _name.dispose();
+    _barcode.dispose();
     _cost.dispose();
     _price.dispose();
     _stock.dispose();
@@ -49,10 +60,17 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
     _loaded = true;
 
     _name.text = product.name;
+    _barcode.text = product.barcode ?? '';
+    _unitLabel = product.unitLabel;
     _cost.text = product.costPrice.toStringAsFixed(2);
     _price.text = product.sellingPrice.toStringAsFixed(2);
     _stock.text = QuantityFormatter.exact(product.stockQuantity);
     _reorder.text = QuantityFormatter.exact(product.reorderLevel);
+  }
+
+  Future<void> _scanBarcode() async {
+    final code = await ref.read(barcodeScannerProvider).scanOnce(context);
+    if (code != null && mounted) setState(() => _barcode.text = code);
   }
 
   Future<void> _save() async {
@@ -70,17 +88,19 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
             sellingPrice: double.parse(_price.text),
             stockQuantity: double.tryParse(_stock.text) ?? 0,
             reorderLevel: double.tryParse(_reorder.text) ?? 0,
+            unitLabel: _unitLabel,
+            barcode: _barcode.text,
           );
 
       ref.read(dataRevisionProvider.notifier).localWrite();
 
       if (!mounted) return;
-      FeedbackMessenger.success(context, 'Product saved.');
+      FeedbackMessenger.success(context, context.l10n.productSaved);
       context.pop();
     } on Object {
       if (!mounted) return;
       setState(() => _saving = false);
-      FeedbackMessenger.error(context, 'Could not save the product.');
+      FeedbackMessenger.error(context, context.l10n.productSaveFailed);
     }
   }
 
@@ -94,7 +114,11 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.productId == null ? 'Add product' : 'Edit product'),
+        title: Text(
+          widget.productId == null
+              ? context.l10n.productAdd
+              : context.l10n.productEdit,
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -109,14 +133,29 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
                   TextFormField(
                     controller: _name,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Product name',
-                      hintText: 'Lucky Me Pancit Canton',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.productName,
+                      hintText: context.l10n.productNameHint,
                     ),
                     validator: (value) =>
                         (value == null || value.trim().isEmpty)
-                        ? 'Enter a name'
+                        ? context.l10n.commonEnterName
                         : null,
+                  ),
+                  AppSpacing.gapLg,
+                  TextFormField(
+                    controller: _barcode,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.productBarcode,
+                      suffixIcon: ref.watch(barcodeScannerProvider).isAvailable
+                          ? IconButton(
+                              onPressed: _scanBarcode,
+                              icon: const Icon(Icons.qr_code_scanner_rounded),
+                              tooltip: context.l10n.scanAction,
+                            )
+                          : null,
+                    ),
                   ),
                   AppSpacing.gapLg,
                   Row(
@@ -124,14 +163,14 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
                       Expanded(
                         child: _MoneyInput(
                           controller: _cost,
-                          label: 'Cost (puhunan)',
+                          label: context.l10n.productCost,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: _MoneyInput(
                           controller: _price,
-                          label: 'Selling price',
+                          label: context.l10n.productPrice,
                         ),
                       ),
                     ],
@@ -147,14 +186,14 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
                       Expanded(
                         child: _NumberInput(
                           controller: _stock,
-                          label: 'Stock on hand',
+                          label: context.l10n.productStock,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: _NumberInput(
                           controller: _reorder,
-                          label: 'Warn me below',
+                          label: context.l10n.productReorder,
                         ),
                       ),
                     ],
@@ -170,7 +209,7 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
                             dimension: 22,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Save product'),
+                        : Text(context.l10n.productSave),
                   ),
                 ],
               ),
@@ -196,7 +235,7 @@ class _MoneyInput extends StatelessWidget {
       decoration: InputDecoration(labelText: label, prefixText: '₱ '),
       validator: (value) {
         final parsed = double.tryParse(value ?? '');
-        if (parsed == null || parsed < 0) return 'Enter an amount';
+        if (parsed == null || parsed < 0) return context.l10n.commonEnterAmount;
         return null;
       },
     );

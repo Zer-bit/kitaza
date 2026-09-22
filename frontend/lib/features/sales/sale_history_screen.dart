@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/route_paths.dart';
-import '../../core/formatting/day_formatter.dart';
 import '../../core/formatting/peso_formatter.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/models/sale.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/sale_repository.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/feedback_messenger.dart';
@@ -16,6 +16,7 @@ import '../../shared/widgets/money_text.dart';
 import '../../shared/widgets/page_body.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../dashboard/widgets/period_selector.dart';
+import '../receipts/receipt_sheet.dart';
 import 'sale_history_controller.dart';
 
 class SaleHistoryScreen extends ConsumerWidget {
@@ -26,11 +27,11 @@ class SaleHistoryScreen extends ConsumerWidget {
     final sales = ref.watch(saleHistoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sales')),
+      appBar: AppBar(title: Text(context.l10n.navSales)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(RoutePaths.recordSale),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add sale'),
+        label: Text(context.l10n.actionAddSale),
       ),
       body: Column(
         children: [
@@ -55,10 +56,9 @@ class SaleHistoryScreen extends ConsumerWidget {
                 if (items.isEmpty) {
                   return EmptyState(
                     icon: Icons.point_of_sale_rounded,
-                    title: 'No sales in this period',
-                    message:
-                        'Every sale you record shows up here with its profit.',
-                    actionLabel: 'Add a sale',
+                    title: context.l10n.saleHistoryEmptyTitle,
+                    message: context.l10n.saleHistoryEmptyMessage,
+                    actionLabel: context.l10n.saleHistoryEmptyAction,
                     onAction: () => context.push(RoutePaths.recordSale),
                   );
                 }
@@ -92,9 +92,12 @@ class _SaleRow extends ConsumerWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      title: Text(sale.summaryLabel),
+      title: Text(_summary(sale, context.l10n)),
       subtitle: Text(
-        '${DayFormatter.relative(sale.occurredAt)} · ${sale.paymentMethod.label}',
+        context.l10n.commonSeparator(
+          context.l10n.relativeDay(sale.occurredAt),
+          context.l10n.paymentMethod(sale.paymentMethod),
+        ),
       ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -102,11 +105,14 @@ class _SaleRow extends ConsumerWidget {
         children: [
           MoneyText(sale.totalAmount, size: 17),
           Text(
-            '${PesoFormatter.plain(sale.profitAmount)} profit',
+            context.l10n.saleProfitAmount(
+              PesoFormatter.plain(sale.profitAmount),
+            ),
             style: theme.textTheme.bodySmall,
           ),
         ],
       ),
+      onTap: () => ReceiptSheet.show(context, sale),
       onLongPress: () => _confirmVoid(context, ref),
     );
   }
@@ -115,18 +121,16 @@ class _SaleRow extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Void this sale?'),
-        content: const Text(
-          'The amount is removed from your totals and any stock is put back.',
-        ),
+        title: Text(context.l10n.saleVoidTitle),
+        content: Text(context.l10n.saleVoidMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Keep it'),
+            child: Text(context.l10n.saleVoidKeep),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Void sale'),
+            child: Text(context.l10n.saleVoidConfirm),
           ),
         ],
       ),
@@ -138,7 +142,16 @@ class _SaleRow extends ConsumerWidget {
     ref.read(dataRevisionProvider.notifier).localWrite();
 
     if (context.mounted) {
-      FeedbackMessenger.success(context, 'Sale voided.');
+      FeedbackMessenger.success(context, context.l10n.saleVoided);
     }
   }
 }
+
+/// The history row title: the product when there is one line, otherwise a
+/// count.
+String _summary(Sale sale, AppLocalizations l10n) =>
+    switch (sale.lines.length) {
+      0 => l10n.saleGeneric,
+      1 => l10n.displayProductName(sale.lines.first.productName),
+      final count => l10n.saleItemCount(count),
+    };

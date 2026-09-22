@@ -36,3 +36,8 @@ final productByIdProvider = FutureProvider.autoDispose.family<Product?, String>(
     return ref.watch(productRepositoryProvider).find(productId);
   },
 );
+
+final productCountProvider = FutureProvider.autoDispose<int>((ref) {
+  ref.watch(dataRevisionProvider);
+  return ref.watch(productRepositoryProvider).count();
+});

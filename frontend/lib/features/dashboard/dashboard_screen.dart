@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/route_paths.dart';
+import '../../core/formatting/peso_formatter.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/responsive.dart';
 import '../../data/models/dashboard_summary.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/sync_coordinator.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/page_body.dart';
@@ -20,15 +22,18 @@ import 'widgets/health_banner.dart';
 import 'widgets/highlight_tiles.dart';
 import 'widgets/period_selector.dart';
 import 'widgets/quick_action_bar.dart';
+import 'widgets/starter_prompt_card.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final summary = ref.watch(dashboardSummaryProvider);
     final storeName =
-        ref.watch(currentSessionProvider)?.store.name ?? 'Your store';
+        ref.watch(currentSessionProvider)?.store.name ??
+        l10n.dashboardYourStore;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,7 +41,7 @@ class DashboardScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(storeName, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text(_greeting(), style: Theme.of(context).textTheme.bodySmall),
+            Text(_greeting(l10n), style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
         actions: [
@@ -44,7 +49,7 @@ class DashboardScreen extends ConsumerWidget {
           IconButton(
             onPressed: () => context.push(RoutePaths.settings),
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            tooltip: l10n.commonSettings,
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
@@ -65,11 +70,11 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  String _greeting() {
+  String _greeting(AppLocalizations l10n) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Magandang umaga';
-    if (hour < 18) return 'Magandang hapon';
-    return 'Magandang gabi';
+    if (hour < 12) return l10n.dashboardGoodMorning;
+    if (hour < 18) return l10n.dashboardGoodAfternoon;
+    return l10n.dashboardGoodEvening;
   }
 }
 
@@ -95,6 +100,7 @@ class _DashboardBody extends ConsumerWidget {
                 onRecordExpense: () => context.push(RoutePaths.recordExpense),
                 onViewReports: () => context.go(RoutePaths.reports),
               ),
+              const StarterPromptCard(),
               AppSpacing.gapXl,
               PeriodSelector(
                 selected: summary.period,
@@ -104,16 +110,14 @@ class _DashboardBody extends ConsumerWidget {
               AppSpacing.gapLg,
               HealthBanner(health: summary.health),
               AppSpacing.gapXl,
-              const SectionHeader(title: 'Money this period'),
+              SectionHeader(title: context.l10n.dashboardMoneyThisPeriod),
               _StatGrid(summary: summary),
               AppSpacing.gapXl,
               if (!summary.hasActivity)
-                const EmptyState(
+                EmptyState(
                   icon: Icons.receipt_long_rounded,
-                  title: 'Nothing recorded yet',
-                  message:
-                      'Tap "Add sale" after your next customer. It takes about '
-                      'five seconds and everything else fills in from there.',
+                  title: context.l10n.dashboardEmptyTitle,
+                  message: context.l10n.dashboardEmptyMessage,
                 )
               else ...[
                 if (summary.bestSeller != null) ...[
@@ -145,44 +149,65 @@ class _StatGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final cards = [
       StatCard(
-        label: 'Sales',
+        label: l10n.dashboardSales,
         amount: summary.salesTotal,
         icon: Icons.trending_up_rounded,
-        caption:
-            '${summary.saleCount} sale${summary.saleCount == 1 ? '' : 's'}',
+        caption: l10n.dashboardSaleCount(summary.saleCount),
       ),
       StatCard(
-        label: 'Expenses',
+        label: l10n.dashboardExpenses,
         amount: summary.expensesTotal,
         icon: Icons.trending_down_rounded,
-        caption: 'Cost of goods ${summary.costOfGoods.toStringAsFixed(2)}',
+        caption: l10n.dashboardCostOfGoods(
+          PesoFormatter.format(summary.costOfGoods),
+        ),
       ),
       StatCard(
-        label: 'Profit',
+        label: l10n.dashboardProfit,
         amount: summary.netProfit,
         icon: Icons.savings_outlined,
         colorBySign: true,
-        caption: '${summary.marginPercent.toStringAsFixed(0)}% of sales',
+        caption: l10n.dashboardMarginOfSales(
+          summary.marginPercent.toStringAsFixed(0),
+        ),
       ),
       StatCard(
-        label: 'Cash kept',
+        label: l10n.dashboardCashKept,
         amount: summary.cashMovement,
         icon: Icons.account_balance_wallet_outlined,
         colorBySign: true,
-        caption: 'After your withdrawals',
+        caption: l10n.dashboardAfterWithdrawals,
       ),
     ];
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: context.statColumns,
-      mainAxisSpacing: AppSpacing.md,
-      crossAxisSpacing: AppSpacing.md,
-      childAspectRatio: 1.55,
-      children: cards,
+    // Rows that grow with their content rather than a fixed-ratio grid: at
+    // large text sizes a fixed ratio clipped the figures. Cards in a row
+    // share the tallest card's height so the grid still looks even.
+    final columns = context.statColumns;
+    return Column(
+      children: [
+        for (var start = 0; start < cards.length; start += columns) ...[
+          if (start > 0) AppSpacing.gapMd,
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = start; i < start + columns; i++) ...[
+                  if (i > start) AppSpacing.gapMd,
+                  Expanded(
+                    child: i < cards.length
+                        ? cards[i]
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -202,11 +227,13 @@ class _WithdrawalPrompt extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         leading: const CircleAvatar(child: Icon(Icons.wallet_rounded)),
-        title: const Text('Owner withdrawals'),
+        title: Text(context.l10n.dashboardWithdrawalsTitle),
         subtitle: Text(
           total > 0
-              ? 'You took out ${total.toStringAsFixed(2)} this period'
-              : 'Record money you take for personal use',
+              ? context.l10n.dashboardWithdrawalsTaken(
+                  PesoFormatter.format(total),
+                )
+              : context.l10n.dashboardWithdrawalsPrompt,
         ),
         trailing: const Icon(Icons.chevron_right_rounded),
       ),

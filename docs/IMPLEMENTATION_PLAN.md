@@ -1,8 +1,9 @@
 # Kitaza — Implementation Plan
 
 This is the build order for Kitaza, from the scaffold that exists today through
-to a product small businesses pay for monthly. Phases 0–4 are **done and
-verified**; 5 onward are planned.
+to a product small businesses pay for monthly. Phases 0–5 are **done and
+verified** as far as they can be without real phones and real stores (Phase 5
+lists exactly what that leaves); 6 onward are planned.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -187,26 +188,73 @@ totals. ✅ Proven by the contract test against the live API.
 
 ---
 
-## Phase 5 — Ready to hand to a real store
+## Phase 5 — Ready to hand to a real store ✅ Done (pending field trial)
 
 Everything needed before a stranger uses it unsupervised.
 
-- [ ] A real logo to replace the placeholder — edit
+- [x] **Filipino localisation.** Every screen in English and Filipino, chosen
+      automatically from the phone or set in Settings. Owner-facing server
+      errors (wrong password, email taken, too many attempts) are translated
+      on the phone from the server's error codes.
+- [x] **Accessibility audit.** Every main screen is checked on a 360×640 phone
+      at 1.4× text, in light and dark, in both languages, empty and full of
+      data, against Flutter's tap-target, labelling and contrast guidelines —
+      60 checks — plus 31 measured colour-pair contrast ratios. The profit
+      chart, health banner and keypad have spoken descriptions.
+- [x] **Widget tests for the sale and expense flows**, driven through the
+      real screens against a real database, in both languages.
+- [x] **Starter catalogue.** 23 common sari-sari items offered as a reviewable
+      checklist, with a clear warning that the prices are typical, not the
+      owner's. Offered on the dashboard and the empty product list.
+- [x] **Barcode scanning.** Checkout scanning with the camera held open,
+      scanning a product's code in the editor, unknown codes offered as new
+      products, and USB/Bluetooth barcode guns through the product search.
+- [x] **Receipts.** Shared as text to Messenger/Viber/SMS, or printed on a
+      Bluetooth ESC/POS thermal printer (58 or 80 mm), chosen in Settings.
+- [x] **Crash and error reporting.** Uncaught errors kept on the phone,
+      de-duplicated and capped; uploaded by cloud stores to our own endpoint,
+      shareable to support from offline stores. No third-party service.
+- [x] **Backups.** On the phone: a daily automatic copy (a week kept), an
+      exported copy to send anywhere, and restore — including onto a new
+      phone from the welcome screen. On the server: a scheduled `pg_dump`
+      service with 14-day retention and a guarded restore script.
+- [ ] **A real logo** — yours to provide. Replace
       `frontend/assets/brand/source/kitaza_glyph.svg` and run `make brand`.
-- [ ] Onboarding that seeds ~20 common sari-sari products so the catalogue is
-      not empty on day one.
-- [ ] Barcode scanning for products.
-- [ ] Receipt printing / sharing (thermal Bluetooth printers are common).
-- [ ] Widget tests for the record-sale and record-expense flows.
-- [ ] Crash and error reporting.
-- [ ] Filipino (Tagalog) localisation. The UI already speaks in the owner's
-      terms — *puhunan*, *utang* — but the interface language itself is English.
-- [ ] Accessibility audit: screen reader labels, verified contrast, layout at
-      1.4× text scale.
-- [ ] Automated database backup and a restore path.
+
+### Defects found and fixed
+
+| Defect | Effect | Caught by |
+|---|---|---|
+| Record-sale screen overflowed 94 px on a 360×640 phone | **Save button unreachable** on common budget phones | Sale flow test |
+| Scan button squeezed the app bar title at large text | "Add sale" faded to invisible (contrast 1.00:1) | Contrast guideline |
+| A wrong password showed "Your session expired" | Confusing sign-in errors | Reading the error path |
+| Filipino plurals: "1" shown for 2, 3, 5, 7, 8, 11, 23… | "1 benta" on the dashboard for 3 sales | Starter catalogue test |
+| Editing a product reset its unit to "pc" and wiped its barcode | A per-kilo item became per-piece after a price change | Reading the editor |
+| Light-mode Good/Average health headlines at 4.42 and 4.44:1 | Under the WCAG AA minimum the docs claimed was met | Measured contrast test |
+| Empty states, stat cards, health banner, product rows overflowed at large text | Clipped text for older owners | Accessibility audit |
+| A plain file copy of the database missed recent writes | **Backups silently incomplete**, even missing tables | Backup test, confirmed by removing the fix |
+
+### What is not verified, and why
+
+These need hardware or people this environment does not have. None is a known
+problem; each is simply untested.
+
+- **On a real phone.** There is no Android SDK or device here. The app has
+  been compiled (release web build), analysed and tested against a real
+  SQLite engine, but never launched on Android or iOS.
+- **Live camera scanning.** The scanning logic is tested; the camera screen
+  has only been compiled.
+- **Bluetooth printing.** The receipt layout and the exact ESC/POS bytes are
+  tested; the Bluetooth link to a physical printer is not.
+- **The Filipino wording.** Written for how owners talk at the counter, but it
+  needs review by a native speaker before real stores see it.
+- **The Docker backup service.** The scripts were run for real against
+  Postgres 18 (backup, restore, identical content afterwards); the compose
+  service wrapping them was validated but not run, as Docker is unavailable.
 
 **Exit criteria:** five real stores using it for two weeks without the founder
-in the room.
+in the room. Everything above is ready for that trial; the trial itself is
+yours to run.
 
 ---
 

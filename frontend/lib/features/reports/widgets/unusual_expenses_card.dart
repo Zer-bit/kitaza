@@ -4,6 +4,7 @@ import '../../../core/formatting/day_formatter.dart';
 import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/report_models.dart';
+import '../../../l10n/l10n.dart';
 
 /// Spending that stands out against the store's own history. Each row says
 /// exactly why it was flagged, so the owner can dismiss it in their head
@@ -31,7 +32,10 @@ class UnusualExpensesCard extends StatelessWidget {
                   color: theme.colorScheme.secondary,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Text('Worth a second look', style: theme.textTheme.titleMedium),
+                Text(
+                  context.l10n.reportUnusual,
+                  style: theme.textTheme.titleMedium,
+                ),
               ],
             ),
             AppSpacing.gapMd,
@@ -45,7 +49,8 @@ class UnusualExpensesCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            expense.label,
+                            expense.description ??
+                                context.l10n.expenseCategory(expense.category),
                             style: theme.textTheme.bodyLarge,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -58,9 +63,11 @@ class UnusualExpensesCard extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      '${expense.timesAboveAverage}x your usual '
-                      '${PesoFormatter.plain(expense.categoryAverage)} · '
-                      '${DayFormatter.dayMonth(expense.occurredAt)}',
+                      context.l10n.reportUnusualDetail(
+                        '${expense.timesAboveAverage}',
+                        PesoFormatter.plain(expense.categoryAverage),
+                        DayFormatter.dayMonth(expense.occurredAt),
+                      ),
                       style: theme.textTheme.bodySmall,
                     ),
                   ],

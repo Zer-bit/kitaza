@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import 'auth_controller.dart';
 import 'widgets/auth_scaffold.dart';
@@ -46,15 +47,17 @@ class _LocalSetupScreenState extends ConsumerState<LocalSetupScreen> {
 
     final failure = ref.read(authControllerProvider).error;
     if (failure != null) {
-      FeedbackMessenger.error(context, 'Could not set up. Please try again.');
+      FeedbackMessenger.error(context, context.l10n.setupFailed);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AuthScaffold(
-      title: 'Set up your store',
-      subtitle: 'This takes about ten seconds.',
+      title: l10n.setupTitle,
+      subtitle: l10n.setupSubtitle,
       onBack: () => context.pop(),
       children: [
         Form(
@@ -64,12 +67,12 @@ class _LocalSetupScreenState extends ConsumerState<LocalSetupScreen> {
               TextFormField(
                 controller: _storeName,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Store name',
-                  hintText: 'Aling Nena Sari-Sari Store',
+                decoration: InputDecoration(
+                  labelText: l10n.commonStoreName,
+                  hintText: l10n.setupStoreHint,
                 ),
                 validator: (value) => (value == null || value.trim().length < 2)
-                    ? 'Enter a name'
+                    ? l10n.commonEnterName
                     : null,
               ),
               AppSpacing.gapLg,
@@ -78,12 +81,12 @@ class _LocalSetupScreenState extends ConsumerState<LocalSetupScreen> {
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _submit(),
-                decoration: const InputDecoration(
-                  labelText: 'Your name',
-                  hintText: 'Nena Reyes',
+                decoration: InputDecoration(
+                  labelText: l10n.commonYourName,
+                  hintText: l10n.setupNameHint,
                 ),
                 validator: (value) => (value == null || value.trim().length < 2)
-                    ? 'Enter your name'
+                    ? l10n.commonEnterYourName
                     : null,
               ),
             ],
@@ -97,7 +100,7 @@ class _LocalSetupScreenState extends ConsumerState<LocalSetupScreen> {
                   dimension: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Start using Kitaza'),
+              : Text(l10n.setupSubmit),
         ),
       ],
     );

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/formatting/day_formatter.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/models/owner_withdrawal.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/withdrawal_repository.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/amount_field.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
@@ -26,11 +26,11 @@ class WithdrawalScreen extends ConsumerWidget {
     final history = ref.watch(withdrawalHistoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Owner withdrawals')),
+      appBar: AppBar(title: Text(context.l10n.withdrawalTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _RecordWithdrawalSheet.show(context),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Record'),
+        label: Text(context.l10n.withdrawalRecord),
       ),
       body: Column(
         children: [
@@ -49,12 +49,10 @@ class WithdrawalScreen extends ConsumerWidget {
               onRetry: () => ref.invalidate(withdrawalHistoryProvider),
               builder: (items) {
                 if (items.isEmpty) {
-                  return const EmptyState(
+                  return EmptyState(
                     icon: Icons.wallet_rounded,
-                    title: 'No withdrawals recorded',
-                    message:
-                        'When you take money from the store for personal use, '
-                        'record it here so your profit stays accurate.',
+                    title: context.l10n.withdrawalEmptyTitle,
+                    message: context.l10n.withdrawalEmptyMessage,
                   );
                 }
 
@@ -90,8 +88,7 @@ class _ExplainerCard extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
-                'Money you take home is not a business expense. Recording it '
-                'here keeps your profit honest and shows what is really left.',
+                context.l10n.withdrawalExplainer,
                 style: theme.textTheme.bodySmall,
               ),
             ),
@@ -130,8 +127,8 @@ class _WithdrawalRow extends ConsumerWidget {
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.xs,
         ),
-        title: Text(withdrawal.reason ?? 'Personal withdrawal'),
-        subtitle: Text(DayFormatter.relative(withdrawal.occurredAt)),
+        title: Text(withdrawal.reason ?? context.l10n.withdrawalDefaultReason),
+        subtitle: Text(context.l10n.relativeDay(withdrawal.occurredAt)),
         trailing: MoneyText(withdrawal.amount, size: 17),
       ),
     );
@@ -181,7 +178,7 @@ class _RecordWithdrawalSheetState
 
     if (!mounted) return;
     Navigator.pop(context);
-    FeedbackMessenger.success(context, 'Withdrawal recorded.');
+    FeedbackMessenger.success(context, context.l10n.withdrawalRecorded);
   }
 
   @override
@@ -198,21 +195,21 @@ class _RecordWithdrawalSheetState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SectionHeader(title: 'Money taken out'),
+            SectionHeader(title: context.l10n.withdrawalSheetTitle),
             AmountField(controller: _amount, autofocus: true),
             AppSpacing.gapLg,
             TextFormField(
               controller: _reason,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'What for? (optional)',
-                hintText: 'Grocery, tuition, allowance',
+              decoration: InputDecoration(
+                labelText: context.l10n.withdrawalReason,
+                hintText: context.l10n.withdrawalReasonHint,
               ),
             ),
             AppSpacing.gapXl,
             FilledButton(
               onPressed: _saving ? null : _save,
-              child: const Text('Record withdrawal'),
+              child: Text(context.l10n.withdrawalSubmit),
             ),
             AppSpacing.gapMd,
           ],

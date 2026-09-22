@@ -3,10 +3,16 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// A throwaway database with the real schema, so tests exercise the same SQL
 /// the app runs rather than a simplified stand-in.
-Future<Database> openTestDatabase() async {
+///
+/// Widget tests pass [sameIsolate]: they run on a simulated clock, and
+/// sqflite's default background isolate never answers there.
+Future<Database> openTestDatabase({bool sameIsolate = false}) async {
   sqfliteFfiInit();
+  final factory = sameIsolate
+      ? databaseFactoryFfiNoIsolate
+      : databaseFactoryFfi;
 
-  final db = await databaseFactoryFfi.openDatabase(
+  final db = await factory.openDatabase(
     inMemoryDatabasePath,
     // Without this, every in-memory open returns the same shared database,
     // and two simulated devices would silently be one.

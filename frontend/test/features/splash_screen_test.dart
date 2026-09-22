@@ -4,16 +4,11 @@ import 'package:kitaza_app/core/theme/app_palette.dart';
 import 'package:kitaza_app/features/splash/splash_screen.dart';
 import 'package:kitaza_app/shared/widgets/kitaza_logo.dart';
 
+import '../support/localized.dart';
+
 void main() {
-  Widget host({Brightness brightness = Brightness.light}) {
-    return MediaQuery(
-      data: MediaQueryData(platformBrightness: brightness),
-      child: const Directionality(
-        textDirection: TextDirection.ltr,
-        child: SplashScreen(),
-      ),
-    );
-  }
+  Widget host({Brightness brightness = Brightness.light}) =>
+      localized(const SplashScreen(), platformBrightness: brightness);
 
   testWidgets('shows the logo at the same size as the native splash', (
     tester,
@@ -29,13 +24,31 @@ void main() {
   ) async {
     await tester.pumpWidget(host());
     expect(
-      tester.widget<ColoredBox>(find.byType(ColoredBox).first).color,
+      tester
+          .widget<ColoredBox>(
+            find
+                .descendant(
+                  of: find.byType(SplashScreen),
+                  matching: find.byType(ColoredBox),
+                )
+                .first,
+          )
+          .color,
       AppPalette.canvasLight,
     );
 
     await tester.pumpWidget(host(brightness: Brightness.dark));
     expect(
-      tester.widget<ColoredBox>(find.byType(ColoredBox).first).color,
+      tester
+          .widget<ColoredBox>(
+            find
+                .descendant(
+                  of: find.byType(SplashScreen),
+                  matching: find.byType(ColoredBox),
+                )
+                .first,
+          )
+          .color,
       AppPalette.canvasDark,
     );
   });

@@ -6,11 +6,13 @@ import '../../app/route_paths.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/debouncer.dart';
 import '../../data/models/product.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/page_body.dart';
 import 'product_controller.dart';
 import 'widgets/product_tile.dart';
+import 'widgets/starter_catalog_sheet.dart';
 
 class ProductListScreen extends ConsumerStatefulWidget {
   const ProductListScreen({super.key});
@@ -35,11 +37,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     final products = ref.watch(productListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
+      appBar: AppBar(title: Text(context.l10n.navProducts)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(RoutePaths.productEditor),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add product'),
+        label: Text(context.l10n.productAdd),
       ),
       body: Column(
         children: [
@@ -52,9 +54,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             ),
             child: TextField(
               controller: _search,
-              decoration: const InputDecoration(
-                hintText: 'Search products',
-                prefixIcon: Icon(Icons.search_rounded),
+              decoration: InputDecoration(
+                hintText: context.l10n.productSearch,
+                prefixIcon: const Icon(Icons.search_rounded),
               ),
               onChanged: (value) => _debouncer.run(
                 () =>
@@ -70,12 +72,13 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 if (items.isEmpty) {
                   return EmptyState(
                     icon: Icons.inventory_2_outlined,
-                    title: 'No products yet',
-                    message:
-                        'Adding your regular items makes each sale one tap, '
-                        'and lets Kitaza tell you which ones actually earn.',
-                    actionLabel: 'Add your first product',
-                    onAction: () => context.push(RoutePaths.productEditor),
+                    title: context.l10n.productEmptyTitle,
+                    message: context.l10n.productEmptyMessage,
+                    actionLabel: context.l10n.starterOffer,
+                    onAction: () => StarterCatalogSheet.show(context),
+                    secondaryActionLabel: context.l10n.productEmptyAction,
+                    onSecondaryAction: () =>
+                        context.push(RoutePaths.productEditor),
                   );
                 }
 

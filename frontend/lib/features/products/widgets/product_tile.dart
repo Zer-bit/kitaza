@@ -4,6 +4,7 @@ import '../../../core/formatting/peso_formatter.dart';
 import '../../../core/formatting/quantity_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/product.dart';
+import '../../../l10n/l10n.dart';
 
 class ProductTile extends StatelessWidget {
   const ProductTile({super.key, required this.product, required this.onTap});
@@ -21,35 +22,34 @@ class ProductTile extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Row(
+      title: Text(product.name, maxLines: 2, overflow: TextOverflow.ellipsis),
+      // Details wrap onto a second line instead of pushing sideways: a long
+      // name, the stock, a restock badge and the margin did not fit one line
+      // on a small phone at large text.
+      subtitle: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
-            '${_stockLabel()} ${product.unitLabel}',
+            context.l10n.productStockUnits(_stockLabel(), product.unitLabel),
             style: theme.textTheme.bodySmall?.copyWith(
               color: product.isLowOnStock ? theme.colorScheme.error : null,
               fontWeight: product.isLowOnStock ? FontWeight.w700 : null,
             ),
           ),
-          if (product.isLowOnStock) ...[
-            const SizedBox(width: AppSpacing.sm),
-            const _LowStockBadge(),
-          ],
-        ],
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
+          if (product.isLowOnStock) const _LowStockBadge(),
           Text(
-            PesoFormatter.format(product.sellingPrice),
-            style: theme.textTheme.titleMedium,
-          ),
-          Text(
-            '${product.marginPercent.toStringAsFixed(0)}% margin',
+            context.l10n.productMargin(
+              product.marginPercent.toStringAsFixed(0),
+            ),
             style: theme.textTheme.bodySmall,
           ),
         ],
+      ),
+      trailing: Text(
+        PesoFormatter.format(product.sellingPrice),
+        style: theme.textTheme.titleMedium,
       ),
     );
   }
@@ -74,7 +74,7 @@ class _LowStockBadge extends StatelessWidget {
         borderRadius: AppRadius.pillAll,
       ),
       child: Text(
-        'Restock',
+        context.l10n.productRestock,
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.onErrorContainer,
         ),

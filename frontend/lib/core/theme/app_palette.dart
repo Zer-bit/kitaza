@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 ///
 /// Chosen for a shop counter rather than a screenshot: deep teal reads as
 /// trustworthy and stays legible in daylight, the amber accent is warm without
-/// shouting, and every pair here clears WCAG AA contrast so an owner in their
+/// shouting, and every text pair here clears WCAG AA contrast - measured by
+/// palette_contrast_test.dart, not assumed - so an owner in their
 /// sixties can read it as easily as their teenage helper.
 abstract final class AppPalette {
   // Brand
@@ -19,9 +20,12 @@ abstract final class AppPalette {
   static const Color amberBright = Color(0xFFFBBF24);
 
   // Health ratings. Always shown with an icon and a label, never colour alone.
-  static const Color good = Color(0xFF15803D);
+  // The light shades were darkened after measuring: the original good and
+  // caution headlines reached only 4.42:1 and 4.44:1 on their banners, under
+  // the 4.5:1 WCAG AA minimum. Locked by palette_contrast_test.dart.
+  static const Color good = Color(0xFF147436);
   static const Color goodDark = Color(0xFF4ADE80);
-  static const Color caution = Color(0xFFA16207);
+  static const Color caution = Color(0xFF925605);
   static const Color cautionDark = Color(0xFFFACC15);
   static const Color alert = Color(0xFFB91C1C);
   static const Color alertDark = Color(0xFFF87171);

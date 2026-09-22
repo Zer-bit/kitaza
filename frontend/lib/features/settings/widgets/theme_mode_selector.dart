@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
+
 class ThemeModeSelector extends StatelessWidget {
   const ThemeModeSelector({
     super.key,
@@ -13,21 +15,21 @@ class ThemeModeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<ThemeMode>(
-      segments: const [
+      segments: [
         ButtonSegment(
           value: ThemeMode.light,
-          icon: Icon(Icons.light_mode_outlined),
-          label: Text('Light'),
+          icon: const Icon(Icons.light_mode_outlined),
+          label: Text(context.l10n.settingsThemeLight),
         ),
         ButtonSegment(
           value: ThemeMode.system,
-          icon: Icon(Icons.brightness_auto_outlined),
-          label: Text('Auto'),
+          icon: const Icon(Icons.brightness_auto_outlined),
+          label: Text(context.l10n.settingsThemeAuto),
         ),
         ButtonSegment(
           value: ThemeMode.dark,
-          icon: Icon(Icons.dark_mode_outlined),
-          label: Text('Dark'),
+          icon: const Icon(Icons.dark_mode_outlined),
+          label: Text(context.l10n.settingsThemeDark),
         ),
       ],
       selected: {selected},

@@ -22,5 +22,7 @@ abstract final class AppConfig {
 
   /// Local database file name, kept stable across releases.
   static const String databaseFile = 'kitaza.db';
-  static const int databaseVersion = 1;
+
+  /// Must match the newest step in `SchemaMigrations`.
+  static const int databaseVersion = 2;
 }

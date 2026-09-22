@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/report_period.dart';
+import '../../../l10n/l10n.dart';
 
 class PeriodSelector extends StatelessWidget {
   const PeriodSelector({
@@ -17,7 +18,10 @@ class PeriodSelector extends StatelessWidget {
     return SegmentedButton<ReportPeriod>(
       segments: [
         for (final period in ReportPeriod.values)
-          ButtonSegment(value: period, label: Text(period.label)),
+          ButtonSegment(
+            value: period,
+            label: Text(context.l10n.reportPeriod(period)),
+          ),
       ],
       selected: {selected},
       showSelectedIcon: false,

@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../data/local/dao/sync_queue_dao.dart';
 import '../../data/repositories/store_scope.dart';
 import '../../data/repositories/sync_coordinator.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import 'widgets/queued_change_description.dart';
@@ -27,17 +28,16 @@ class SyncProblemsScreen extends ConsumerWidget {
     final problems = ref.watch(_problemsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sync problems')),
+      appBar: AppBar(title: Text(context.l10n.problemsTitle)),
       body: AsyncContent<List<QueuedChange>>(
         value: problems,
         onRetry: () => ref.invalidate(_problemsProvider),
         builder: (items) {
           if (items.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.cloud_done_rounded,
-              title: 'Nothing is stuck',
-              message:
-                  'Every entry has reached the cloud or is waiting its turn.',
+              title: context.l10n.problemsEmptyTitle,
+              message: context.l10n.problemsEmptyMessage,
             );
           }
 
@@ -61,7 +61,8 @@ class _ProblemTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final description = QueuedChangeDescription.of(change);
+    final l10n = context.l10n;
+    final description = QueuedChangeDescription.of(change, l10n);
     final parked = change.attempts >= SyncQueueDao.maxAttempts;
 
     return Padding(
@@ -95,15 +96,15 @@ class _ProblemTile extends ConsumerWidget {
           ),
           AppSpacing.gapXs,
           Text(
-            change.lastError ?? 'Refused by the server',
+            change.lastError ?? l10n.problemsRefused,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.error,
             ),
           ),
           Text(
             parked
-                ? 'Stopped retrying after ${change.attempts} attempts.'
-                : 'Tried ${change.attempts} time${change.attempts == 1 ? "" : "s"}; will retry.',
+                ? l10n.problemsStopped(change.attempts)
+                : l10n.problemsWillRetry(change.attempts),
             style: theme.textTheme.bodySmall,
           ),
           AppSpacing.gapSm,
@@ -114,12 +115,12 @@ class _ProblemTile extends ConsumerWidget {
                     .read(syncCoordinatorProvider.notifier)
                     .retryParked(change.rowId),
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try again'),
+                label: Text(l10n.commonTryAgain),
               ),
               TextButton.icon(
                 onPressed: () => _confirmDiscard(context, ref),
                 icon: const Icon(Icons.cloud_off_rounded),
-                label: const Text('Keep on phone only'),
+                label: Text(l10n.problemsKeepLocal),
               ),
             ],
           ),
@@ -132,19 +133,16 @@ class _ProblemTile extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Stop uploading this?'),
-        content: const Text(
-          'It stays in your records on this phone, but other devices and the '
-          'cloud backup will not have it.',
-        ),
+        title: Text(context.l10n.problemsDiscardTitle),
+        content: Text(context.l10n.problemsDiscardMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Keep on phone only'),
+            child: Text(context.l10n.problemsKeepLocal),
           ),
         ],
       ),

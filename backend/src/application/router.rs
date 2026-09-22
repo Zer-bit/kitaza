@@ -11,6 +11,7 @@ use tower_http::trace::TraceLayer;
 use crate::config::ServerSettings;
 use crate::features::authentication::auth_routes;
 use crate::features::dashboard::dashboard_routes;
+use crate::features::diagnostics::diagnostics_routes;
 use crate::features::expenses::expense_routes;
 use crate::features::health::health_routes;
 use crate::features::inventory::inventory_routes;
@@ -35,7 +36,8 @@ pub fn build_router(state: AppState, settings: &ServerSettings) -> Router {
         .merge(withdrawal_routes())
         .merge(dashboard_routes())
         .merge(report_routes())
-        .merge(sync_routes());
+        .merge(sync_routes())
+        .merge(diagnostics_routes());
 
     Router::new()
         .merge(health_routes())

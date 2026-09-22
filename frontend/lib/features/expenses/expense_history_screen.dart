@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/route_paths.dart';
-import '../../core/formatting/day_formatter.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/models/expense.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/expense_repository.dart';
+import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/money_text.dart';
@@ -24,11 +24,11 @@ class ExpenseHistoryScreen extends ConsumerWidget {
     final expenses = ref.watch(expenseHistoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Expenses')),
+      appBar: AppBar(title: Text(context.l10n.navExpenses)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(RoutePaths.recordExpense),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add expense'),
+        label: Text(context.l10n.expenseTitle),
       ),
       body: Column(
         children: [
@@ -53,11 +53,9 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                 if (items.isEmpty) {
                   return EmptyState(
                     icon: Icons.receipt_long_rounded,
-                    title: 'No expenses recorded',
-                    message:
-                        'Track what you spend on stock, load, transport and '
-                        'bills so your profit is real.',
-                    actionLabel: 'Add an expense',
+                    title: context.l10n.expenseHistoryEmptyTitle,
+                    message: context.l10n.expenseHistoryEmptyMessage,
+                    actionLabel: context.l10n.expenseHistoryEmptyAction,
                     onAction: () => context.push(RoutePaths.recordExpense),
                   );
                 }
@@ -114,9 +112,14 @@ class _ExpenseRow extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSecondaryContainer,
           ),
         ),
-        title: Text(expense.displayLabel),
+        title: Text(
+          expense.description ?? context.l10n.expenseCategory(expense.category),
+        ),
         subtitle: Text(
-          '${expense.category.label} · ${DayFormatter.relative(expense.occurredAt)}',
+          context.l10n.commonSeparator(
+            context.l10n.expenseCategory(expense.category),
+            context.l10n.relativeDay(expense.occurredAt),
+          ),
         ),
         trailing: MoneyText(expense.amount, size: 17),
       ),

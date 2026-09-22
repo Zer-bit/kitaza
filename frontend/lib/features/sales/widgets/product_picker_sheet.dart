@@ -6,6 +6,8 @@ import '../../../core/formatting/quantity_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/debouncer.dart';
 import '../../../data/models/product.dart';
+import '../../../data/repositories/product_repository.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/widgets/async_content.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../products/product_controller.dart';
@@ -44,6 +46,18 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
     super.dispose();
   }
 
+  Future<void> _pickByBarcode(String code) async {
+    if (code.trim().isEmpty) return;
+    final product = await ref
+        .read(productRepositoryProvider)
+        .findByBarcode(code);
+    if (product == null || !mounted) return;
+
+    widget.onSelected(product);
+    _controller.clear();
+    ref.read(productSearchTermProvider.notifier).update('');
+  }
+
   @override
   Widget build(BuildContext context) {
     final products = ref.watch(productListProvider);
@@ -64,10 +78,13 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
               TextField(
                 controller: _controller,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search product or scan code',
-                  prefixIcon: Icon(Icons.search_rounded),
+                decoration: InputDecoration(
+                  hintText: context.l10n.salePickerSearch,
+                  prefixIcon: const Icon(Icons.search_rounded),
                 ),
+                // A USB or Bluetooth barcode gun types the code and presses
+                // Enter; an exact barcode match is picked straight away.
+                onSubmitted: _pickByBarcode,
                 onChanged: (value) => _debouncer.run(
                   () => ref
                       .read(productSearchTermProvider.notifier)
@@ -80,12 +97,10 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
                   value: products,
                   builder: (items) {
                     if (items.isEmpty) {
-                      return const EmptyState(
+                      return EmptyState(
                         icon: Icons.inventory_2_outlined,
-                        title: 'No products yet',
-                        message:
-                            'You can still record the sale by typing the amount '
-                            'on the keypad.',
+                        title: context.l10n.salePickerEmptyTitle,
+                        message: context.l10n.salePickerEmptyMessage,
                       );
                     }
 
@@ -124,8 +139,11 @@ class _ProductRow extends StatelessWidget {
       title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         product.isOutOfStock
-            ? 'Out of stock'
-            : '${QuantityFormatter.exact(product.stockQuantity)} ${product.unitLabel} left',
+            ? context.l10n.saleOutOfStock
+            : context.l10n.saleStockLeft(
+                QuantityFormatter.exact(product.stockQuantity),
+                product.unitLabel,
+              ),
         style: theme.textTheme.bodySmall?.copyWith(
           color: product.isLowOnStock ? theme.colorScheme.error : null,
         ),

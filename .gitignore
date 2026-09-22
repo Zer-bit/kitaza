@@ -138,6 +138,11 @@ pgdata/
 # ─── Docker ───────────────────────────────────────────────────────────────
 docker-compose.override.yml
 
+# Database dumps from the backup service: real customer data, never pushed.
+backups/
+*.dump
+*.dump.partial
+
 
 # ─── Editors and IDEs ─────────────────────────────────────────────────────
 .idea/
