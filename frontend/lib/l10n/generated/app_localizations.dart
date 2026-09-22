@@ -2821,6 +2821,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your access does not allow this. Ask the owner.'**
   String get syncNotAllowed;
+
+  /// No description provided for @settingsPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get settingsPlan;
+
+  /// No description provided for @planTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan'**
+  String get planTitle;
+
+  /// No description provided for @planStatusTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Free Pro trial, 1 day left} other{Free Pro trial, {count} days left}}'**
+  String planStatusTrial(int count);
+
+  /// No description provided for @planStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan}, paid until {date}'**
+  String planStatusActive(Object plan, Object date);
+
+  /// No description provided for @planStatusGrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan has ended. Everything keeps working until {date}.'**
+  String planStatusGrace(Object date);
+
+  /// No description provided for @planStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup is paused. Everything you record is kept on this phone and uploads as soon as you renew.'**
+  String get planStatusPaused;
+
+  /// No description provided for @planStatusUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'This server does not charge. Everything is included.'**
+  String get planStatusUnlimited;
+
+  /// No description provided for @planBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get planBasic;
+
+  /// No description provided for @planPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get planPro;
+
+  /// No description provided for @planBasicPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup and sync for one store, on all your phones'**
+  String get planBasicPoints;
+
+  /// No description provided for @planProPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 5 stores, staff accounts, and everything in Basic'**
+  String get planProPoints;
+
+  /// No description provided for @planPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} a month'**
+  String planPerMonth(Object price);
+
+  /// No description provided for @planPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} a year'**
+  String planPerYear(Object price);
+
+  /// No description provided for @planMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get planMonthly;
+
+  /// No description provided for @planYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly, 2 months free'**
+  String get planYearly;
+
+  /// No description provided for @planPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} with GCash or Maya'**
+  String planPay(Object amount);
+
+  /// No description provided for @planPayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay ahead, like buying load. Nothing is ever charged automatically.'**
+  String get planPayHint;
+
+  /// No description provided for @planFinishInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish paying on the page that opened. Kitaza updates when you come back.'**
+  String get planFinishInBrowser;
+
+  /// No description provided for @planCouldNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the payment page. Try again.'**
+  String get planCouldNotOpen;
+
+  /// No description provided for @planPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you! Your plan is updated.'**
+  String get planPaid;
+
+  /// No description provided for @planCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get planCurrent;
+
+  /// No description provided for @planHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get planHistory;
+
+  /// No description provided for @planOneMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'1 month'**
+  String get planOneMonth;
+
+  /// No description provided for @planOneYear.
+  ///
+  /// In en, this message translates to:
+  /// **'1 year'**
+  String get planOneYear;
+
+  /// No description provided for @planLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Kitaza offline for free'**
+  String get planLeaveTitle;
+
+  /// No description provided for @planLeaveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep everything on this phone and stop syncing. Your records in the cloud stay there.'**
+  String get planLeaveHint;
+
+  /// No description provided for @planLeaveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch this phone to offline?'**
+  String get planLeaveConfirmTitle;
+
+  /// No description provided for @planLeaveConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone keeps every record and stops syncing. Your other phones and staff will no longer see what is recorded here. You can move back to the cloud any time.'**
+  String get planLeaveConfirmMessage;
+
+  /// No description provided for @planLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use offline'**
+  String get planLeaveConfirm;
+
+  /// No description provided for @planLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone now works offline. Nothing was lost.'**
+  String get planLeft;
+
+  /// No description provided for @planPausedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup is paused until the plan is renewed. This entry is kept on the phone.'**
+  String get planPausedShort;
+
+  /// No description provided for @planUpgradeNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs Kitaza Pro.'**
+  String get planUpgradeNeeded;
+
+  /// No description provided for @planBannerTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Your free trial ends in 1 day.} other{Your free trial ends in {count} days.}}'**
+  String planBannerTrial(int count);
+
+  /// No description provided for @planBannerEnding.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Your plan ends in 1 day.} other{Your plan ends in {count} days.}}'**
+  String planBannerEnding(int count);
+
+  /// No description provided for @planBannerGrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan has ended. Syncing continues until {date}.'**
+  String planBannerGrace(Object date);
+
+  /// No description provided for @planBannerPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup is paused. Your entries are kept on this phone.'**
+  String get planBannerPaused;
+
+  /// No description provided for @planBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a plan'**
+  String get planBannerAction;
+
+  /// No description provided for @planBannerStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the owner to renew the store\'s plan.'**
+  String get planBannerStaff;
+
+  /// No description provided for @syncPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused, saved on this phone'**
+  String get syncPaused;
+
+  /// No description provided for @activitySubscriptionPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} paid {amount} for {plan}'**
+  String activitySubscriptionPaid(Object name, Object amount, Object plan);
 }
 
 class _AppLocalizationsDelegate

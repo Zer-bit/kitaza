@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use axum::extract::{FromRequestParts, Path};
+use axum::extract::{FromRequestParts, MatchedPath, Path};
+use axum::http::Method;
 use axum::http::request::Parts;
 use uuid::Uuid;
 
@@ -39,8 +40,26 @@ impl FromRequestParts<AppState> for StoreScope {
 
         authorise(state, &actor, store_id).await?;
 
+        let route = parts
+            .extensions
+            .get::<MatchedPath>()
+            .map(|path| path.as_str().to_owned())
+            .unwrap_or_default();
+        let takes_entries =
+            !matches!(parts.method, Method::GET | Method::HEAD) && !is_account_management(&route);
+        state
+            .billing_service
+            .check_store_request(&actor, store_id, takes_entries)
+            .await?;
+
         Ok(Self { store_id, actor })
     }
+}
+
+/// Managing staff and renaming a store stay open on a paused account. Taking
+/// someone's access away must never wait on a payment.
+fn is_account_management(route: &str) -> bool {
+    route.contains("/staff") || route.ends_with("/stores/{store_id}")
 }
 
 pub async fn authorise(state: &AppState, actor: &Actor, store_id: Uuid) -> Result<(), ApiError> {

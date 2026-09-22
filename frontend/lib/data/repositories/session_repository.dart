@@ -11,6 +11,7 @@ import '../models/access_grant.dart';
 import '../models/auth_session.dart';
 import '../models/owner_account.dart';
 import '../models/store_profile.dart';
+import '../models/subscription.dart';
 import '../remote/auth_api.dart';
 import 'store_scope.dart';
 
@@ -82,6 +83,7 @@ class SessionRepository {
       accessToken: await _tokens.readAccessToken(),
       refreshToken: refreshToken,
       ended: refreshToken == null,
+      subscription: Subscription.decode(_preferences.readSubscription()),
     );
   }
 
@@ -167,6 +169,7 @@ class SessionRepository {
     await _saveStores(fresh.stores);
     await _sessionDao.saveOwner(fresh.owner);
     await _preferences.writeAccess(after.encode());
+    await _preferences.writeSubscription(fresh.subscription.encode());
     await _preferences.writeActiveStoreId(fresh.store.id);
 
     return AccountRefresh(
@@ -174,8 +177,40 @@ class SessionRepository {
         store: fresh.store,
         stores: fresh.stores,
         access: after,
+        subscription: fresh.subscription,
       ),
-      accessChanged: before != after,
+      // A payment that unpaused the account matters as much as a new
+      // permission: either way there is now something to upload.
+      accessChanged:
+          before != after || current.subscription != fresh.subscription,
+    );
+  }
+
+  /// Takes this phone off the cloud and keeps using it offline, for free,
+  /// with every record on it. Anything not yet uploaded stays queued, so
+  /// moving back to the cloud later uploads it then.
+  ///
+  /// The owner's way out of paying without losing a single sale: the cloud
+  /// copy stays on the server, and this phone keeps its own.
+  Future<AuthSession> leaveCloud(AuthSession current) async {
+    final refreshToken = await _tokens.readRefreshToken();
+    if (refreshToken != null) {
+      try {
+        await _authApi.signOut(refreshToken);
+      } on Object {
+        // The phone goes offline whether or not the server hears about it.
+      }
+    }
+
+    await _tokens.clear();
+    await _preferences.clearAllSyncCursors();
+    await _preferences.clearAccess();
+    await _preferences.writeStorageMode(StorageMode.local.name);
+
+    return AuthSession(
+      owner: current.owner,
+      store: current.store,
+      mode: StorageMode.local,
     );
   }
 
@@ -245,6 +280,7 @@ class SessionRepository {
       session.store,
       StorageMode.cloud,
       access: session.access,
+      subscription: session.subscription,
     );
     return session;
   }
@@ -292,6 +328,7 @@ class SessionRepository {
       session.store,
       StorageMode.cloud,
       access: session.access,
+      subscription: session.subscription,
     );
 
     return session;
@@ -324,10 +361,14 @@ class SessionRepository {
     StoreProfile active,
     StorageMode mode, {
     AccessGrant? access,
+    Subscription? subscription,
   }) async {
     await _sessionDao.saveOwner(owner);
     await _saveStores(stores.isEmpty ? [active] : stores);
     if (access != null) await _preferences.writeAccess(access.encode());
+    if (subscription != null) {
+      await _preferences.writeSubscription(subscription.encode());
+    }
     await _preferences.writeStorageMode(mode.name);
     await _preferences.writeActiveStoreId(active.id);
     await _preferences.writeOnboarded(true);

@@ -218,6 +218,21 @@ impl StaffRepository {
         Ok(())
     }
 
+    /// The owner of the store a live code joins, without using the code up.
+    pub async fn owner_of_code(&self, code_hash: &str) -> ApiResult<Option<Uuid>> {
+        let owner: Option<(Uuid,)> = sqlx::query_as(
+            "SELECT s.owner_id FROM staff_invites i
+             JOIN staff_members st ON st.id = i.staff_id
+             JOIN stores s ON s.id = st.store_id
+             WHERE i.code_hash = $1 AND i.redeemed_at IS NULL AND i.expires_at > now()",
+        )
+        .bind(code_hash)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(owner.map(|(id,)| id))
+    }
+
     /// Uses up a join code. Single use: the row is locked and marked in the
     /// same transaction, so two phones typing the same code cannot both join.
     pub async fn redeem(&self, code_hash: &str) -> ApiResult<Option<RedeemedInvite>> {

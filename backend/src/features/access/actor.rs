@@ -1,5 +1,6 @@
 use uuid::Uuid;
 
+use crate::features::billing::SubscriptionRecord;
 use crate::shared::{ApiError, ApiResult};
 
 use super::permission::{Permission, Permissions};
@@ -15,6 +16,8 @@ pub struct Actor {
     pub name: String,
     pub device_name: String,
     pub staff: Option<StaffGrant>,
+    /// The owner's subscription, which covers their staff too.
+    pub subscription: Option<SubscriptionRecord>,
 }
 
 /// What a staff member's session is limited to: one store, and whatever the
@@ -87,6 +90,7 @@ mod tests {
                 store_id: Uuid::new_v4(),
                 permissions,
             }),
+            subscription: None,
         }
     }
 

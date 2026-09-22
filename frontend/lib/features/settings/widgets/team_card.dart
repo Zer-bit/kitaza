@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/route_paths.dart';
 import '../../../l10n/l10n.dart';
+import '../../authentication/auth_controller.dart';
+import '../../billing/billing_text.dart';
 
 /// The owner's way into staff, devices and the activity log.
 class TeamCard extends StatelessWidget {
@@ -15,6 +18,8 @@ class TeamCard extends StatelessWidget {
     return Card(
       child: Column(
         children: [
+          const _PlanTile(),
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.groups_2_outlined),
             title: Text(l10n.staffTitle),
@@ -60,6 +65,24 @@ class TeamNeedsCloudCard extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => context.push(RoutePaths.cloudUpgrade),
       ),
+    );
+  }
+}
+
+class _PlanTile extends ConsumerWidget {
+  const _PlanTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final subscription = ref.watch(subscriptionProvider);
+
+    return ListTile(
+      leading: const Icon(Icons.workspace_premium_outlined),
+      title: Text(l10n.settingsPlan),
+      subtitle: Text(l10n.subscriptionStatus(subscription, DateTime.now())),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () => context.push(RoutePaths.plan),
     );
   }
 }

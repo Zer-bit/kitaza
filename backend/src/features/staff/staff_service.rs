@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 use crate::features::access::{Actor, Permissions, SessionDirectory};
 use crate::features::audit::{AuditAction, AuditEntry, AuditTrail};
+use crate::features::billing::BillingService;
 use crate::infrastructure::realtime::{EventBroadcaster, RealtimeEvent, RealtimeTopic};
 use crate::shared::{ApiError, ApiResult};
 
@@ -23,6 +24,7 @@ pub struct StaffService {
     sessions: SessionDirectory,
     audit: AuditTrail,
     broadcaster: EventBroadcaster,
+    billing: BillingService,
 }
 
 impl StaffService {
@@ -31,12 +33,14 @@ impl StaffService {
         sessions: SessionDirectory,
         audit: AuditTrail,
         broadcaster: EventBroadcaster,
+        billing: BillingService,
     ) -> Self {
         Self {
             repository,
             sessions,
             audit,
             broadcaster,
+            billing,
         }
     }
 
@@ -51,6 +55,7 @@ impl StaffService {
         actor: &Actor,
         request: SaveStaffRequest,
     ) -> ApiResult<AddedStaff> {
+        self.billing.check_staff(actor.subscription.as_ref())?;
         let permissions = Permissions::from_list(&request.permissions);
         let staff = self
             .repository
@@ -111,6 +116,7 @@ impl StaffService {
         actor: &Actor,
         staff_id: Uuid,
     ) -> ApiResult<InviteView> {
+        self.billing.check_staff(actor.subscription.as_ref())?;
         let staff = self
             .repository
             .find(store_id, staff_id)

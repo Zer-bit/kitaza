@@ -1,12 +1,16 @@
 import 'package:kitaza_app/core/config/storage_mode.dart';
 import 'package:kitaza_app/core/errors/app_failure.dart';
+import 'package:kitaza_app/core/platform/link_opener.dart';
 import 'package:kitaza_app/data/models/access_grant.dart';
 import 'package:kitaza_app/data/models/activity_event.dart';
 import 'package:kitaza_app/data/models/auth_session.dart';
+import 'package:kitaza_app/data/models/billing_overview.dart';
 import 'package:kitaza_app/data/models/owner_account.dart';
 import 'package:kitaza_app/data/models/signed_in_device.dart';
 import 'package:kitaza_app/data/models/staff_member.dart';
 import 'package:kitaza_app/data/models/store_profile.dart';
+import 'package:kitaza_app/data/models/subscription.dart';
+import 'package:kitaza_app/data/remote/billing_api.dart';
 import 'package:kitaza_app/data/remote/team_api.dart';
 
 import 'in_memory_database.dart';
@@ -20,28 +24,36 @@ const _home = StoreProfile(id: testStoreId, name: 'Test Store');
 const _branch = StoreProfile(id: 'branch', name: "Nena's Carinderia sa Kanto");
 
 /// An owner signed in to the cloud with two stores.
-AuthSession cloudOwner({bool ended = false}) => AuthSession(
+AuthSession cloudOwner({
+  bool ended = false,
+  Subscription subscription = const Subscription.unlimited(),
+}) => AuthSession(
   owner: _owner,
   store: _home,
   stores: const [_home, _branch],
   mode: StorageMode.cloud,
   ended: ended,
+  subscription: subscription,
 );
 
 /// A staff member of the test store with [permissions].
-AuthSession staffMember(Set<Permission> permissions, {bool ended = false}) =>
-    AuthSession(
-      owner: const OwnerAccount(id: 'owner', fullName: 'Nena Reyes'),
-      store: _home,
-      mode: StorageMode.cloud,
-      ended: ended,
-      access: AccessGrant(
-        role: MemberRole.staff,
-        displayName: 'Liza',
-        staffId: 'liza',
-        permissions: permissions,
-      ),
-    );
+AuthSession staffMember(
+  Set<Permission> permissions, {
+  bool ended = false,
+  Subscription subscription = const Subscription.unlimited(),
+}) => AuthSession(
+  owner: const OwnerAccount(id: 'owner', fullName: 'Nena Reyes'),
+  store: _home,
+  mode: StorageMode.cloud,
+  ended: ended,
+  subscription: subscription,
+  access: AccessGrant(
+    role: MemberRole.staff,
+    displayName: 'Liza',
+    staffId: 'liza',
+    permissions: permissions,
+  ),
+);
 
 /// Stands in for the server's staff, devices and activity endpoints.
 class FakeTeamApi implements TeamApi {
@@ -249,3 +261,67 @@ List<ActivityEvent> sampleActivity() {
     }, ago: const Duration(days: 2)),
   ];
 }
+
+/// Subscriptions as they look on a given day.
+Subscription trialWithDaysLeft(int days) => Subscription(
+  status: SubscriptionStatus.trial,
+  plan: PlanTier.pro,
+  periodEndsAt: DateTime.now().add(Duration(days: days, hours: -1)),
+  pausesAt: DateTime.now().add(Duration(days: days + 7)),
+  storeLimit: 5,
+);
+
+const pausedPlan = Subscription(status: SubscriptionStatus.paused);
+
+class FakeBillingApi implements BillingApi {
+  FakeBillingApi({required this.overviewToShow});
+
+  BillingOverview overviewToShow;
+  final List<({PlanTier plan, int months})> checkouts = [];
+
+  @override
+  Future<BillingOverview> overview() async => overviewToShow;
+
+  @override
+  Future<Uri> checkout(PlanTier plan, int months) async {
+    checkouts.add((plan: plan, months: months));
+    return Uri.parse('https://pay.example/checkout/${checkouts.length}');
+  }
+}
+
+class FakeLinkOpener implements LinkOpener {
+  final List<Uri> opened = [];
+  bool works = true;
+
+  @override
+  Future<bool> open(Uri link) async {
+    opened.add(link);
+    return works;
+  }
+}
+
+BillingOverview billingOverview({
+  Subscription subscription = pausedPlan,
+  bool enabled = true,
+  List<PaymentRecord> payments = const [],
+}) => BillingOverview(
+  enabled: enabled,
+  subscription: subscription,
+  plans: const [
+    PlanOffer(
+      plan: PlanTier.basic,
+      monthlyPrice: 99,
+      yearlyPrice: 990,
+      storeLimit: 1,
+      allowsStaff: false,
+    ),
+    PlanOffer(
+      plan: PlanTier.pro,
+      monthlyPrice: 199,
+      yearlyPrice: 1990,
+      storeLimit: 5,
+      allowsStaff: true,
+    ),
+  ],
+  payments: payments,
+);

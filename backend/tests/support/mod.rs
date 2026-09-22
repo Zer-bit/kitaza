@@ -13,7 +13,8 @@ use chrono::{DateTime, Utc};
 use http_body_util::BodyExt;
 use kitaza_server::application::{AppState, build_router};
 use kitaza_server::config::{
-    AppSettings, DatabaseSettings, RedisSettings, SecuritySettings, ServerSettings, SyncSettings,
+    AppSettings, BillingMode, BillingSettings, DatabaseSettings, RedisSettings, SecuritySettings,
+    ServerSettings, SyncSettings,
 };
 use kitaza_server::infrastructure::cache::CacheHandle;
 use serde_json::{Value, json};
@@ -64,7 +65,15 @@ impl TestApp {
     /// A small page size lets pagination be tested with a handful of rows
     /// instead of thousands.
     pub fn with_page_size(pool: PgPool, page_size: i64) -> Self {
-        let settings = settings(page_size);
+        Self::build(pool, settings(page_size, BillingMode::Off))
+    }
+
+    /// Plans enforced, with the test gateway taking "payments".
+    pub fn with_billing(pool: PgPool) -> Self {
+        Self::build(pool, settings(500, BillingMode::Test))
+    }
+
+    fn build(pool: PgPool, settings: AppSettings) -> Self {
         let state = AppState::assemble(&settings, pool.clone(), CacheHandle::disabled());
         let router = build_router(state.clone(), &settings.server);
         Self {
@@ -81,9 +90,22 @@ impl TestApp {
         token: Option<&str>,
         body: Option<Value>,
     ) -> (StatusCode, Value) {
+        self.call_raw(method, &format!("/api/v1{path}"), token, body)
+            .await
+    }
+
+    /// For the plain pages outside the API prefix. Non-JSON bodies come back
+    /// as `Value::Null`.
+    pub async fn call_raw(
+        &self,
+        method: Method,
+        path: &str,
+        token: Option<&str>,
+        body: Option<Value>,
+    ) -> (StatusCode, Value) {
         let mut request = Request::builder()
             .method(method)
-            .uri(format!("/api/v1{path}"))
+            .uri(path)
             .header("content-type", "application/json");
         if let Some(token) = token {
             request = request.header("authorization", format!("Bearer {token}"));
@@ -303,7 +325,7 @@ pub fn ids_of(rows: &Value) -> Vec<String> {
         .collect()
 }
 
-fn settings(page_size: i64) -> AppSettings {
+fn settings(page_size: i64, billing: BillingMode) -> AppSettings {
     AppSettings {
         server: ServerSettings {
             bind_address: SocketAddr::from(([127, 0, 0, 1], 0)),
@@ -334,6 +356,12 @@ fn settings(page_size: i64) -> AppSettings {
         sync: SyncSettings {
             settle_window: Duration::ZERO,
             page_size,
+        },
+        billing: BillingSettings {
+            mode: billing,
+            public_url: "http://kitaza.test".into(),
+            trial: chrono::Duration::days(30),
+            grace: chrono::Duration::days(7),
         },
     }
 }

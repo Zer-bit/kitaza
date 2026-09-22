@@ -109,6 +109,31 @@ database can be read.
   never taken from the device. Staff may re-send their own rows (a retry) but
   not overwrite anyone else's.
 
+### Plans and payments
+
+Billing is a check, not a wall. Every store-scoped request asks
+`BillingService` after ownership: reads always pass for the owner, and writes
+pass while the account is on a trial, paid, or in its grace week. What is
+refused is an *upload*, never access to records. A paused phone keeps
+recording offline, still downloads, and uploads the moment the owner pays,
+so the promise "never lock an owner out of their own records" holds by
+construction. Managing staff and devices is exempt, since taking someone's
+access away must never wait on a payment.
+
+Money comes in as **prepaid periods**. GCash and Maya payments through a
+gateway are one-off, not recurring, and paying ahead suits a market used to
+buying load. A payment row is opened before the owner is sent to the
+gateway; the gateway's webhook marks it paid and extends the subscription in
+one transaction. Only a pending payment can be confirmed, so a webhook
+delivered twice counts once. PayMongo sits behind a small `PaymentGateway`
+enum next to a test gateway whose checkout is a page on the server itself,
+which is what the tests and local development use. With `KITAZA_BILLING=off`
+nothing is enforced at all.
+
+The subscription is read with the session on each request (cached like the
+rest of the session), so a payment unpauses every phone on its next request;
+the phones are also nudged over the socket to re-read their account.
+
 ### Money
 
 `NUMERIC(14,2)` in Postgres, `rust_decimal::Decimal` in Rust. JSON is the only
@@ -238,6 +263,13 @@ opening, every 15 minutes, and at once when the store's socket says
 it regardless. A staff member who gains or loses `view_profit` has their store
 downloaded again from scratch, and one who loses it has the expenses and
 withdrawals on the phone removed.
+
+**A paused plan is not an error.** The sync coordinator treats a
+`subscription_required` refusal as its own phase: entries stay queued, the
+download still runs, the status light says *paused*, and the next try waits
+for the socket's nudge after a payment rather than a backoff. The owner can
+also leave the cloud for free offline use at any time, keeping every record
+and every unsent entry on the phone.
 
 **When the server ends a session** — the device was revoked, or its staff
 member removed — the phone shows a *signed out* screen instead of the store,
@@ -415,7 +447,9 @@ owners ──< stores ──< products ──< stock_movements
    │             └──< staff_members ──< staff_invites
    │
    ├──< device_sessions ──< refresh_tokens      (a session may belong to staff)
-   └──< audit_events                            (per store, or account-wide)
+   ├──< audit_events                            (per store, or account-wide)
+   ├─── subscriptions                           (one per owner; covers staff)
+   └──< payments                                (prepaid periods)
 ```
 
 Every business table carries `updated_at` and a nullable `deleted_at`.

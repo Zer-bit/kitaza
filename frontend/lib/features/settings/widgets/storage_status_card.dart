@@ -33,6 +33,17 @@ class StorageStatusCard extends ConsumerWidget {
                     ),
             ),
           ),
+          if (status.phase == SyncPhase.paused) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                Icons.pause_circle_outline_rounded,
+                color: theme.colorScheme.secondary,
+              ),
+              title: Text(l10n.syncPaused),
+              subtitle: Text(l10n.planStatusPaused),
+            ),
+          ],
           if (status.hasPendingWork) ...[
             const Divider(height: 1),
             ListTile(

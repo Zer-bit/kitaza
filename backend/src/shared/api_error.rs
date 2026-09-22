@@ -27,6 +27,15 @@ pub enum ApiError {
     #[error("too many attempts, please try again later")]
     TooManyRequests,
 
+    /// The account is paused for want of payment. Devices keep what they
+    /// were sending and try again once it is paid.
+    #[error("{0}")]
+    SubscriptionRequired(String),
+
+    /// The account is paid up, but its plan does not include this.
+    #[error("{0}")]
+    UpgradeRequired(String),
+
     #[error(transparent)]
     Internal(#[from] anyhow::Error),
 }
@@ -51,6 +60,9 @@ impl ApiError {
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Conflict(_) => StatusCode::CONFLICT,
             Self::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
+            Self::SubscriptionRequired(_) | Self::UpgradeRequired(_) => {
+                StatusCode::PAYMENT_REQUIRED
+            }
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -63,6 +75,8 @@ impl ApiError {
             Self::NotFound(_) => "not_found",
             Self::Conflict(_) => "conflict",
             Self::TooManyRequests => "too_many_requests",
+            Self::SubscriptionRequired(_) => "subscription_required",
+            Self::UpgradeRequired(_) => "upgrade_required",
             Self::Internal(_) => "internal_error",
         }
     }

@@ -39,6 +39,12 @@ services:
       KITAZA_JWT_SECRET: ${KITAZA_JWT_SECRET:-local-development-secret-change-me-32}
       KITAZA_ALLOWED_ORIGINS: ${KITAZA_ALLOWED_ORIGINS:-*}
       KITAZA_LOG: info,kitaza_server=debug
+      # "test" takes pretend payments on a page served by the API itself, so
+      # the plan screen can be tried locally. Production uses "paymongo".
+      KITAZA_BILLING: ${KITAZA_BILLING:-test}
+      KITAZA_PUBLIC_URL: ${KITAZA_PUBLIC_URL:-http://localhost:8080}
+      KITAZA_PAYMONGO_SECRET_KEY: ${KITAZA_PAYMONGO_SECRET_KEY:-}
+      KITAZA_PAYMONGO_WEBHOOK_SECRET: ${KITAZA_PAYMONGO_WEBHOOK_SECRET:-}
     ports:
       - "8080:8080"
     depends_on:

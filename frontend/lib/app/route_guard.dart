@@ -56,7 +56,8 @@ bool mayOpen(AuthSession session, String location) {
     RoutePaths.cloudUpgrade => !session.isCloud,
     RoutePaths.staff ||
     RoutePaths.devices ||
-    RoutePaths.activity => session.isCloud && access.isOwner,
+    RoutePaths.activity ||
+    RoutePaths.plan => session.isCloud && access.isOwner,
     _ => true,
   };
 }

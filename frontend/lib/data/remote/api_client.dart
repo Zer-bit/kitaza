@@ -84,6 +84,13 @@ class ApiClient {
       DioExceptionType.receiveTimeout ||
       DioExceptionType.connectionError => const AppFailure.offline(),
       _ when status == 401 && !anonymous => const AppFailure.unauthorized(),
+      _ when status == 402 && _codeFrom(error) == 'subscription_required' =>
+        AppFailure(
+          _messageFrom(error),
+          kind: FailureKind.paused,
+          code: 'subscription_required',
+          cause: error,
+        ),
       _ when status != null && status >= 500 => AppFailure(
         'The Kitaza server is having trouble.',
         kind: FailureKind.server,

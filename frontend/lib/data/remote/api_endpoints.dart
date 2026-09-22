@@ -9,6 +9,8 @@ abstract final class ApiEndpoints {
   static const String join = '/auth/join';
   static const String stores = '/stores';
   static const String devices = '/devices';
+  static const String billing = '/billing';
+  static const String billingCheckout = '/billing/checkout';
 
   static String store(String storeId) => '/stores/$storeId';
   static String device(String sessionId) => '/devices/$sessionId';

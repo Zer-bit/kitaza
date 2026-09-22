@@ -152,6 +152,9 @@ void countMessagesShowTheirNumber() {
       'staffDevices': l10n.staffDevices,
       'problemsWillRetry': l10n.problemsWillRetry,
       'reportsTitle': l10n.reportsTitle,
+      'planStatusTrial': l10n.planStatusTrial,
+      'planBannerTrial': l10n.planBannerTrial,
+      'planBannerEnding': l10n.planBannerEnding,
       'backupConfirmSummary': (count) =>
           l10n.backupConfirmSummary('Store', count, count),
     };

@@ -107,6 +107,47 @@ produce thousands of occurrences of a bug that affects nobody else.
 
 ---
 
+## Taking payments
+
+`KITAZA_BILLING` decides:
+
+| Value | Meaning |
+|---|---|
+| `off` | Nothing is charged; every cloud account has every feature. The default outside Docker. |
+| `test` | Plans are enforced, and checkout is a page on this server with a pay button. The Docker Compose default, for trying the flow. Never in production. |
+| `paymongo` | Real payments. Needs `KITAZA_PAYMONGO_SECRET_KEY` and `KITAZA_PAYMONGO_WEBHOOK_SECRET`. |
+
+For PayMongo:
+
+1. In the PayMongo dashboard, enable GCash, Maya and cards on the account.
+2. Create a webhook pointing at
+   `<KITAZA_PUBLIC_URL>/api/v1/billing/webhooks/paymongo` for the event
+   `checkout_session.payment.paid`, and put its secret in
+   `KITAZA_PAYMONGO_WEBHOOK_SECRET`.
+3. Set `KITAZA_PUBLIC_URL` to the address phones reach the server at; the
+   checkout returns the owner's browser to `/billing/return` there.
+4. Start with the test keys (`sk_test_…`) and pay a test checkout before
+   switching to live keys.
+
+If a webhook is missed, the payment shows in PayMongo but the owner's plan
+has not moved. Re-send the event from the PayMongo dashboard: the handler
+extends the subscription, and ignores an event it has already acted on, so
+re-sending is always safe. Payments still waiting on their webhook:
+
+```sql
+SELECT id, owner_id, plan, months, amount, provider_reference, created_at
+FROM payments WHERE status = 'pending' ORDER BY created_at DESC;
+```
+
+A pending row can also be a checkout the owner opened and abandoned; those
+are harmless and never extend anything.
+
+`KITAZA_TRIAL_DAYS` (30) and `KITAZA_GRACE_DAYS` (7) tune the trial and the
+grace week. Accounts that existed before billing was added were given a
+30-day trial by migration 7.
+
+---
+
 ## Devices and staff
 
 Owners manage both from the app: *Settings → Stores and staff*. Support rarely

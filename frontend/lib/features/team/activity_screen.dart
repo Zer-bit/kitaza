@@ -217,6 +217,7 @@ class _EventTile extends StatelessWidget {
     ActivityAction.deviceSignedOut => Icons.phonelink_erase_rounded,
     ActivityAction.storeAdded ||
     ActivityAction.storeRenamed => Icons.storefront_outlined,
+    ActivityAction.subscriptionPaid => Icons.workspace_premium_outlined,
     ActivityAction.other => Icons.history_rounded,
   };
 }

@@ -22,6 +22,7 @@ enum ActivityAction {
   deviceSignedOut('device_signed_out'),
   storeAdded('store_added'),
   storeRenamed('store_renamed'),
+  subscriptionPaid('subscription_paid'),
   other('');
 
   const ActivityAction(this.wireName);

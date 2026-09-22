@@ -1732,4 +1732,171 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get syncNotAllowed =>
       'Hindi ito pinapayagan ng access mo. Magtanong sa may-ari.';
+
+  @override
+  String get settingsPlan => 'Plan';
+
+  @override
+  String get planTitle => 'Ang plan mo';
+
+  @override
+  String planStatusTrial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Libreng Pro trial, $count araw pa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planStatusActive(Object plan, Object date) {
+    return '$plan, bayad hanggang $date';
+  }
+
+  @override
+  String planStatusGrace(Object date) {
+    return 'Tapos na ang plan mo. Gagana pa ang lahat hanggang $date.';
+  }
+
+  @override
+  String get planStatusPaused =>
+      'Naka-pause ang cloud backup. Nakatago sa phone na ito ang lahat ng itatala mo, at mag-a-upload agad pag nag-renew ka.';
+
+  @override
+  String get planStatusUnlimited =>
+      'Walang bayad sa server na ito. Kasama na ang lahat.';
+
+  @override
+  String get planBasic => 'Basic';
+
+  @override
+  String get planPro => 'Pro';
+
+  @override
+  String get planBasicPoints =>
+      'Backup at sync para sa isang tindahan, sa lahat ng phone mo';
+
+  @override
+  String get planProPoints =>
+      'Hanggang 5 tindahan, staff accounts, at lahat ng nasa Basic';
+
+  @override
+  String planPerMonth(Object price) {
+    return '$price kada buwan';
+  }
+
+  @override
+  String planPerYear(Object price) {
+    return '$price kada taon';
+  }
+
+  @override
+  String get planMonthly => 'Buwanan';
+
+  @override
+  String get planYearly => 'Taunan, libre ang 2 buwan';
+
+  @override
+  String planPay(Object amount) {
+    return 'Magbayad ng $amount gamit ang GCash o Maya';
+  }
+
+  @override
+  String get planPayHint =>
+      'Paunang bayad, parang pagbili ng load. Walang awtomatikong kaltas kailanman.';
+
+  @override
+  String get planFinishInBrowser =>
+      'Tapusin ang pagbayad sa page na bumukas. Mag-a-update ang Kitaza pagbalik mo.';
+
+  @override
+  String get planCouldNotOpen =>
+      'Hindi mabuksan ang page ng bayad. Subukan ulit.';
+
+  @override
+  String get planPaid => 'Salamat! Na-update na ang plan mo.';
+
+  @override
+  String get planCurrent => 'Kasalukuyan';
+
+  @override
+  String get planHistory => 'Mga bayad';
+
+  @override
+  String get planOneMonth => '1 buwan';
+
+  @override
+  String get planOneYear => '1 taon';
+
+  @override
+  String get planLeaveTitle => 'Gamitin ang Kitaza offline nang libre';
+
+  @override
+  String get planLeaveHint =>
+      'Itago ang lahat sa phone na ito at itigil ang pag-sync. Mananatili sa cloud ang records mo roon.';
+
+  @override
+  String get planLeaveConfirmTitle => 'Gawing offline ang phone na ito?';
+
+  @override
+  String get planLeaveConfirmMessage =>
+      'Itatago ng phone na ito ang lahat ng records at titigil ito sa pag-sync. Hindi na makikita ng ibang phone at staff mo ang maitatala rito. Puwede kang bumalik sa cloud kahit kailan.';
+
+  @override
+  String get planLeaveConfirm => 'Gamitin offline';
+
+  @override
+  String get planLeft => 'Offline na ang phone na ito. Walang nawala.';
+
+  @override
+  String get planPausedShort =>
+      'Naka-pause ang cloud backup hanggang ma-renew ang plan. Nakatago sa phone ang entry na ito.';
+
+  @override
+  String get planUpgradeNeeded => 'Kailangan ng Kitaza Pro para rito.';
+
+  @override
+  String planBannerTrial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Matatapos ang libreng trial mo sa loob ng $count araw.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planBannerEnding(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Matatapos ang plan mo sa loob ng $count araw.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planBannerGrace(Object date) {
+    return 'Tapos na ang plan mo. Tuloy ang pag-sync hanggang $date.';
+  }
+
+  @override
+  String get planBannerPaused =>
+      'Naka-pause ang cloud backup. Nakatago sa phone na ito ang mga entry mo.';
+
+  @override
+  String get planBannerAction => 'Pumili ng plan';
+
+  @override
+  String get planBannerStaff =>
+      'Pakiusapan ang may-ari na i-renew ang plan ng tindahan.';
+
+  @override
+  String get syncPaused => 'Naka-pause, nakatago sa phone';
+
+  @override
+  String activitySubscriptionPaid(Object name, Object amount, Object plan) {
+    return 'Nagbayad si $name ng $amount para sa $plan';
+  }
 }

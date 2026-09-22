@@ -12,10 +12,12 @@ extension FailureText on AppLocalizations {
       FailureKind.offline => errorOffline,
       FailureKind.server => errorServer,
       FailureKind.unauthorized => errorSessionExpired,
+      FailureKind.paused => planPausedShort,
       FailureKind.rejected => switch (error.code) {
         'unauthorized' => errorWrongCredentials,
         'conflict' => errorEmailTaken,
         'too_many_requests' => errorTooManyAttempts,
+        'upgrade_required' => planUpgradeNeeded,
         _ => fallback ?? errorGeneric,
       },
     };

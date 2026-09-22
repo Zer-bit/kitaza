@@ -17,6 +17,7 @@ import '../../shared/widgets/page_body.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/stat_card.dart';
 import '../authentication/auth_controller.dart';
+import '../billing/widgets/plan_banner.dart';
 import '../settings/widgets/sync_indicator.dart';
 import 'dashboard_controller.dart';
 import 'widgets/health_banner.dart';
@@ -142,6 +143,7 @@ class _DashboardBody extends ConsumerWidget {
                     ? () => context.go(RoutePaths.reports)
                     : null,
               ),
+              const PlanBanner(),
               if (access.can(Permission.manageProducts))
                 const StarterPromptCard(),
               AppSpacing.gapXl,

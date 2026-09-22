@@ -54,6 +54,10 @@ class SyncIndicator extends ConsumerWidget {
         icon: Icons.error_outline_rounded,
         tooltip: context.l10n.syncProblem,
       ),
+      SyncPhase.paused => _Chip(
+        icon: Icons.pause_circle_outline_rounded,
+        tooltip: context.l10n.syncPaused,
+      ),
       SyncPhase.idle => _Chip(
         icon: status.hasPendingWork
             ? Icons.cloud_upload_outlined

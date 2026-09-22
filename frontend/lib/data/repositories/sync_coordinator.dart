@@ -15,7 +15,9 @@ import 'data_revision.dart';
 import 'store_scope.dart';
 import 'sync_row_mapper.dart';
 
-enum SyncPhase { idle, syncing, offline, failed }
+/// [paused]: the owner's plan has lapsed. Entries wait on the phone and
+/// upload once it is paid; that is not a failure.
+enum SyncPhase { idle, syncing, offline, failed, paused }
 
 class SyncStatus {
   const SyncStatus({
@@ -152,21 +154,37 @@ class SyncCoordinator extends Notifier<SyncStatus> {
     state = state.copyWith(phase: SyncPhase.syncing);
 
     try {
-      await _pushOutbox(storeId);
+      // A paused account still downloads: everything already in the cloud
+      // stays the owner's to read. Only uploading waits.
+      var uploadsPaused = false;
+      try {
+        await _pushOutbox(storeId);
+      } on AppFailure catch (failure) {
+        if (failure.kind != FailureKind.paused) rethrow;
+        uploadsPaused = true;
+      }
       final pulledAnything = await _pullChanges(storeId);
       if (!ref.mounted) return;
 
       _consecutiveFailures = 0;
-      _retryAfter = null;
+      // Paying is announced to the phone and triggers a sync of its own, so
+      // there is no point knocking again every few minutes before then.
+      _retryAfter = uploadsPaused ? DateTime.now().add(_maxBackoff) : null;
       if (pulledAnything) ref.read(dataRevisionProvider.notifier).bump();
-      await _uploadErrorReports();
+      if (!uploadsPaused) await _uploadErrorReports();
 
       state = state.copyWith(
-        phase: SyncPhase.idle,
+        phase: uploadsPaused ? SyncPhase.paused : SyncPhase.idle,
         lastSyncedAt: DateTime.now(),
       );
     } on Object catch (error) {
       if (!ref.mounted) return;
+      if (error case AppFailure(kind: FailureKind.paused)) {
+        // A staff phone of a paused store cannot even download.
+        _retryAfter = DateTime.now().add(_maxBackoff);
+        state = state.copyWith(phase: SyncPhase.paused);
+        return;
+      }
       if (error case AppFailure(kind: FailureKind.unauthorized)) {
         _sessionLost = true;
         _stopWatching();

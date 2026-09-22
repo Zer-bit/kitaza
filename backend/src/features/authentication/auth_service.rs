@@ -2,9 +2,11 @@ use chrono::{Duration, Utc};
 use rand::RngExt;
 use serde_json::json;
 use sha2::{Digest, Sha256};
+use uuid::Uuid;
 
-use crate::features::access::{Actor, SessionDirectory, StaffGrant};
+use crate::features::access::{Actor, SessionDirectory};
 use crate::features::audit::{AuditAction, AuditEntry, AuditTrail};
+use crate::features::billing::BillingService;
 use crate::features::staff::{StaffRepository, join_code};
 use crate::infrastructure::cache::{RateLimitVerdict, RateLimiter};
 use crate::shared::{ApiError, ApiResult};
@@ -36,6 +38,7 @@ pub struct AuthDependencies {
     pub rate_limiter: RateLimiter,
     pub sessions: SessionDirectory,
     pub audit: AuditTrail,
+    pub billing: BillingService,
     pub refresh_lifetime: Duration,
 }
 
@@ -47,6 +50,7 @@ pub struct AuthService {
     rate_limiter: RateLimiter,
     sessions: SessionDirectory,
     audit: AuditTrail,
+    billing: BillingService,
     refresh_lifetime: Duration,
 }
 
@@ -59,6 +63,7 @@ impl AuthService {
             rate_limiter: dependencies.rate_limiter,
             sessions: dependencies.sessions,
             audit: dependencies.audit,
+            billing: dependencies.billing,
             refresh_lifetime: dependencies.refresh_lifetime,
         }
     }
@@ -85,6 +90,7 @@ impl AuthService {
                 request.full_name.trim(),
                 request.store_name.trim(),
                 &business_type,
+                Utc::now() + self.billing.trial_length(),
             )
             .await?;
 
@@ -132,31 +138,25 @@ impl AuthService {
     /// A staff member's phone joining with the code their owner shared. The
     /// code is used up: a second phone needs a new one.
     pub async fn join(&self, request: JoinRequest) -> ApiResult<AuthenticatedSession> {
-        let redeemed = self
-            .staff
-            .redeem(&join_code::fingerprint(&request.code))
-            .await?
-            .ok_or_else(|| {
-                ApiError::Unauthorized("this code is not valid or has expired".into())
-            })?;
+        let code_hash = join_code::fingerprint(&request.code);
+
+        // Checked before the code is used up, so an owner who upgrades can
+        // hand over the same code.
+        if let Some(owner_id) = self.staff.owner_of_code(&code_hash).await? {
+            let subscription = self.billing.subscription_of(owner_id).await?;
+            self.billing.check_staff(subscription.as_ref())?;
+        }
+
+        let redeemed = self.staff.redeem(&code_hash).await?.ok_or_else(|| {
+            ApiError::Unauthorized("this code is not valid or has expired".into())
+        })?;
 
         let device = device_name(request.device_name, request.device_tag);
         let session_id = self
             .repository
             .open_session(redeemed.owner_id, Some(redeemed.staff.id), &device)
             .await?;
-
-        let actor = Actor {
-            owner_id: redeemed.owner_id,
-            session_id,
-            name: redeemed.staff.display_name.clone(),
-            device_name: device,
-            staff: Some(StaffGrant {
-                staff_id: redeemed.staff.id,
-                store_id: redeemed.staff.store_id,
-                permissions: redeemed.staff.permissions(),
-            }),
-        };
+        let actor = self.actor_for(session_id).await?;
 
         self.audit
             .record(
@@ -250,6 +250,7 @@ impl AuthService {
             },
             stores: stores.iter().map(to_summary).collect(),
             access: AccessSummary::of(actor),
+            subscription: self.billing.summary(actor.subscription.as_ref()),
         })
     }
 
@@ -262,15 +263,16 @@ impl AuthService {
             .repository
             .open_session(owner.id, None, &device)
             .await?;
-
-        let actor = Actor {
-            owner_id: owner.id,
-            session_id,
-            name: owner.full_name,
-            device_name: device,
-            staff: None,
-        };
+        let actor = self.actor_for(session_id).await?;
         self.issue(&actor).await
+    }
+
+    /// The actor behind a session just opened, subscription and all.
+    async fn actor_for(&self, session_id: Uuid) -> ApiResult<Actor> {
+        self.sessions
+            .resolve(session_id)
+            .await?
+            .ok_or_else(|| ApiError::Internal(anyhow::anyhow!("a new session did not resolve")))
     }
 
     async fn issue(&self, actor: &Actor) -> ApiResult<AuthenticatedSession> {

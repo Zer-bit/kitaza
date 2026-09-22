@@ -27,6 +27,9 @@ class FakeSyncApi implements SyncApi {
   final List<PullPage> pages = [];
   Set<String> refuse = {};
   Object? failWith;
+
+  /// Fails uploads only, as a paused account does.
+  Object? pushFailWith;
   Future<void> Function()? duringPush;
 
   @override
@@ -36,6 +39,7 @@ class FakeSyncApi implements SyncApi {
   ) async {
     attempts++;
     if (failWith case final error?) throw error;
+    if (pushFailWith case final error?) throw error;
     pushes.add(batch);
     pushedTo.add(storeId);
     await duringPush?.call();
@@ -262,6 +266,65 @@ void main() {
       1,
       reason: 'kept to send later',
     );
+  });
+
+  group('when the owner\'s plan has paused the account', () {
+    const paused = AppFailure(
+      'this account is paused',
+      kind: FailureKind.paused,
+      code: 'subscription_required',
+    );
+
+    test('entries wait on the phone and downloads carry on', () async {
+      await SyncQueueDao(
+        db,
+      ).enqueue(QueuedEntity.sales, 's1', {'id': 's1'}, storeId: testStoreId);
+      api.pushFailWith = paused;
+      api.pages.add(
+        page({
+          'expenses': [_expense('from-another-phone')],
+        }, cursor: 'c1'),
+      );
+
+      container = await start();
+      container.read(syncCoordinatorProvider);
+      await settle();
+
+      final status = container.read(syncCoordinatorProvider);
+      expect(status.phase, SyncPhase.paused);
+      expect(status.pendingCount, 1, reason: 'kept, not failed or parked');
+      expect(await SyncQueueDao(db).parkedCount(), 0);
+      expect(await db.query('expenses'), hasLength(1));
+    });
+
+    test('paying lets the waiting entries go up', () async {
+      await SyncQueueDao(
+        db,
+      ).enqueue(QueuedEntity.sales, 's1', {'id': 's1'}, storeId: testStoreId);
+      api.pushFailWith = paused;
+      container = await start();
+      container.read(syncCoordinatorProvider);
+      await settle();
+
+      api.pushFailWith = null;
+      await container
+          .read(syncCoordinatorProvider.notifier)
+          .syncNow(force: true);
+
+      expect(container.read(syncCoordinatorProvider).phase, SyncPhase.idle);
+      expect(await SyncQueueDao(db).pendingCount(), 0);
+    });
+
+    test('a staff phone that cannot even download just waits', () async {
+      api.failWith = paused;
+      container = await start();
+      container.read(syncCoordinatorProvider);
+      await settle();
+
+      final status = container.read(syncCoordinatorProvider);
+      expect(status.phase, SyncPhase.paused);
+      expect(status.lastError, isNull);
+    });
   });
 
   test('an entry written during an upload is not lost', () async {

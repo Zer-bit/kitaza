@@ -2,6 +2,7 @@ import '../../core/config/storage_mode.dart';
 import 'access_grant.dart';
 import 'owner_account.dart';
 import 'store_profile.dart';
+import 'subscription.dart';
 
 /// The signed-in state of this device. `mode` decides whether anything is ever
 /// sent over the network.
@@ -15,6 +16,7 @@ class AuthSession {
     this.accessToken,
     this.refreshToken,
     this.ended = false,
+    this.subscription = const Subscription.unlimited(),
   }) : access = access ?? AccessGrant.owner(owner.fullName),
        stores = stores ?? [store];
 
@@ -34,6 +36,9 @@ class AuthSession {
   /// staff member removed. Its records stay until someone signs back in or
   /// chooses to clear them, because unsent sales may be among them.
   final bool ended;
+
+  /// The owner's plan, which covers their staff too. Unlimited offline.
+  final Subscription subscription;
 
   bool get isCloud => mode.isCloud;
 
@@ -61,6 +66,9 @@ class AuthSession {
       access: access,
       accessToken: json['access_token'] as String?,
       refreshToken: json['refresh_token'] as String?,
+      subscription: Subscription.fromJson(
+        json['subscription'] as Map<String, dynamic>?,
+      ),
     );
   }
 
@@ -78,6 +86,7 @@ class AuthSession {
     List<StoreProfile>? stores,
     AccessGrant? access,
     bool? ended,
+    Subscription? subscription,
   }) => AuthSession(
     owner: owner,
     store: store ?? this.store,
@@ -87,5 +96,6 @@ class AuthSession {
     accessToken: accessToken ?? this.accessToken,
     refreshToken: refreshToken,
     ended: ended ?? this.ended,
+    subscription: subscription ?? this.subscription,
   );
 }

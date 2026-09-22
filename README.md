@@ -108,7 +108,23 @@ docker compose up --build
 ```
 
 This starts Postgres, Redis and the API on `http://localhost:8080`. Migrations
-run automatically on boot.
+run automatically on boot. Billing runs in test mode: the plan screen's
+checkout opens a page on the API with a pretend "pay" button. See
+[docs/OPERATIONS.md](docs/OPERATIONS.md#taking-payments) for real payments.
+
+If Docker says *permission denied* on `/var/run/docker.sock`, either run the
+commands with `sudo`, or give your user access once and log in again:
+
+```bash
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"      # then log out and back in
+```
+
+To rebuild just the API after a code change:
+
+```bash
+docker compose build api && docker compose up -d api
+```
 
 Point the app at it:
 

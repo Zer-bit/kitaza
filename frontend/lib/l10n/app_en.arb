@@ -1016,5 +1016,104 @@
   },
   "accountStaffSignOutNote": "To use this phone again, you will need a new join code from the owner.",
   "productCostSetByOwner": "The owner sets the cost price.",
-  "syncNotAllowed": "Your access does not allow this. Ask the owner."
+  "syncNotAllowed": "Your access does not allow this. Ask the owner.",
+  "settingsPlan": "Plan",
+  "planTitle": "Your plan",
+  "planStatusTrial": "{count, plural, =1{Free Pro trial, 1 day left} other{Free Pro trial, {count} days left}}",
+  "@planStatusTrial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planStatusActive": "{plan}, paid until {date}",
+  "@planStatusActive": {
+    "placeholders": {
+      "plan": {},
+      "date": {}
+    }
+  },
+  "planStatusGrace": "Your plan has ended. Everything keeps working until {date}.",
+  "@planStatusGrace": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "planStatusPaused": "Cloud backup is paused. Everything you record is kept on this phone and uploads as soon as you renew.",
+  "planStatusUnlimited": "This server does not charge. Everything is included.",
+  "planBasic": "Basic",
+  "planPro": "Pro",
+  "planBasicPoints": "Backup and sync for one store, on all your phones",
+  "planProPoints": "Up to 5 stores, staff accounts, and everything in Basic",
+  "planPerMonth": "{price} a month",
+  "@planPerMonth": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "planPerYear": "{price} a year",
+  "@planPerYear": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "planMonthly": "Monthly",
+  "planYearly": "Yearly, 2 months free",
+  "planPay": "Pay {amount} with GCash or Maya",
+  "@planPay": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "planPayHint": "You pay ahead, like buying load. Nothing is ever charged automatically.",
+  "planFinishInBrowser": "Finish paying on the page that opened. Kitaza updates when you come back.",
+  "planCouldNotOpen": "Could not open the payment page. Try again.",
+  "planPaid": "Thank you! Your plan is updated.",
+  "planCurrent": "Current",
+  "planHistory": "Payments",
+  "planOneMonth": "1 month",
+  "planOneYear": "1 year",
+  "planLeaveTitle": "Use Kitaza offline for free",
+  "planLeaveHint": "Keep everything on this phone and stop syncing. Your records in the cloud stay there.",
+  "planLeaveConfirmTitle": "Switch this phone to offline?",
+  "planLeaveConfirmMessage": "This phone keeps every record and stops syncing. Your other phones and staff will no longer see what is recorded here. You can move back to the cloud any time.",
+  "planLeaveConfirm": "Use offline",
+  "planLeft": "This phone now works offline. Nothing was lost.",
+  "planPausedShort": "Cloud backup is paused until the plan is renewed. This entry is kept on the phone.",
+  "planUpgradeNeeded": "This needs Kitaza Pro.",
+  "planBannerTrial": "{count, plural, =1{Your free trial ends in 1 day.} other{Your free trial ends in {count} days.}}",
+  "@planBannerTrial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planBannerEnding": "{count, plural, =1{Your plan ends in 1 day.} other{Your plan ends in {count} days.}}",
+  "@planBannerEnding": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planBannerGrace": "Your plan has ended. Syncing continues until {date}.",
+  "@planBannerGrace": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "planBannerPaused": "Cloud backup is paused. Your entries are kept on this phone.",
+  "planBannerAction": "Choose a plan",
+  "planBannerStaff": "Ask the owner to renew the store's plan.",
+  "syncPaused": "Paused, saved on this phone",
+  "activitySubscriptionPaid": "{name} paid {amount} for {plan}",
+  "@activitySubscriptionPaid": {
+    "placeholders": {
+      "name": {},
+      "amount": {},
+      "plan": {}
+    }
+  }
 }

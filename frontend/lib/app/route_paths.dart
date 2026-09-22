@@ -24,6 +24,7 @@ abstract final class RoutePaths {
   static const String staff = '/settings/staff';
   static const String devices = '/settings/devices';
   static const String activity = '/settings/activity';
+  static const String plan = '/settings/plan';
 
   static const Set<String> publicRoutes = {
     welcome,

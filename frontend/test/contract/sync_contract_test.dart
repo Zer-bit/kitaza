@@ -13,8 +13,10 @@ import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
 import 'package:kitaza_app/data/models/activity_event.dart';
 import 'package:kitaza_app/data/models/auth_session.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
+import 'package:kitaza_app/data/models/subscription.dart';
 import 'package:kitaza_app/data/remote/api_client.dart';
 import 'package:kitaza_app/data/remote/auth_api.dart';
+import 'package:kitaza_app/data/remote/billing_api.dart';
 import 'package:kitaza_app/data/remote/team_api.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
 import 'package:kitaza_app/data/repositories/product_repository.dart';
@@ -42,7 +44,11 @@ class Device {
   final ProviderContainer container;
   final String storeId;
 
-  static Future<Device> signIn(String token, String cloudStoreId) async {
+  static Future<Device> signIn(
+    String token,
+    String cloudStoreId, {
+    String? api,
+  }) async {
     final db = await openTestDatabase();
     // The shared fixture seeds a local store; this device belongs to the
     // cloud store instead.
@@ -56,7 +62,7 @@ class Device {
 
     final dio = Dio(
       BaseOptions(
-        baseUrl: _api!,
+        baseUrl: api ?? _api!,
         contentType: 'application/json',
         headers: {'authorization': 'Bearer $token'},
         validateStatus: (status) => status != null && status < 400,
@@ -134,6 +140,8 @@ Future<void> _outlastSettleWindow() =>
     Future<void>.delayed(const Duration(milliseconds: 2500));
 
 void main() {
+  billingContract();
+
   test(
     'two phones sharing a store end up with identical books',
     () async {
@@ -328,14 +336,82 @@ void main() {
   );
 }
 
+/// A server started with `KITAZA_BILLING=test KITAZA_TRIAL_DAYS=0
+/// KITAZA_GRACE_DAYS=0`, where a new account is paused from the start.
+final String? _billingApi = Platform.environment['KITAZA_CONTRACT_BILLING_API'];
+
 final Object _skip = _api == null
     ? 'set KITAZA_CONTRACT_API to run against a live server'
     : false;
 
-ApiClient _client(String? token) => ApiClient(
+/// The billing scenario, against the server named by
+/// KITAZA_CONTRACT_BILLING_API.
+void billingContract() {
+  test(
+    'a paused account keeps its sale on the phone until the owner pays',
+    () async {
+      final api = _billingApi!;
+      final anonymous = ApiClient(
+        Dio(
+          BaseOptions(
+            baseUrl: api,
+            contentType: 'application/json',
+            validateStatus: (status) => status != null && status < 400,
+          ),
+        ),
+      );
+      final registered = await anonymous.post(
+        '/auth/register',
+        authenticated: false,
+        body: {
+          'email': 'billing-${const Uuid().v4().substring(0, 8)}@example.com',
+          'password': 'contract-test-password',
+          'full_name': 'Billing Test',
+          'store_name': 'Billing Store',
+        },
+      );
+      final session = AuthSession.fromJson(registered, mode: StorageMode.cloud);
+      expect(session.subscription.status, SubscriptionStatus.paused);
+
+      final token = session.accessToken!;
+      final phone = await Device.signIn(token, session.store.id, api: api);
+      addTearDown(phone.close);
+
+      await phone.sales.record(cart: [CartLine.quick(75)]);
+      final waiting = await phone.sync();
+      expect(waiting.phase, SyncPhase.paused);
+      expect(await SyncQueueDao(phone.db).pendingCount(), 1);
+
+      // The owner pays; the test gateway's page stands in for GCash.
+      final billing = BillingApi(_client(token, api: api));
+      final checkout = await billing.checkout(PlanTier.basic, 1);
+      await Dio().postUri<dynamic>(checkout);
+
+      final account = await AuthApi(_client(token, api: api)).account();
+      final after = Subscription.fromJson(
+        account['subscription'] as Map<String, dynamic>,
+      );
+      expect(after.status, SubscriptionStatus.active);
+      expect(after.plan, PlanTier.basic);
+
+      final uploaded = await phone.sync();
+      expect(uploaded.phase, SyncPhase.idle, reason: uploaded.lastError);
+      expect(await SyncQueueDao(phone.db).pendingCount(), 0);
+
+      final overview = await billing.overview();
+      expect(overview.payments.single.amount, 99);
+    },
+    skip: _billingApi == null
+        ? 'set KITAZA_CONTRACT_BILLING_API to run against a paused-by-default server'
+        : false,
+    timeout: const Timeout(Duration(minutes: 1)),
+  );
+}
+
+ApiClient _client(String? token, {String? api}) => ApiClient(
   Dio(
     BaseOptions(
-      baseUrl: _api!,
+      baseUrl: api ?? _api!,
       contentType: 'application/json',
       headers: {'authorization': ?token == null ? null : 'Bearer $token'},
       validateStatus: (status) => status != null && status < 400,

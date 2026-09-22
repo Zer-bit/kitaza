@@ -65,8 +65,9 @@ impl AuthRepository {
         Ok(owner)
     }
 
-    /// Creates the owner and their first store in one transaction: an owner
-    /// without a store cannot record anything, so the two must never diverge.
+    /// Creates the owner, their first store and their trial in one
+    /// transaction: an owner without a store cannot record anything, so the
+    /// two must never diverge.
     pub async fn create_owner_with_store(
         &self,
         email: &str,
@@ -74,6 +75,7 @@ impl AuthRepository {
         full_name: &str,
         store_name: &str,
         business_type: &str,
+        trial_ends_at: DateTime<Utc>,
     ) -> ApiResult<(OwnerRecord, StoreRecord)> {
         let mut transaction = self.pool.begin().await?;
 
@@ -97,6 +99,14 @@ impl AuthRepository {
         .bind(store_name)
         .bind(business_type)
         .fetch_one(&mut *transaction)
+        .await?;
+
+        sqlx::query(
+            "INSERT INTO subscriptions (owner_id, plan, trial_ends_at) VALUES ($1, 'pro', $2)",
+        )
+        .bind(owner.id)
+        .bind(trial_ends_at)
+        .execute(&mut *transaction)
         .await?;
 
         transaction.commit().await?;

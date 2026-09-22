@@ -26,6 +26,7 @@ pub enum AuditAction {
     DeviceSignedOut,
     StoreAdded,
     StoreRenamed,
+    SubscriptionPaid,
 }
 
 impl AuditAction {
@@ -61,6 +62,7 @@ impl AuditAction {
             AuditAction::DeviceSignedOut => "device_signed_out",
             AuditAction::StoreAdded => "store_added",
             AuditAction::StoreRenamed => "store_renamed",
+            AuditAction::SubscriptionPaid => "subscription_paid",
         }
     }
 

@@ -93,6 +93,11 @@ extension ActivityText on AppLocalizations {
         event.text('old_name'),
         event.text('name'),
       ),
+      ActivityAction.subscriptionPaid => activitySubscriptionPaid(
+        name,
+        money('amount'),
+        event.text('plan') == 'basic' ? planBasic : planPro,
+      ),
       ActivityAction.other => activityOther(name),
     };
   }

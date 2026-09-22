@@ -12,6 +12,10 @@ enum FailureKind {
   /// The request itself was refused - bad input, a conflict. Retrying the
   /// same thing will get the same answer.
   rejected,
+
+  /// The account is paused until it is paid. Nothing is wrong with the
+  /// entry; it waits on the phone.
+  paused,
 }
 
 /// A failure already translated into something worth showing an owner. The

@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kitaza_app/core/config/storage_mode.dart';
 import 'package:kitaza_app/core/device/device_identity.dart';
 import 'package:kitaza_app/core/storage/preferences_store.dart';
 import 'package:kitaza_app/core/storage/secure_token_store.dart';
@@ -7,6 +8,7 @@ import 'package:kitaza_app/data/local/dao/session_dao.dart';
 import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
 import 'package:kitaza_app/data/models/access_grant.dart';
 import 'package:kitaza_app/data/models/owner_account.dart';
+import 'package:kitaza_app/data/models/subscription.dart';
 import 'package:kitaza_app/data/remote/auth_api.dart';
 import 'package:kitaza_app/data/repositories/session_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -293,5 +295,54 @@ void main() {
       reason: 'stays where it was',
     );
     expect(await SessionDao(db).readStore('branch'), isNotNull);
+  });
+
+  group('plans', () {
+    test(
+      'switching to offline keeps every record, unsent ones included',
+      () async {
+        await signedInBefore();
+        final current = (await sessions.restore())!.copyWith(ended: false);
+
+        final local = await sessions.leaveCloud(current);
+
+        expect(local.mode, StorageMode.local);
+        expect(local.store.id, testStoreId);
+        expect(await salesOnPhone(), 2);
+        expect(
+          await SyncQueueDao(db).pendingCount(),
+          1,
+          reason: 'uploads if the phone moves back to the cloud',
+        );
+        expect(preferences.readStorageMode(), 'local');
+        expect(
+          await const SecureTokenStore(FlutterSecureStorage())
+              .readRefreshToken(),
+          isNull,
+        );
+      },
+    );
+
+    test('a payment made on another phone counts as a change', () async {
+      await signedInBefore();
+      final current = (await sessions.restore())!.copyWith(
+        ended: false,
+        subscription: const Subscription(status: SubscriptionStatus.paused),
+      );
+      api.next = {
+        ..._session(),
+        'subscription': {'status': 'active', 'plan': 'basic'},
+      };
+
+      final refreshed = await sessions.refreshAccount(current);
+
+      expect(refreshed.accessChanged, isTrue, reason: 'time to upload');
+      expect(refreshed.session.subscription.status, SubscriptionStatus.active);
+      expect(
+        Subscription.decode(preferences.readSubscription()).plan,
+        PlanTier.basic,
+        reason: 'remembered for opening without signal',
+      );
+    });
   });
 }

@@ -9,6 +9,7 @@ import '../features/authentication/session_ended_screen.dart';
 import '../features/authentication/sign_in_screen.dart';
 import '../features/authentication/sign_up_screen.dart';
 import '../features/authentication/welcome_screen.dart';
+import '../features/billing/plan_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/expenses/expense_history_screen.dart';
 import '../features/expenses/record_expense_screen.dart';
@@ -162,6 +163,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'activity',
             builder: (context, state) => const ActivityScreen(),
+          ),
+          GoRoute(
+            path: 'plan',
+            builder: (context, state) => const PlanScreen(),
           ),
         ],
       ),

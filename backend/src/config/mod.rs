@@ -1,9 +1,11 @@
+mod billing_settings;
 mod database_settings;
 mod redis_settings;
 mod security_settings;
 mod server_settings;
 mod sync_settings;
 
+pub use billing_settings::{BillingMode, BillingSettings};
 pub use database_settings::DatabaseSettings;
 pub use redis_settings::RedisSettings;
 pub use security_settings::SecuritySettings;
@@ -19,6 +21,7 @@ pub struct AppSettings {
     pub redis: RedisSettings,
     pub security: SecuritySettings,
     pub sync: SyncSettings,
+    pub billing: BillingSettings,
 }
 
 impl AppSettings {
@@ -29,6 +32,7 @@ impl AppSettings {
             redis: RedisSettings::from_environment()?,
             security: SecuritySettings::from_environment()?,
             sync: SyncSettings::from_environment()?,
+            billing: BillingSettings::from_environment()?,
         })
     }
 }

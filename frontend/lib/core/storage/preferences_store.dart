@@ -14,6 +14,7 @@ class PreferencesStore {
   static const String _onboardedKey = 'kitaza.onboarded';
   static const String _syncCursorKey = 'kitaza.sync_cursor';
   static const String _accessKey = 'kitaza.access';
+  static const String _subscriptionKey = 'kitaza.subscription';
   static const String _languageKey = 'kitaza.language';
   static const String _lastAutoBackupKey = 'kitaza.last_auto_backup';
   static const String _printerAddressKey = 'kitaza.printer_address';
@@ -97,10 +98,17 @@ class PreferencesStore {
       _preferences.setString(_accessKey, value);
   Future<void> clearAccess() => _preferences.remove(_accessKey);
 
+  /// The owner's plan as last described, so a paused account says so even
+  /// when opened without signal.
+  String? readSubscription() => _preferences.getString(_subscriptionKey);
+  Future<void> writeSubscription(String value) =>
+      _preferences.setString(_subscriptionKey, value);
+
   Future<void> clearSession() async {
     await _preferences.remove(_activeStoreKey);
     await _preferences.remove(_onboardedKey);
     await _preferences.remove(_accessKey);
+    await _preferences.remove(_subscriptionKey);
     await clearAllSyncCursors();
   }
 }

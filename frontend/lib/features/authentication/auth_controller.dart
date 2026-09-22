@@ -4,6 +4,7 @@ import '../../core/config/storage_mode.dart';
 import '../../data/models/access_grant.dart';
 import '../../data/models/auth_session.dart';
 import '../../data/models/store_profile.dart';
+import '../../data/models/subscription.dart';
 import '../../data/remote/session_signal.dart';
 import '../../data/remote/team_api.dart';
 import '../../data/repositories/session_repository.dart';
@@ -146,6 +147,16 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     return refreshed.accessChanged;
   }
 
+  /// Moves this phone to free, offline use, keeping every record on it.
+  Future<void> leaveCloud() async {
+    final current = state.value;
+    if (current == null || !current.isCloud || !current.access.isOwner) return;
+
+    final local = await _sessions.leaveCloud(current);
+    _adopt(local);
+    state = AsyncValue.data(local);
+  }
+
   /// The server refused to renew this phone's session: it was signed out
   /// from another device, or its staff member was removed. The records stay
   /// until someone signs back in or chooses to clear them.
@@ -217,3 +228,10 @@ final isCloudOwnerProvider = Provider<bool>((ref) {
   final session = ref.watch(currentSessionProvider);
   return session != null && session.isCloud && session.access.isOwner;
 });
+
+/// The owner's plan. Unlimited offline and on servers that do not charge.
+final subscriptionProvider = Provider<Subscription>(
+  (ref) =>
+      ref.watch(currentSessionProvider)?.subscription ??
+      const Subscription.unlimited(),
+);

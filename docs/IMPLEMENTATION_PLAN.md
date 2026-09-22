@@ -1,9 +1,9 @@
 # Kitaza — Implementation Plan
 
 This is the build order for Kitaza, from the scaffold that exists today through
-to a product small businesses pay for monthly. Phases 0–6 are **done and
-verified** as far as they can be without real phones and real stores (Phases
-5 and 6 list exactly what that leaves); 7 onward are planned.
+to a product small businesses pay for monthly. Phases 0–7 are **done and
+verified** as far as they can be without real phones, real stores and a live
+payment account (Phases 5–7 list exactly what that leaves); 8 is planned.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -327,15 +327,60 @@ refused, and signing it out stops it.
 
 ---
 
-## Phase 7 — Revenue
+## Phase 7 — Revenue ✅ Done
 
-- [ ] Subscription plans: Basic ₱99/month, Pro ₱199/month.
-- [ ] Free tier that is genuinely useful — local-only mode, unlimited. Cloud
-      sync, multi-device and staff accounts are what people pay for.
-- [ ] GCash and Maya billing; card payments are rare in this market.
-- [ ] Grace periods that never lock an owner out of their **own** records.
-      Losing access to your sales history because a payment failed is the
-      fastest way to lose a customer permanently.
+- [x] **Plans.** Basic ₱99 a month: cloud backup and sync for one store, on
+      all the owner's phones. Pro ₱199 a month: up to five stores and staff
+      accounts. A year costs ten months.
+- [x] **A free tier that is genuinely useful.** Offline mode needs no account
+      and no plan, with no limits. Every new cloud account, and every account
+      that existed before this phase, starts with a 30-day Pro trial.
+- [x] **GCash and Maya billing** through PayMongo, cards accepted too. Owners
+      pay ahead for a month or a year, like buying load; nothing is ever
+      charged automatically. Webhooks are signature-checked, and a payment
+      reported twice counts once. A test mode serves its own checkout page so
+      the whole flow runs without real money.
+- [x] **Grace that never locks an owner out.** A week of grace after a
+      period ends, with reminders on the home screen from five days before.
+      After that the account *pauses*: new entries wait on the phone and
+      upload the moment it is paid, everything already in the cloud can
+      still be downloaded, and removing staff or devices is never blocked.
+      The owner can also switch any phone to free offline use and keep every
+      record on it.
+- [x] **Fair plan changes.** Paying during a trial starts after the trial;
+      paying early adds to the time left; switching plans converts the time
+      left at the price ratio. Stores past a smaller plan's limit stay
+      readable.
+
+### What was checked
+
+- Every rule on where an account stands, and every payment calculation,
+  has a unit test; seven integration tests run the whole flow against
+  Postgres, including one that fails if a paused owner could not remove a
+  staff member.
+- A live contract test: a new account paused from the start records a sale,
+  the sale waits on the phone, the owner pays through the test checkout,
+  and the sale uploads.
+- The Dockerfile's build steps were replayed outside Docker: the release
+  binary built, ran its migrations and served the checkout pages. A real
+  HTTPS call to PayMongo from that binary was answered (with 401 for a fake
+  key), which proves the TLS setup.
+
+### What is not verified, and why
+
+- **The Docker image itself.** Docker cannot be started without the
+  machine owner's password. The build steps pass outside it (see above);
+  the commands to build and run it are in `README.md`.
+- **A real PayMongo payment.** That needs a PayMongo account and keys. The
+  checkout request and the webhook signature follow PayMongo's documented
+  format and are tested against it, but no real webhook has been received.
+- **Handing off to the GCash and Maya apps** from the checkout page on a
+  real phone, and coming back to Kitaza.
+- **The Filipino wording** of the 40 new strings.
+
+**Exit criteria:** an owner can pay with GCash or Maya, and one who stops
+paying loses nothing. The second is proven end to end; the first needs a
+live PayMongo account.
 
 ---
 

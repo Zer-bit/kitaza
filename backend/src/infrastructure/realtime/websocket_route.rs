@@ -38,6 +38,10 @@ async fn upgrade_connection(
     authorise(&state, &actor, store_id)
         .await
         .map_err(|_| ApiError::Forbidden("this store does not belong to you".into()))?;
+    state
+        .billing_service
+        .check_store_request(&actor, store_id, false)
+        .await?;
 
     let session_id = actor.session_id;
     Ok(upgrade.on_upgrade(move |socket| pump_events(socket, state, store_id, session_id)))

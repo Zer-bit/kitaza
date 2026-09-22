@@ -2,6 +2,7 @@ use crate::config::AppSettings;
 use crate::features::access::SessionDirectory;
 use crate::features::audit::AuditTrail;
 use crate::features::authentication::{AuthDependencies, AuthRepository, AuthService, TokenIssuer};
+use crate::features::billing::{BillingDependencies, BillingRepository, BillingService};
 use crate::features::dashboard::{DashboardRepository, DashboardService};
 use crate::features::devices::DeviceRepository;
 use crate::features::diagnostics::{DiagnosticsRepository, DiagnosticsService};
@@ -31,6 +32,7 @@ pub struct AppState {
     pub audit_trail: AuditTrail,
     pub auth_service: AuthService,
     pub staff_service: StaffService,
+    pub billing_service: BillingService,
     pub device_repository: DeviceRepository,
     pub product_service: ProductService,
     pub inventory_service: InventoryService,
@@ -57,6 +59,13 @@ impl AppState {
         let session_directory = SessionDirectory::new(pool.clone());
         let audit_trail = AuditTrail::new(pool.clone());
         let staff_repository = StaffRepository::new(pool.clone());
+        let billing_service = BillingService::new(BillingDependencies {
+            repository: BillingRepository::new(pool.clone()),
+            settings: settings.billing.clone(),
+            sessions: session_directory.clone(),
+            audit: audit_trail.clone(),
+            broadcaster: broadcaster.clone(),
+        });
 
         let product_repository = ProductRepository::new(pool.clone());
         let sale_repository = SaleRepository::new(pool.clone());
@@ -100,6 +109,7 @@ impl AppState {
             session_directory.clone(),
             audit_trail.clone(),
             broadcaster.clone(),
+            billing_service.clone(),
         );
         let sync_service = SyncService::new(
             SyncRepository::new(pool.clone(), settings.sync.settle_window),
@@ -130,8 +140,10 @@ impl AppState {
                 rate_limiter,
                 sessions: session_directory.clone(),
                 audit: audit_trail.clone(),
+                billing: billing_service.clone(),
                 refresh_lifetime: settings.security.refresh_token_lifetime,
             }),
+            billing_service,
             staff_service,
             device_repository: DeviceRepository::new(pool.clone()),
             session_directory,

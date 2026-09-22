@@ -4,9 +4,12 @@ import 'package:kitaza_app/app/route_paths.dart';
 import 'package:kitaza_app/data/models/access_grant.dart';
 import 'package:kitaza_app/data/models/activity_event.dart';
 import 'package:kitaza_app/data/models/auth_session.dart';
+import 'package:kitaza_app/data/models/billing_overview.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:kitaza_app/data/models/payment_method.dart';
 import 'package:kitaza_app/data/models/staff_member.dart';
+import 'package:kitaza_app/data/models/subscription.dart';
+import 'package:kitaza_app/data/remote/billing_api.dart';
 import 'package:kitaza_app/data/remote/team_api.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
 import 'package:kitaza_app/data/repositories/product_repository.dart';
@@ -15,6 +18,7 @@ import 'package:kitaza_app/data/repositories/withdrawal_repository.dart';
 import 'package:kitaza_app/features/authentication/auth_controller.dart';
 import 'package:kitaza_app/features/authentication/join_store_screen.dart';
 import 'package:kitaza_app/features/authentication/session_ended_screen.dart';
+import 'package:kitaza_app/features/billing/plan_screen.dart';
 import 'package:kitaza_app/features/dashboard/dashboard_screen.dart';
 import 'package:kitaza_app/features/expenses/expense_history_screen.dart';
 import 'package:kitaza_app/features/expenses/record_expense_screen.dart';
@@ -137,7 +141,40 @@ final Map<String, (String, WidgetBuilder, AuthSession)> _signedInScreens = {
     (_) => const JoinStoreScreen(),
     cloudOwner(),
   ),
+  'plan, paused': (
+    RoutePaths.plan,
+    (_) => const PlanScreen(),
+    cloudOwner(subscription: pausedPlan),
+  ),
+  'home, paused owner': (
+    RoutePaths.dashboard,
+    (_) => const DashboardScreen(),
+    cloudOwner(subscription: pausedPlan),
+  ),
+  'home, trial ending, cashier': (
+    RoutePaths.dashboard,
+    (_) => const DashboardScreen(),
+    staffMember({}, subscription: trialWithDaysLeft(2)),
+  ),
 };
+
+FakeBillingApi _billing({required bool busy}) => FakeBillingApi(
+  overviewToShow: billingOverview(
+    payments: busy
+        ? [
+            for (final (index, months) in [1, 12, 1].indexed)
+              PaymentRecord(
+                id: 'p$index',
+                plan: index.isEven ? PlanTier.pro : PlanTier.basic,
+                months: months,
+                amount: months == 12 ? 1990 : 199,
+                paidAt: DateTime(2026, 9 - index, 3),
+                method: 'gcash',
+              ),
+          ]
+        : const [],
+  ),
+);
 
 FakeTeamApi _busyTeam() => FakeTeamApi()
   ..staffList.addAll([
@@ -218,6 +255,7 @@ void main() {
               teamApiProvider.overrideWithValue(
                 busy ? _busyTeam() : FakeTeamApi(),
               ),
+              billingApiProvider.overrideWithValue(_billing(busy: busy)),
             ],
           );
           if (busy) await _seedBusyDay(phone);

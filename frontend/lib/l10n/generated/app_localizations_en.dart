@@ -1741,4 +1741,172 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get syncNotAllowed =>
       'Your access does not allow this. Ask the owner.';
+
+  @override
+  String get settingsPlan => 'Plan';
+
+  @override
+  String get planTitle => 'Your plan';
+
+  @override
+  String planStatusTrial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Free Pro trial, $count days left',
+      one: 'Free Pro trial, 1 day left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planStatusActive(Object plan, Object date) {
+    return '$plan, paid until $date';
+  }
+
+  @override
+  String planStatusGrace(Object date) {
+    return 'Your plan has ended. Everything keeps working until $date.';
+  }
+
+  @override
+  String get planStatusPaused =>
+      'Cloud backup is paused. Everything you record is kept on this phone and uploads as soon as you renew.';
+
+  @override
+  String get planStatusUnlimited =>
+      'This server does not charge. Everything is included.';
+
+  @override
+  String get planBasic => 'Basic';
+
+  @override
+  String get planPro => 'Pro';
+
+  @override
+  String get planBasicPoints =>
+      'Backup and sync for one store, on all your phones';
+
+  @override
+  String get planProPoints =>
+      'Up to 5 stores, staff accounts, and everything in Basic';
+
+  @override
+  String planPerMonth(Object price) {
+    return '$price a month';
+  }
+
+  @override
+  String planPerYear(Object price) {
+    return '$price a year';
+  }
+
+  @override
+  String get planMonthly => 'Monthly';
+
+  @override
+  String get planYearly => 'Yearly, 2 months free';
+
+  @override
+  String planPay(Object amount) {
+    return 'Pay $amount with GCash or Maya';
+  }
+
+  @override
+  String get planPayHint =>
+      'You pay ahead, like buying load. Nothing is ever charged automatically.';
+
+  @override
+  String get planFinishInBrowser =>
+      'Finish paying on the page that opened. Kitaza updates when you come back.';
+
+  @override
+  String get planCouldNotOpen => 'Could not open the payment page. Try again.';
+
+  @override
+  String get planPaid => 'Thank you! Your plan is updated.';
+
+  @override
+  String get planCurrent => 'Current';
+
+  @override
+  String get planHistory => 'Payments';
+
+  @override
+  String get planOneMonth => '1 month';
+
+  @override
+  String get planOneYear => '1 year';
+
+  @override
+  String get planLeaveTitle => 'Use Kitaza offline for free';
+
+  @override
+  String get planLeaveHint =>
+      'Keep everything on this phone and stop syncing. Your records in the cloud stay there.';
+
+  @override
+  String get planLeaveConfirmTitle => 'Switch this phone to offline?';
+
+  @override
+  String get planLeaveConfirmMessage =>
+      'This phone keeps every record and stops syncing. Your other phones and staff will no longer see what is recorded here. You can move back to the cloud any time.';
+
+  @override
+  String get planLeaveConfirm => 'Use offline';
+
+  @override
+  String get planLeft => 'This phone now works offline. Nothing was lost.';
+
+  @override
+  String get planPausedShort =>
+      'Cloud backup is paused until the plan is renewed. This entry is kept on the phone.';
+
+  @override
+  String get planUpgradeNeeded => 'This needs Kitaza Pro.';
+
+  @override
+  String planBannerTrial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your free trial ends in $count days.',
+      one: 'Your free trial ends in 1 day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planBannerEnding(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your plan ends in $count days.',
+      one: 'Your plan ends in 1 day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planBannerGrace(Object date) {
+    return 'Your plan has ended. Syncing continues until $date.';
+  }
+
+  @override
+  String get planBannerPaused =>
+      'Cloud backup is paused. Your entries are kept on this phone.';
+
+  @override
+  String get planBannerAction => 'Choose a plan';
+
+  @override
+  String get planBannerStaff => 'Ask the owner to renew the store\'s plan.';
+
+  @override
+  String get syncPaused => 'Paused, saved on this phone';
+
+  @override
+  String activitySubscriptionPaid(Object name, Object amount, Object plan) {
+    return '$name paid $amount for $plan';
+  }
 }

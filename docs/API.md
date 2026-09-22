@@ -10,7 +10,8 @@ Errors share one shape:
 ```
 
 Codes: `bad_request`, `unauthorized`, `forbidden`, `not_found`, `conflict`,
-`too_many_requests`, `internal_error`.
+`too_many_requests`, `subscription_required`, `upgrade_required`,
+`internal_error`. The two billing codes come with `402 Payment Required`.
 
 ## Health
 
@@ -48,6 +49,19 @@ Codes: `bad_request`, `unauthorized`, `forbidden`, `not_found`, `conflict`,
 For staff, `access.role` is `staff`, `access.staff_id` is set, `stores` holds
 their one store, and `owner.email` is left out.
 
+Every account description also carries the owner's `subscription`, staff
+included, so a phone knows whether its uploads will be taken:
+
+```json
+"subscription": {
+  "status": "trial", "plan": "pro",
+  "period_ends_at": "...", "pauses_at": "...",
+  "store_limit": 5, "allows_staff": true
+}
+```
+
+`status` is `unlimited` (billing off), `trial`, `active`, `grace` or `paused`.
+
 **Sessions.** Each sign-in opens a device session; the access token names
 it, and the server looks it up on every request (remembered for up to 20
 seconds per instance). Revoking a device, removing a staff member or changing
@@ -73,6 +87,43 @@ owner grants:
 
 Withdrawals, stores, staff, devices and the activity log are owner-only. A
 refusal is `403 forbidden` with a message starting `only the owner`.
+
+## Billing
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/billing` | Owner only. Where the account stands, the plans and prices, and past payments. |
+| POST | `/billing/checkout` | Owner only. `{ "plan": "pro", "months": 1 }` (1 or 12). Returns `checkout_url` to open in the browser. |
+| POST | `/billing/webhooks/paymongo` | PayMongo's webhook. Verified by its `Paymongo-Signature` header; acts on `checkout_session.payment.paid`. |
+
+Unprefixed pages for the phone's browser: `GET /billing/return` (where a
+checkout comes back to) and, in test mode only, `GET|POST
+/billing/test-checkout/{payment_id}` (a pay button, no money).
+
+**Plans.** Basic ₱99 a month: cloud sync for one store. Pro ₱199 a month: up
+to five stores and staff. A year costs ten months. Offline use needs no plan.
+
+**Payments are prepaid periods**, not recurring charges: GCash and Maya
+payments through a gateway are one-off. A payment extends the subscription
+from whichever is later, now or the end of what is already bought; paying
+during a trial starts after the trial; time left on one plan is converted to
+the other at the price ratio. The gateway may report a payment more than
+once; it is counted once.
+
+**What each standing allows:**
+
+| | Uploads | Downloads (owner) | Staff | Stores taking entries |
+|---|---|---|---|---|
+| trial | yes | yes | yes | 5 |
+| active / grace | yes | yes | Pro only | 1 (Basic) or 5 (Pro) |
+| paused | **no** | **yes** | no | none |
+
+Grace lasts 7 days after a trial or paid period ends. While paused, uploads
+are refused with `subscription_required` and wait on the phones; nothing is
+deleted, the owner can still download everything, rename stores, and remove
+staff or devices. A store past the plan's limit (the newest ones first) is
+read-only, refused with `upgrade_required`. So is adding a store or staff
+member the plan does not cover.
 
 ## Stores
 
@@ -134,8 +185,8 @@ Actions: `sale_recorded`, `sale_voided`, `expense_recorded`, `expense_deleted`,
 `stock_received`, `stock_removed`, `stock_counted` (with `counted` and
 `change`), `stock_spoiled`, `staff_added`, `staff_changed`, `staff_removed`,
 `staff_invited`, `staff_joined`, `device_signed_out`, `store_added`,
-`store_renamed`. Entries are written when something actually changes, so a
-retried push is logged once. `occurred_at` is when it happened on the phone.
+`store_renamed`, `subscription_paid`. Entries are written when something
+actually changes, so a retried push is logged once. `occurred_at` is when it happened on the phone.
 
 ## Store-scoped endpoints
 

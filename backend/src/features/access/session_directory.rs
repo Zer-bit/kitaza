@@ -8,6 +8,8 @@ use uuid::Uuid;
 use crate::infrastructure::database::PgPool;
 use crate::shared::ApiResult;
 
+use crate::features::billing::SubscriptionRecord;
+
 use super::actor::{Actor, StaffGrant};
 use super::permission::Permissions;
 
@@ -37,6 +39,9 @@ struct SessionRow {
     can_record_expenses: Option<bool>,
     can_view_profit: Option<bool>,
     can_delete_records: Option<bool>,
+    plan: Option<String>,
+    trial_ends_at: Option<chrono::DateTime<chrono::Utc>>,
+    paid_through: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 /// Turns a session id from an access token into the person behind it, or
@@ -71,10 +76,12 @@ impl SessionDirectory {
                     st.store_id AS staff_store_id,
                     st.removed_at IS NULL AS staff_live,
                     st.can_manage_products, st.can_record_expenses,
-                    st.can_view_profit, st.can_delete_records
+                    st.can_view_profit, st.can_delete_records,
+                    sub.plan, sub.trial_ends_at, sub.paid_through
              FROM device_sessions s
              JOIN owners o ON o.id = s.owner_id
              LEFT JOIN staff_members st ON st.id = s.staff_id
+             LEFT JOIN subscriptions sub ON sub.owner_id = s.owner_id
              WHERE s.id = $1",
         )
         .bind(session_id)
@@ -131,11 +138,18 @@ fn into_actor(session_id: Uuid, row: SessionRow) -> Option<Actor> {
         }
     };
 
+    let subscription = row.plan.map(|plan| SubscriptionRecord {
+        plan,
+        trial_ends_at: row.trial_ends_at,
+        paid_through: row.paid_through,
+    });
+
     Some(Actor {
         owner_id: row.owner_id,
         session_id,
         name: row.staff_name.unwrap_or(row.owner_name),
         device_name: row.device_name,
         staff,
+        subscription,
     })
 }

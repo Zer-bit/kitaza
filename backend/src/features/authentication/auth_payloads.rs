@@ -3,6 +3,7 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::features::access::{Actor, Permission};
+use crate::features::billing::SubscriptionSummary;
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct RegisterRequest {
@@ -84,6 +85,7 @@ pub struct AccountView {
     pub owner: OwnerProfile,
     pub stores: Vec<StoreSummary>,
     pub access: AccessSummary,
+    pub subscription: SubscriptionSummary,
 }
 
 #[derive(Debug, Serialize)]

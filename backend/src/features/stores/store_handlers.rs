@@ -37,6 +37,8 @@ pub async fn create_store(
     CurrentOwner(owner): CurrentOwner,
     ValidatedJson(request): ValidatedJson<CreateStoreRequest>,
 ) -> ApiResult<(StatusCode, Json<StoreSummary>)> {
+    state.billing_service.check_new_store(&owner).await?;
+
     let store = sqlx::query_as::<_, StoreRecord>(
         "INSERT INTO stores (owner_id, name, business_type) VALUES ($1, $2, $3)
          RETURNING id, name, business_type, currency_code",
