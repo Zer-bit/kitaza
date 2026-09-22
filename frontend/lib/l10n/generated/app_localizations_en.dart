@@ -1267,4 +1267,478 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get printerFailed =>
       'The printer did not accept the receipt. Try again.';
+
+  @override
+  String get welcomeJoinStaff => 'Join a store as staff';
+
+  @override
+  String get joinTitle => 'Join a store';
+
+  @override
+  String get joinSubtitle =>
+      'Ask the store owner for a join code. They make one in Settings, under Staff.';
+
+  @override
+  String get joinCodeLabel => 'Join code';
+
+  @override
+  String get joinCodeInvalid => 'Enter all 10 letters and numbers of the code';
+
+  @override
+  String get joinAction => 'Join store';
+
+  @override
+  String get joinCodeRefused =>
+      'That code did not work. It may have been used already or expired. Ask the owner for a new one.';
+
+  @override
+  String get joinSharedPhoneNote =>
+      'Each code works on one phone. Anything recorded here goes to the store, under your name.';
+
+  @override
+  String get sessionEndedTitle => 'This phone was signed out';
+
+  @override
+  String sessionEndedMessage(Object store) {
+    return '$store was signed out on this phone from another device, or your access to it was removed.';
+  }
+
+  @override
+  String sessionEndedUnsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count entries recorded here have not reached the cloud yet. Sign back in to send them.',
+      one: '1 entry recorded here has not reached the cloud yet. Sign back in to send it.',
+      zero: 'Everything recorded here had already reached the cloud.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionEndedSignIn => 'Sign in again';
+
+  @override
+  String get sessionEndedJoin => 'Enter a new join code';
+
+  @override
+  String get sessionEndedClear => 'Remove this store from the phone';
+
+  @override
+  String get sessionEndedClearTitle => 'Remove this store\'s records?';
+
+  @override
+  String sessionEndedClearMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count entries that never reached the cloud will be lost for good.',
+      one: '1 entry that never reached the cloud will be lost for good.',
+      zero: 'Everything here is already in the cloud, so nothing will be lost.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionEndedClearConfirm => 'Remove';
+
+  @override
+  String get settingsTeam => 'Stores and staff';
+
+  @override
+  String get storesHint =>
+      'Tap a store to open it. Each keeps its own products, sales and staff.';
+
+  @override
+  String get storesOpenNow => 'Open now';
+
+  @override
+  String get storesAdd => 'Add another store';
+
+  @override
+  String get storesAddTitle => 'New store';
+
+  @override
+  String get storesAddSubmit => 'Add store';
+
+  @override
+  String get storesRename => 'Rename store';
+
+  @override
+  String storesSwitched(Object store) {
+    return 'Now working in $store';
+  }
+
+  @override
+  String get storesPickerTitle => 'Open a store';
+
+  @override
+  String get storesSwitchHint => 'Switch store';
+
+  @override
+  String get teamLocalTitle => 'Staff and more stores';
+
+  @override
+  String get teamLocalMessage =>
+      'Staff accounts, more than one store and signing out a lost phone all need your records in the cloud.';
+
+  @override
+  String get staffTitle => 'Staff';
+
+  @override
+  String get staffTileHint => 'Let helpers sell from their own phone';
+
+  @override
+  String get staffEmptyTitle => 'No staff yet';
+
+  @override
+  String get staffEmptyMessage =>
+      'Add the people who help at the counter. They sell from their own phone, and you choose what else they can do.';
+
+  @override
+  String get staffAdd => 'Add staff';
+
+  @override
+  String get staffNameLabel => 'Their name';
+
+  @override
+  String get staffAlwaysSells =>
+      'Staff can always record sales. Choose what else they may do:';
+
+  @override
+  String get permissionManageProducts => 'Manage products';
+
+  @override
+  String get permissionManageProductsHint =>
+      'Add and edit products and prices, record deliveries and stock counts';
+
+  @override
+  String get permissionRecordExpenses => 'Record expenses';
+
+  @override
+  String get permissionRecordExpensesHint => 'Write down what the store spends';
+
+  @override
+  String get permissionViewProfit => 'See profit and costs';
+
+  @override
+  String get permissionViewProfitHint =>
+      'Cost prices, profit, expenses and the health score. Without this, costs never reach their phone.';
+
+  @override
+  String get permissionDeleteRecords => 'Void and delete';
+
+  @override
+  String get permissionDeleteRecordsHint =>
+      'Void sales and delete expenses. Every void is kept in the activity log.';
+
+  @override
+  String get staffSells => 'Sells';
+
+  @override
+  String get staffShortProducts => 'products';
+
+  @override
+  String get staffShortExpenses => 'expenses';
+
+  @override
+  String get staffShortProfit => 'profit';
+
+  @override
+  String get staffShortDelete => 'voids';
+
+  @override
+  String staffDevices(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Signed in on $count phones',
+      one: 'Signed in on 1 phone',
+      zero: 'Not signed in yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffCodeWorksUntil(Object when) {
+    return 'Join code works until $when';
+  }
+
+  @override
+  String get staffNewCode => 'Make a new join code';
+
+  @override
+  String get staffNewCodeHint =>
+      'For a new or replaced phone. Any earlier code stops working.';
+
+  @override
+  String get staffRemove => 'Remove from store';
+
+  @override
+  String staffRemoveTitle(Object name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String staffRemoveMessage(Object name) {
+    return '$name\'s phone will be signed out straight away. Sales on it that have not reached the cloud yet will not arrive.';
+  }
+
+  @override
+  String staffRemoved(Object name) {
+    return '$name was removed';
+  }
+
+  @override
+  String get staffSaved =>
+      'Saved. Their phone picks this up within a few minutes.';
+
+  @override
+  String inviteTitle(Object name) {
+    return 'Join code for $name';
+  }
+
+  @override
+  String inviteSteps(Object name) {
+    return 'On $name\'s phone, open Kitaza, tap “Join a store as staff” and enter this code.';
+  }
+
+  @override
+  String inviteExpires(Object when) {
+    return 'Works on one phone, until $when.';
+  }
+
+  @override
+  String get inviteShare => 'Share code';
+
+  @override
+  String get inviteCopy => 'Copy';
+
+  @override
+  String get inviteCopied => 'Code copied';
+
+  @override
+  String inviteShareText(Object store, Object code) {
+    return 'Join $store on Kitaza: open Kitaza, tap “Join a store as staff” and enter $code. The code works once, for one day.';
+  }
+
+  @override
+  String get inviteDone => 'Done';
+
+  @override
+  String get devicesTitle => 'Signed-in devices';
+
+  @override
+  String get devicesTileHint =>
+      'Every phone using your stores. Sign out one that was lost.';
+
+  @override
+  String get devicesIntro =>
+      'Every phone that can open your stores. Sign out one that was lost, sold, or belongs to someone who left.';
+
+  @override
+  String get devicesThisPhone => 'This phone';
+
+  @override
+  String get devicesYou => 'You';
+
+  @override
+  String devicesStaff(Object name) {
+    return '$name, staff';
+  }
+
+  @override
+  String devicesLastActive(Object when) {
+    return 'Last active $when';
+  }
+
+  @override
+  String get devicesSignOut => 'Sign out';
+
+  @override
+  String devicesSignOutTitle(Object device) {
+    return 'Sign out $device?';
+  }
+
+  @override
+  String get devicesSignOutMessage =>
+      'It stops syncing straight away and has to sign in again to be used. Anything on it that has not reached the cloud yet will not arrive.';
+
+  @override
+  String devicesSignedOut(Object device) {
+    return '$device was signed out';
+  }
+
+  @override
+  String get activityTitle => 'Activity';
+
+  @override
+  String get activityTileHint => 'Who recorded, changed and voided what';
+
+  @override
+  String get activityFilterAll => 'Everything';
+
+  @override
+  String get activityFilterRemovals => 'Voids and deletions';
+
+  @override
+  String get activityEmptyTitle => 'Nothing here yet';
+
+  @override
+  String get activityEmptyMessage =>
+      'Sales, changes and voids from every phone are listed here, with who made them.';
+
+  @override
+  String get activityShowOlder => 'Show older';
+
+  @override
+  String activitySaleRecorded(Object name, Object amount) {
+    return '$name recorded a sale of $amount';
+  }
+
+  @override
+  String activitySaleVoided(Object name, Object amount) {
+    return '$name voided a sale of $amount';
+  }
+
+  @override
+  String activityExpenseRecorded(Object name, Object amount, Object category) {
+    return '$name recorded $amount for $category';
+  }
+
+  @override
+  String activityExpenseDeleted(Object name, Object amount, Object category) {
+    return '$name deleted $amount for $category';
+  }
+
+  @override
+  String activityWithdrawalRecorded(Object name, Object amount) {
+    return '$name took out $amount for personal use';
+  }
+
+  @override
+  String activityWithdrawalDeleted(Object name, Object amount) {
+    return '$name deleted a withdrawal of $amount';
+  }
+
+  @override
+  String activityProductAdded(Object name, Object product, Object price) {
+    return '$name added $product at $price';
+  }
+
+  @override
+  String activityProductChanged(Object name, Object product) {
+    return '$name changed $product';
+  }
+
+  @override
+  String activityProductRemoved(Object name, Object product) {
+    return '$name removed $product';
+  }
+
+  @override
+  String activityPriceChange(Object before, Object after) {
+    return 'Price $before to $after';
+  }
+
+  @override
+  String activityCostChange(Object before, Object after) {
+    return 'Cost $before to $after';
+  }
+
+  @override
+  String activityRenamedFrom(Object before) {
+    return 'Was “$before”';
+  }
+
+  @override
+  String activityStockReceived(Object name, Object quantity, Object product) {
+    return '$name received $quantity $product';
+  }
+
+  @override
+  String activityStockRemoved(Object name, Object quantity, Object product) {
+    return '$name took out $quantity $product';
+  }
+
+  @override
+  String activityStockCounted(Object name, Object quantity, Object product) {
+    return '$name counted $quantity $product';
+  }
+
+  @override
+  String activityStockDifference(Object change) {
+    return '$change from what was expected';
+  }
+
+  @override
+  String activityStockSpoiled(Object name, Object quantity, Object product) {
+    return '$name marked $quantity $product as spoiled';
+  }
+
+  @override
+  String activityStaffAdded(Object name, Object staff) {
+    return '$name added $staff as staff';
+  }
+
+  @override
+  String activityStaffChanged(Object name, Object staff) {
+    return '$name changed what $staff can do';
+  }
+
+  @override
+  String activityStaffRemoved(Object name, Object staff) {
+    return '$name removed $staff';
+  }
+
+  @override
+  String activityStaffInvited(Object name, Object staff) {
+    return '$name made a join code for $staff';
+  }
+
+  @override
+  String activityStaffJoined(Object name, Object device) {
+    return '$name joined on $device';
+  }
+
+  @override
+  String activityDeviceSignedOut(Object name, Object member, Object device) {
+    return '$name signed out $member\'s $device';
+  }
+
+  @override
+  String activityStoreAdded(Object name, Object store) {
+    return '$name opened $store';
+  }
+
+  @override
+  String activityStoreRenamed(Object name, Object before, Object store) {
+    return '$name renamed $before to $store';
+  }
+
+  @override
+  String activityOther(Object name) {
+    return '$name made a change';
+  }
+
+  @override
+  String get activityStaffBadge => 'Staff';
+
+  @override
+  String accountStaffAt(Object store) {
+    return 'Staff at $store';
+  }
+
+  @override
+  String get accountStaffSignOutNote =>
+      'To use this phone again, you will need a new join code from the owner.';
+
+  @override
+  String get productCostSetByOwner => 'The owner sets the cost price.';
+
+  @override
+  String get syncNotAllowed =>
+      'Your access does not allow this. Ask the owner.';
 }

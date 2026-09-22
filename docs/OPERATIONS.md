@@ -107,6 +107,37 @@ produce thousands of occurrences of a bug that affects nobody else.
 
 ---
 
+## Devices and staff
+
+Owners manage both from the app: *Settings → Stores and staff*. Support rarely
+needs to, but when an owner cannot reach a phone at all:
+
+```sql
+-- Every phone signed in to an owner's account, newest activity first.
+SELECT s.id, s.device_name, st.display_name AS staff, s.last_seen_at
+FROM device_sessions s
+JOIN owners o ON o.id = s.owner_id
+LEFT JOIN staff_members st ON st.id = s.staff_id
+WHERE lower(o.email) = lower('<email>') AND s.revoked_at IS NULL
+ORDER BY s.last_seen_at DESC;
+
+-- Sign one out. Its refresh tokens die with it.
+UPDATE device_sessions SET revoked_at = now() WHERE id = '<session id>';
+UPDATE refresh_tokens  SET revoked_at = now() WHERE session_id = '<session id>';
+```
+
+Each API instance remembers who a session belongs to for 20 seconds, so on a
+multi-instance deployment a revoke can take that long to reach every
+instance. The phone finds out on its next request and shows its signed-out
+screen; nothing on it is deleted.
+
+**Upgrading a server from before Phase 6** runs migration 6, which turns every
+live refresh token into a device session and drops dead ones. Phones already
+signed in stay signed in: their next request is refused once for lacking a
+session id, and they renew silently.
+
+---
+
 ## Running the tests that need services
 
 ```bash

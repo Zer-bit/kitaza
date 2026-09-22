@@ -24,8 +24,13 @@ pub struct StoreRecord {
 #[derive(Debug, FromRow)]
 pub struct RefreshTokenRecord {
     pub owner_id: Uuid,
+    pub session_id: Uuid,
+    pub staff_id: Option<Uuid>,
     pub expires_at: DateTime<Utc>,
     pub revoked_at: Option<DateTime<Utc>>,
+    pub rotated_at: Option<DateTime<Utc>>,
+    pub session_live: bool,
+    pub staff_live: bool,
 }
 
 #[derive(Clone)]
@@ -110,20 +115,59 @@ impl AuthRepository {
         Ok(stores)
     }
 
+    pub async fn find_store(&self, store_id: Uuid) -> ApiResult<Option<StoreRecord>> {
+        let store = sqlx::query_as::<_, StoreRecord>(
+            "SELECT id, name, business_type, currency_code FROM stores WHERE id = $1",
+        )
+        .bind(store_id)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(store)
+    }
+
+    pub async fn open_session(
+        &self,
+        owner_id: Uuid,
+        staff_id: Option<Uuid>,
+        device_name: &str,
+    ) -> ApiResult<Uuid> {
+        let (id,): (Uuid,) = sqlx::query_as(
+            "INSERT INTO device_sessions (owner_id, staff_id, device_name)
+             VALUES ($1, $2, $3) RETURNING id",
+        )
+        .bind(owner_id)
+        .bind(staff_id)
+        .bind(device_name)
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(id)
+    }
+
+    pub async fn touch_session(&self, session_id: Uuid) -> ApiResult<()> {
+        sqlx::query("UPDATE device_sessions SET last_seen_at = now() WHERE id = $1")
+            .bind(session_id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+
     pub async fn store_refresh_token(
         &self,
         owner_id: Uuid,
+        session_id: Uuid,
         token_hash: &str,
-        device_tag: &str,
         expires_at: DateTime<Utc>,
     ) -> ApiResult<()> {
         sqlx::query(
-            "INSERT INTO refresh_tokens (owner_id, token_hash, device_tag, expires_at)
+            "INSERT INTO refresh_tokens (owner_id, session_id, token_hash, expires_at)
              VALUES ($1, $2, $3, $4)",
         )
         .bind(owner_id)
+        .bind(session_id)
         .bind(token_hash)
-        .bind(device_tag)
         .bind(expires_at)
         .execute(&self.pool)
         .await?;
@@ -136,8 +180,14 @@ impl AuthRepository {
         token_hash: &str,
     ) -> ApiResult<Option<RefreshTokenRecord>> {
         let record = sqlx::query_as::<_, RefreshTokenRecord>(
-            "SELECT owner_id, expires_at, revoked_at
-             FROM refresh_tokens WHERE token_hash = $1",
+            "SELECT t.owner_id, t.session_id, s.staff_id, t.expires_at, t.revoked_at,
+                    t.rotated_at,
+                    s.revoked_at IS NULL AS session_live,
+                    COALESCE(st.removed_at IS NULL, TRUE) AS staff_live
+             FROM refresh_tokens t
+             JOIN device_sessions s ON s.id = t.session_id
+             LEFT JOIN staff_members st ON st.id = s.staff_id
+             WHERE t.token_hash = $1",
         )
         .bind(token_hash)
         .fetch_optional(&self.pool)
@@ -146,10 +196,10 @@ impl AuthRepository {
         Ok(record)
     }
 
-    pub async fn revoke_refresh_token(&self, token_hash: &str) -> ApiResult<()> {
+    pub async fn mark_rotated(&self, token_hash: &str) -> ApiResult<()> {
         sqlx::query(
-            "UPDATE refresh_tokens SET revoked_at = now()
-             WHERE token_hash = $1 AND revoked_at IS NULL",
+            "UPDATE refresh_tokens SET rotated_at = now()
+             WHERE token_hash = $1 AND rotated_at IS NULL",
         )
         .bind(token_hash)
         .execute(&self.pool)
@@ -158,10 +208,43 @@ impl AuthRepository {
         Ok(())
     }
 
-    pub async fn purge_expired_tokens(&self, owner_id: Uuid) -> ApiResult<()> {
+    /// Signing out ends the whole device session, not just the one token.
+    pub async fn end_session_for_token(&self, token_hash: &str) -> ApiResult<()> {
+        sqlx::query(
+            "WITH ended AS (
+                 UPDATE device_sessions SET revoked_at = now()
+                 WHERE revoked_at IS NULL
+                   AND id = (SELECT session_id FROM refresh_tokens WHERE token_hash = $1)
+                 RETURNING id
+             )
+             UPDATE refresh_tokens SET revoked_at = now()
+             WHERE revoked_at IS NULL AND session_id IN (SELECT id FROM ended)",
+        )
+        .bind(token_hash)
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    /// Housekeeping on sign-in: nothing here can ever be used again.
+    pub async fn purge_dead_sessions(&self, owner_id: Uuid) -> ApiResult<()> {
         sqlx::query(
             "DELETE FROM refresh_tokens
-             WHERE owner_id = $1 AND (expires_at < now() OR revoked_at < now() - INTERVAL '7 days')",
+             WHERE owner_id = $1
+               AND (expires_at < now()
+                    OR revoked_at < now() - INTERVAL '7 days'
+                    OR rotated_at < now() - INTERVAL '7 days')",
+        )
+        .bind(owner_id)
+        .execute(&self.pool)
+        .await?;
+
+        sqlx::query(
+            "DELETE FROM device_sessions s
+             WHERE s.owner_id = $1
+               AND s.created_at < now() - INTERVAL '1 day'
+               AND NOT EXISTS (SELECT 1 FROM refresh_tokens t WHERE t.session_id = s.id)",
         )
         .bind(owner_id)
         .execute(&self.pool)

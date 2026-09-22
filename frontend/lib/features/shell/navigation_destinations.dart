@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/route_paths.dart';
+import '../../data/models/access_grant.dart';
 import '../../l10n/l10n.dart';
 
 class ShellDestination {
@@ -58,4 +59,18 @@ const List<ShellDestination> shellDestinations = [
     icon: Icons.insights_outlined,
     selectedIcon: Icons.insights_rounded,
   ),
+];
+
+/// The tabs this person gets. A cashier sees sales and products; the money
+/// tabs appear with the permissions that go with them.
+List<ShellDestination> destinationsFor(AccessGrant access) => [
+  for (final destination in shellDestinations)
+    if (switch (destination.path) {
+      RoutePaths.expenseHistory =>
+        access.can(Permission.recordExpenses) ||
+            access.can(Permission.viewProfit),
+      RoutePaths.reports => access.can(Permission.viewProfit),
+      _ => true,
+    })
+      destination,
 ];

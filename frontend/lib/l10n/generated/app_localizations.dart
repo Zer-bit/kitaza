@@ -2131,6 +2131,696 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The printer did not accept the receipt. Try again.'**
   String get printerFailed;
+
+  /// No description provided for @welcomeJoinStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a store as staff'**
+  String get welcomeJoinStaff;
+
+  /// No description provided for @joinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a store'**
+  String get joinTitle;
+
+  /// No description provided for @joinSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the store owner for a join code. They make one in Settings, under Staff.'**
+  String get joinSubtitle;
+
+  /// No description provided for @joinCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Join code'**
+  String get joinCodeLabel;
+
+  /// No description provided for @joinCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter all 10 letters and numbers of the code'**
+  String get joinCodeInvalid;
+
+  /// No description provided for @joinAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join store'**
+  String get joinAction;
+
+  /// No description provided for @joinCodeRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'That code did not work. It may have been used already or expired. Ask the owner for a new one.'**
+  String get joinCodeRefused;
+
+  /// No description provided for @joinSharedPhoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Each code works on one phone. Anything recorded here goes to the store, under your name.'**
+  String get joinSharedPhoneNote;
+
+  /// No description provided for @sessionEndedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone was signed out'**
+  String get sessionEndedTitle;
+
+  /// No description provided for @sessionEndedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{store} was signed out on this phone from another device, or your access to it was removed.'**
+  String sessionEndedMessage(Object store);
+
+  /// No description provided for @sessionEndedUnsent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Everything recorded here had already reached the cloud.} =1{1 entry recorded here has not reached the cloud yet. Sign back in to send it.} other{{count} entries recorded here have not reached the cloud yet. Sign back in to send them.}}'**
+  String sessionEndedUnsent(int count);
+
+  /// No description provided for @sessionEndedSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get sessionEndedSignIn;
+
+  /// No description provided for @sessionEndedJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new join code'**
+  String get sessionEndedJoin;
+
+  /// No description provided for @sessionEndedClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this store from the phone'**
+  String get sessionEndedClear;
+
+  /// No description provided for @sessionEndedClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this store\'s records?'**
+  String get sessionEndedClearTitle;
+
+  /// No description provided for @sessionEndedClearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Everything here is already in the cloud, so nothing will be lost.} =1{1 entry that never reached the cloud will be lost for good.} other{{count} entries that never reached the cloud will be lost for good.}}'**
+  String sessionEndedClearMessage(int count);
+
+  /// No description provided for @sessionEndedClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get sessionEndedClearConfirm;
+
+  /// No description provided for @settingsTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Stores and staff'**
+  String get settingsTeam;
+
+  /// No description provided for @storesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a store to open it. Each keeps its own products, sales and staff.'**
+  String get storesHint;
+
+  /// No description provided for @storesOpenNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open now'**
+  String get storesOpenNow;
+
+  /// No description provided for @storesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another store'**
+  String get storesAdd;
+
+  /// No description provided for @storesAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New store'**
+  String get storesAddTitle;
+
+  /// No description provided for @storesAddSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add store'**
+  String get storesAddSubmit;
+
+  /// No description provided for @storesRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename store'**
+  String get storesRename;
+
+  /// No description provided for @storesSwitched.
+  ///
+  /// In en, this message translates to:
+  /// **'Now working in {store}'**
+  String storesSwitched(Object store);
+
+  /// No description provided for @storesPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a store'**
+  String get storesPickerTitle;
+
+  /// No description provided for @storesSwitchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch store'**
+  String get storesSwitchHint;
+
+  /// No description provided for @teamLocalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff and more stores'**
+  String get teamLocalTitle;
+
+  /// No description provided for @teamLocalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff accounts, more than one store and signing out a lost phone all need your records in the cloud.'**
+  String get teamLocalMessage;
+
+  /// No description provided for @staffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staffTitle;
+
+  /// No description provided for @staffTileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Let helpers sell from their own phone'**
+  String get staffTileHint;
+
+  /// No description provided for @staffEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff yet'**
+  String get staffEmptyTitle;
+
+  /// No description provided for @staffEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the people who help at the counter. They sell from their own phone, and you choose what else they can do.'**
+  String get staffEmptyMessage;
+
+  /// No description provided for @staffAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add staff'**
+  String get staffAdd;
+
+  /// No description provided for @staffNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Their name'**
+  String get staffNameLabel;
+
+  /// No description provided for @staffAlwaysSells.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff can always record sales. Choose what else they may do:'**
+  String get staffAlwaysSells;
+
+  /// No description provided for @permissionManageProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage products'**
+  String get permissionManageProducts;
+
+  /// No description provided for @permissionManageProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and edit products and prices, record deliveries and stock counts'**
+  String get permissionManageProductsHint;
+
+  /// No description provided for @permissionRecordExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Record expenses'**
+  String get permissionRecordExpenses;
+
+  /// No description provided for @permissionRecordExpensesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down what the store spends'**
+  String get permissionRecordExpensesHint;
+
+  /// No description provided for @permissionViewProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'See profit and costs'**
+  String get permissionViewProfit;
+
+  /// No description provided for @permissionViewProfitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost prices, profit, expenses and the health score. Without this, costs never reach their phone.'**
+  String get permissionViewProfitHint;
+
+  /// No description provided for @permissionDeleteRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Void and delete'**
+  String get permissionDeleteRecords;
+
+  /// No description provided for @permissionDeleteRecordsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Void sales and delete expenses. Every void is kept in the activity log.'**
+  String get permissionDeleteRecordsHint;
+
+  /// No description provided for @staffSells.
+  ///
+  /// In en, this message translates to:
+  /// **'Sells'**
+  String get staffSells;
+
+  /// No description provided for @staffShortProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'products'**
+  String get staffShortProducts;
+
+  /// No description provided for @staffShortExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'expenses'**
+  String get staffShortExpenses;
+
+  /// No description provided for @staffShortProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'profit'**
+  String get staffShortProfit;
+
+  /// No description provided for @staffShortDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'voids'**
+  String get staffShortDelete;
+
+  /// No description provided for @staffDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Not signed in yet} =1{Signed in on 1 phone} other{Signed in on {count} phones}}'**
+  String staffDevices(int count);
+
+  /// No description provided for @staffCodeWorksUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Join code works until {when}'**
+  String staffCodeWorksUntil(Object when);
+
+  /// No description provided for @staffNewCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a new join code'**
+  String get staffNewCode;
+
+  /// No description provided for @staffNewCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For a new or replaced phone. Any earlier code stops working.'**
+  String get staffNewCodeHint;
+
+  /// No description provided for @staffRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from store'**
+  String get staffRemove;
+
+  /// No description provided for @staffRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String staffRemoveTitle(Object name);
+
+  /// No description provided for @staffRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s phone will be signed out straight away. Sales on it that have not reached the cloud yet will not arrive.'**
+  String staffRemoveMessage(Object name);
+
+  /// No description provided for @staffRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was removed'**
+  String staffRemoved(Object name);
+
+  /// No description provided for @staffSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Their phone picks this up within a few minutes.'**
+  String get staffSaved;
+
+  /// No description provided for @inviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join code for {name}'**
+  String inviteTitle(Object name);
+
+  /// No description provided for @inviteSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'On {name}\'s phone, open Kitaza, tap “Join a store as staff” and enter this code.'**
+  String inviteSteps(Object name);
+
+  /// No description provided for @inviteExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Works on one phone, until {when}.'**
+  String inviteExpires(Object when);
+
+  /// No description provided for @inviteShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share code'**
+  String get inviteShare;
+
+  /// No description provided for @inviteCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get inviteCopy;
+
+  /// No description provided for @inviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get inviteCopied;
+
+  /// No description provided for @inviteShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Join {store} on Kitaza: open Kitaza, tap “Join a store as staff” and enter {code}. The code works once, for one day.'**
+  String inviteShareText(Object store, Object code);
+
+  /// No description provided for @inviteDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get inviteDone;
+
+  /// No description provided for @devicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed-in devices'**
+  String get devicesTitle;
+
+  /// No description provided for @devicesTileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every phone using your stores. Sign out one that was lost.'**
+  String get devicesTileHint;
+
+  /// No description provided for @devicesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Every phone that can open your stores. Sign out one that was lost, sold, or belongs to someone who left.'**
+  String get devicesIntro;
+
+  /// No description provided for @devicesThisPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone'**
+  String get devicesThisPhone;
+
+  /// No description provided for @devicesYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get devicesYou;
+
+  /// No description provided for @devicesStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, staff'**
+  String devicesStaff(Object name);
+
+  /// No description provided for @devicesLastActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Last active {when}'**
+  String devicesLastActive(Object when);
+
+  /// No description provided for @devicesSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get devicesSignOut;
+
+  /// No description provided for @devicesSignOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out {device}?'**
+  String devicesSignOutTitle(Object device);
+
+  /// No description provided for @devicesSignOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It stops syncing straight away and has to sign in again to be used. Anything on it that has not reached the cloud yet will not arrive.'**
+  String get devicesSignOutMessage;
+
+  /// No description provided for @devicesSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} was signed out'**
+  String devicesSignedOut(Object device);
+
+  /// No description provided for @activityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get activityTitle;
+
+  /// No description provided for @activityTileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Who recorded, changed and voided what'**
+  String get activityTileHint;
+
+  /// No description provided for @activityFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything'**
+  String get activityFilterAll;
+
+  /// No description provided for @activityFilterRemovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Voids and deletions'**
+  String get activityFilterRemovals;
+
+  /// No description provided for @activityEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get activityEmptyTitle;
+
+  /// No description provided for @activityEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales, changes and voids from every phone are listed here, with who made them.'**
+  String get activityEmptyMessage;
+
+  /// No description provided for @activityShowOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show older'**
+  String get activityShowOlder;
+
+  /// No description provided for @activitySaleRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} recorded a sale of {amount}'**
+  String activitySaleRecorded(Object name, Object amount);
+
+  /// No description provided for @activitySaleVoided.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} voided a sale of {amount}'**
+  String activitySaleVoided(Object name, Object amount);
+
+  /// No description provided for @activityExpenseRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} recorded {amount} for {category}'**
+  String activityExpenseRecorded(Object name, Object amount, Object category);
+
+  /// No description provided for @activityExpenseDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} deleted {amount} for {category}'**
+  String activityExpenseDeleted(Object name, Object amount, Object category);
+
+  /// No description provided for @activityWithdrawalRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} took out {amount} for personal use'**
+  String activityWithdrawalRecorded(Object name, Object amount);
+
+  /// No description provided for @activityWithdrawalDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} deleted a withdrawal of {amount}'**
+  String activityWithdrawalDeleted(Object name, Object amount);
+
+  /// No description provided for @activityProductAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added {product} at {price}'**
+  String activityProductAdded(Object name, Object product, Object price);
+
+  /// No description provided for @activityProductChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} changed {product}'**
+  String activityProductChanged(Object name, Object product);
+
+  /// No description provided for @activityProductRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed {product}'**
+  String activityProductRemoved(Object name, Object product);
+
+  /// No description provided for @activityPriceChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Price {before} to {after}'**
+  String activityPriceChange(Object before, Object after);
+
+  /// No description provided for @activityCostChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost {before} to {after}'**
+  String activityCostChange(Object before, Object after);
+
+  /// No description provided for @activityRenamedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Was “{before}”'**
+  String activityRenamedFrom(Object before);
+
+  /// No description provided for @activityStockReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} received {quantity} {product}'**
+  String activityStockReceived(Object name, Object quantity, Object product);
+
+  /// No description provided for @activityStockRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} took out {quantity} {product}'**
+  String activityStockRemoved(Object name, Object quantity, Object product);
+
+  /// No description provided for @activityStockCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} counted {quantity} {product}'**
+  String activityStockCounted(Object name, Object quantity, Object product);
+
+  /// No description provided for @activityStockDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'{change} from what was expected'**
+  String activityStockDifference(Object change);
+
+  /// No description provided for @activityStockSpoiled.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked {quantity} {product} as spoiled'**
+  String activityStockSpoiled(Object name, Object quantity, Object product);
+
+  /// No description provided for @activityStaffAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added {staff} as staff'**
+  String activityStaffAdded(Object name, Object staff);
+
+  /// No description provided for @activityStaffChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} changed what {staff} can do'**
+  String activityStaffChanged(Object name, Object staff);
+
+  /// No description provided for @activityStaffRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed {staff}'**
+  String activityStaffRemoved(Object name, Object staff);
+
+  /// No description provided for @activityStaffInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} made a join code for {staff}'**
+  String activityStaffInvited(Object name, Object staff);
+
+  /// No description provided for @activityStaffJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} joined on {device}'**
+  String activityStaffJoined(Object name, Object device);
+
+  /// No description provided for @activityDeviceSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} signed out {member}\'s {device}'**
+  String activityDeviceSignedOut(Object name, Object member, Object device);
+
+  /// No description provided for @activityStoreAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} opened {store}'**
+  String activityStoreAdded(Object name, Object store);
+
+  /// No description provided for @activityStoreRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} renamed {before} to {store}'**
+  String activityStoreRenamed(Object name, Object before, Object store);
+
+  /// No description provided for @activityOther.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} made a change'**
+  String activityOther(Object name);
+
+  /// No description provided for @activityStaffBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get activityStaffBadge;
+
+  /// No description provided for @accountStaffAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff at {store}'**
+  String accountStaffAt(Object store);
+
+  /// No description provided for @accountStaffSignOutNote.
+  ///
+  /// In en, this message translates to:
+  /// **'To use this phone again, you will need a new join code from the owner.'**
+  String get accountStaffSignOutNote;
+
+  /// No description provided for @productCostSetByOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner sets the cost price.'**
+  String get productCostSetByOwner;
+
+  /// No description provided for @syncNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your access does not allow this. Ask the owner.'**
+  String get syncNotAllowed;
 }
 
 class _AppLocalizationsDelegate

@@ -8,8 +8,11 @@ use crate::shared::ApiError;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccessClaims {
+    /// The owner the data belongs to, for staff as well as owners.
     pub sub: String,
-    pub email: String,
+    /// The device session. Who the caller is, and what they may do, is looked
+    /// up from it on every request, so a revoked device stops at once.
+    pub sid: String,
     pub iat: i64,
     pub exp: i64,
 }
@@ -17,6 +20,10 @@ pub struct AccessClaims {
 impl AccessClaims {
     pub fn owner_id(&self) -> Uuid {
         Uuid::parse_str(&self.sub).unwrap_or_default()
+    }
+
+    pub fn session_id(&self) -> Uuid {
+        Uuid::parse_str(&self.sid).unwrap_or_default()
     }
 }
 
@@ -45,11 +52,11 @@ impl TokenIssuer {
         self.access_lifetime.num_seconds()
     }
 
-    pub fn issue_access_token(&self, owner_id: Uuid, email: &str) -> Result<String, ApiError> {
+    pub fn issue_access_token(&self, owner_id: Uuid, session_id: Uuid) -> Result<String, ApiError> {
         let issued_at = Utc::now();
         let claims = AccessClaims {
             sub: owner_id.to_string(),
-            email: email.to_owned(),
+            sid: session_id.to_string(),
             iat: issued_at.timestamp(),
             exp: (issued_at + self.access_lifetime).timestamp(),
         };
@@ -80,17 +87,16 @@ mod tests {
     /// Guards the crypto backend: jsonwebtoken 11 panics at runtime, not at
     /// compile time, when no provider feature is enabled.
     #[test]
-    fn an_issued_token_verifies_and_names_its_owner() {
+    fn an_issued_token_verifies_and_names_its_owner_and_session() {
         let issuer = issuer();
         let owner_id = Uuid::new_v4();
+        let session_id = Uuid::new_v4();
 
-        let token = issuer
-            .issue_access_token(owner_id, "nena@example.com")
-            .unwrap();
+        let token = issuer.issue_access_token(owner_id, session_id).unwrap();
         let claims = issuer.verify_access_token(&token).unwrap();
 
         assert_eq!(claims.owner_id(), owner_id);
-        assert_eq!(claims.email, "nena@example.com");
+        assert_eq!(claims.session_id(), session_id);
     }
 
     #[test]
@@ -101,17 +107,45 @@ mod tests {
             refresh_token_lifetime: Duration::days(1),
         });
         let token = foreign
-            .issue_access_token(Uuid::new_v4(), "x@example.com")
+            .issue_access_token(Uuid::new_v4(), Uuid::new_v4())
             .unwrap();
 
         assert!(issuer().verify_access_token(&token).is_err());
+    }
+
+    /// Phones signed in before device sessions existed hold tokens without
+    /// a session id. Refusing them sends the phone to refresh, which the
+    /// migration made possible by giving each live refresh token a session.
+    #[test]
+    fn a_token_from_before_sessions_is_refused() {
+        #[derive(Serialize)]
+        struct OldClaims {
+            sub: String,
+            email: String,
+            iat: i64,
+            exp: i64,
+        }
+        let now = Utc::now();
+        let old = encode(
+            &Header::new(Algorithm::HS256),
+            &OldClaims {
+                sub: Uuid::new_v4().to_string(),
+                email: "nena@example.com".into(),
+                iat: now.timestamp(),
+                exp: (now + Duration::minutes(5)).timestamp(),
+            },
+            &EncodingKey::from_secret(b"a-test-secret-that-is-comfortably-over-32-chars"),
+        )
+        .unwrap();
+
+        assert!(issuer().verify_access_token(&old).is_err());
     }
 
     #[test]
     fn a_tampered_token_is_rejected() {
         let issuer = issuer();
         let mut token = issuer
-            .issue_access_token(Uuid::new_v4(), "x@example.com")
+            .issue_access_token(Uuid::new_v4(), Uuid::new_v4())
             .unwrap();
         token.push('x');
 

@@ -35,6 +35,27 @@ class SessionDao {
     return rows.isEmpty ? null : StoreProfile.fromRow(rows.first);
   }
 
+  Future<List<StoreProfile>> readStores() async {
+    final rows = await _db.query('stores', orderBy: 'rowid');
+    return rows.map(StoreProfile.fromRow).toList(growable: false);
+  }
+
+  /// For a staff member who can no longer see the money side of the store:
+  /// removes the expenses and withdrawals the phone held, except their own
+  /// entries still waiting to upload.
+  Future<void> forgetPrivateRecords(String storeId) async {
+    for (final (table, queued) in const [
+      ('expenses', 'expenses'),
+      ('owner_withdrawals', 'withdrawals'),
+    ]) {
+      await _db.rawDelete(
+        'DELETE FROM $table WHERE store_id = ? AND id NOT IN '
+        '(SELECT entity_id FROM sync_queue WHERE entity = ?)',
+        [storeId, queued],
+      );
+    }
+  }
+
   Future<StoreProfile?> readFirstStore() async {
     final rows = await _db.query('stores', limit: 1);
     return rows.isEmpty ? null : StoreProfile.fromRow(rows.first);
@@ -54,6 +75,7 @@ class SessionDao {
       'expenses',
       'owner_withdrawals',
       'stock_movements',
+      'sync_queue',
     ]) {
       await _db.update(
         table,

@@ -51,8 +51,12 @@ class ExpenseRepository {
 
     await _db.transaction((txn) async {
       await ExpenseDao(txn).upsert(_storeId, expense);
-      await SyncQueueDao(txn)
-          .enqueue(QueuedEntity.expenses, expense.id, expense.toPushJson());
+      await SyncQueueDao(txn).enqueue(
+        QueuedEntity.expenses,
+        expense.id,
+        expense.toPushJson(),
+        storeId: _storeId,
+      );
     });
 
     return expense;
@@ -65,6 +69,7 @@ class ExpenseRepository {
         DeletedEntity.expense,
         QueuedEntity.expenses,
         expenseId,
+        storeId: _storeId,
       );
     });
   }

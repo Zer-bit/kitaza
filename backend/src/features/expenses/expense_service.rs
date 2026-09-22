@@ -1,6 +1,9 @@
 use chrono::Utc;
+use serde_json::json;
 use uuid::Uuid;
 
+use crate::features::access::{Actor, Permission};
+use crate::features::audit::{AuditAction, AuditEntry, AuditTrail};
 use crate::infrastructure::cache::DashboardCache;
 use crate::infrastructure::realtime::{EventBroadcaster, RealtimeEvent, RealtimeTopic};
 use crate::shared::{ApiError, ApiResult, PageRequest, money_from_f64};
@@ -14,6 +17,7 @@ pub struct ExpenseService {
     repository: ExpenseRepository,
     cache: DashboardCache,
     broadcaster: EventBroadcaster,
+    audit: AuditTrail,
 }
 
 impl ExpenseService {
@@ -21,19 +25,24 @@ impl ExpenseService {
         repository: ExpenseRepository,
         cache: DashboardCache,
         broadcaster: EventBroadcaster,
+        audit: AuditTrail,
     ) -> Self {
         Self {
             repository,
             cache,
             broadcaster,
+            audit,
         }
     }
 
     pub async fn record(
         &self,
         store_id: Uuid,
+        actor: &Actor,
         request: RecordExpenseRequest,
     ) -> ApiResult<ExpenseView> {
+        actor.require(Permission::RecordExpenses)?;
+
         let category = ExpenseCategory::parse(&request.category)?;
         let description = request
             .description
@@ -41,7 +50,7 @@ impl ExpenseService {
             .map(str::trim)
             .filter(|value| !value.is_empty());
 
-        let expense = self
+        let saved = self
             .repository
             .upsert(
                 store_id,
@@ -50,8 +59,31 @@ impl ExpenseService {
                 description,
                 money_from_f64(request.amount),
                 request.occurred_at.unwrap_or_else(Utc::now),
+                actor.staff_id(),
+                actor.is_owner(),
             )
-            .await?;
+            .await?
+            .ok_or_else(|| {
+                ApiError::Forbidden(
+                    "only the owner can change an expense someone else recorded".into(),
+                )
+            })?;
+        let expense = saved.expense;
+
+        if saved.inserted {
+            self.audit
+                .record(
+                    actor,
+                    AuditEntry::new(
+                        store_id,
+                        AuditAction::ExpenseRecorded,
+                        expense.id,
+                        json!({ "amount": expense.amount, "category": expense.category }),
+                    )
+                    .at(expense.occurred_at),
+                )
+                .await;
+        }
 
         self.cache.invalidate_store(store_id).await;
         self.broadcaster
@@ -74,10 +106,26 @@ impl ExpenseService {
         self.repository.list(store_id, &filter, page).await
     }
 
-    pub async fn remove(&self, store_id: Uuid, expense_id: Uuid) -> ApiResult<()> {
-        if !self.repository.soft_delete(store_id, expense_id).await? {
-            return Err(ApiError::NotFound("expense"));
-        }
+    pub async fn remove(&self, store_id: Uuid, actor: &Actor, expense_id: Uuid) -> ApiResult<()> {
+        actor.require(Permission::DeleteRecords)?;
+
+        let removed = self
+            .repository
+            .soft_delete(store_id, expense_id)
+            .await?
+            .ok_or(ApiError::NotFound("expense"))?;
+
+        self.audit
+            .record(
+                actor,
+                AuditEntry::new(
+                    store_id,
+                    AuditAction::ExpenseDeleted,
+                    expense_id,
+                    json!({ "amount": removed.amount, "category": removed.category }),
+                ),
+            )
+            .await;
 
         self.cache.invalidate_store(store_id).await;
         self.broadcaster

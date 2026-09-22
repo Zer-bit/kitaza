@@ -6,6 +6,13 @@ use crate::shared::{ApiResult, Money, PageRequest};
 
 use super::withdrawal_payloads::WithdrawalView;
 
+#[derive(sqlx::FromRow)]
+struct UpsertedWithdrawal {
+    #[sqlx(flatten)]
+    withdrawal: WithdrawalView,
+    inserted: bool,
+}
+
 #[derive(Clone)]
 pub struct WithdrawalRepository {
     pool: PgPool,
@@ -23,8 +30,8 @@ impl WithdrawalRepository {
         amount: Money,
         reason: Option<&str>,
         occurred_at: DateTime<Utc>,
-    ) -> ApiResult<WithdrawalView> {
-        let withdrawal = sqlx::query_as::<_, WithdrawalView>(
+    ) -> ApiResult<Option<(WithdrawalView, bool)>> {
+        let withdrawal = sqlx::query_as::<_, UpsertedWithdrawal>(
             "INSERT INTO owner_withdrawals (id, store_id, amount, reason, occurred_at)
              VALUES ($1, $2, $3, $4, $5)
              ON CONFLICT (id) DO UPDATE SET
@@ -33,17 +40,18 @@ impl WithdrawalRepository {
                  occurred_at = EXCLUDED.occurred_at,
                  deleted_at  = NULL,
                  updated_at  = now()
-             RETURNING id, amount, reason, occurred_at",
+             WHERE owner_withdrawals.store_id = EXCLUDED.store_id
+             RETURNING id, amount, reason, occurred_at, (xmax = 0) AS inserted",
         )
         .bind(withdrawal_id)
         .bind(store_id)
         .bind(amount)
         .bind(reason)
         .bind(occurred_at)
-        .fetch_one(&self.pool)
+        .fetch_optional(&self.pool)
         .await?;
 
-        Ok(withdrawal)
+        Ok(withdrawal.map(|row| (row.withdrawal, row.inserted)))
     }
 
     pub async fn list(&self, store_id: Uuid, page: PageRequest) -> ApiResult<Vec<WithdrawalView>> {
@@ -62,16 +70,21 @@ impl WithdrawalRepository {
         Ok(withdrawals)
     }
 
-    pub async fn soft_delete(&self, store_id: Uuid, withdrawal_id: Uuid) -> ApiResult<bool> {
-        let result = sqlx::query(
+    pub async fn soft_delete(
+        &self,
+        store_id: Uuid,
+        withdrawal_id: Uuid,
+    ) -> ApiResult<Option<WithdrawalView>> {
+        let removed = sqlx::query_as::<_, WithdrawalView>(
             "UPDATE owner_withdrawals SET deleted_at = now(), updated_at = now()
-             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL",
+             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL
+             RETURNING id, amount, reason, occurred_at",
         )
         .bind(store_id)
         .bind(withdrawal_id)
-        .execute(&self.pool)
+        .fetch_optional(&self.pool)
         .await?;
 
-        Ok(result.rows_affected() > 0)
+        Ok(removed)
     }
 }

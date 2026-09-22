@@ -95,6 +95,7 @@ class ProductRepository {
         QueuedEntity.products,
         product.id,
         product.toPushJson(),
+        storeId: _storeId,
       );
 
       if (movement != null) {
@@ -103,6 +104,7 @@ class ProductRepository {
           QueuedEntity.stockMovements,
           movement.id,
           movement.toPushJson(),
+          storeId: _storeId,
         );
       }
     });
@@ -130,6 +132,7 @@ class ProductRepository {
         QueuedEntity.stockMovements,
         movement.id,
         movement.toPushJson(),
+        storeId: _storeId,
       );
     });
   }
@@ -141,6 +144,7 @@ class ProductRepository {
         DeletedEntity.product,
         QueuedEntity.products,
         productId,
+        storeId: _storeId,
       );
     });
   }

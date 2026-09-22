@@ -2,6 +2,7 @@ use axum::Json;
 use axum::extract::{Query, State};
 
 use crate::application::AppState;
+use crate::features::access::Permission;
 use crate::features::stores::StoreScope;
 use crate::shared::ApiResult;
 
@@ -15,6 +16,7 @@ pub async fn profit_trend(
     scope: StoreScope,
     Query(query): Query<TrendQuery>,
 ) -> ApiResult<Json<ProfitTrend>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .report_service
@@ -28,6 +30,7 @@ pub async fn top_products(
     scope: StoreScope,
     Query(query): Query<ReportQuery>,
 ) -> ApiResult<Json<Vec<ProductPerformance>>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .report_service
@@ -41,6 +44,7 @@ pub async fn expense_breakdown(
     scope: StoreScope,
     Query(query): Query<ReportQuery>,
 ) -> ApiResult<Json<Vec<ExpenseSlice>>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .report_service
@@ -53,6 +57,7 @@ pub async fn unusual_expenses(
     State(state): State<AppState>,
     scope: StoreScope,
 ) -> ApiResult<Json<Vec<UnusualExpense>>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .report_service
@@ -66,6 +71,7 @@ pub async fn periodic_summary(
     scope: StoreScope,
     Query(query): Query<ReportQuery>,
 ) -> ApiResult<Json<WeeklySummary>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .report_service

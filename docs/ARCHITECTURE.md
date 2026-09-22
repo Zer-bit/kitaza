@@ -69,11 +69,45 @@ another feature's repository — it depends on the exported service.
 
 ### Authorisation is structural
 
+Every request resolves to an **actor**: the owner, or one of their staff, on a
+particular device session. The access token carries only the owner and the
+session id; who the caller is and what they may do is looked up from the
+session on each request (remembered for 20 seconds per instance). That lookup
+is what makes revoking a phone or changing a permission bite immediately
+instead of when the hour-long access token runs out.
+
 `StoreScope` is an axum extractor that resolves `/stores/{store_id}/...`,
-verifies the caller owns that store, and hands the handler a verified store id.
-A handler that takes `StoreScope` is authorised by construction; there is no
-check to forget. Confirmed owner/store pairs are memoised, since ownership does
-not change.
+checks the actor may use that store — owners any of theirs, staff only their
+own — and hands the handler the store id and the actor. A handler that takes
+`StoreScope` is authorised by construction; there is no check to forget.
+`CurrentOwner` does the same for owner-only routes.
+
+Permissions are checked in the **services**, not the handlers, so the REST
+endpoints and the sync push — which fans out to the same services — enforce
+exactly the same rules. Staff never receive what they may not see: without
+`view_profit`, the pull zeroes every cost column and leaves out expenses and
+withdrawals, because hiding a number on screen is not enough when the phone's
+database can be read.
+
+### Staff, devices and the activity log
+
+- **Staff join with a code, not a password.** Many helpers have no email, and
+  a password is one more thing to forget. The owner makes a single-use code
+  valid for a day; the phone that uses it gets its own session. A new phone
+  needs a new code.
+- **Sessions are the unit an owner manages.** Refresh tokens rotate on every
+  renewal; the session is the stable thing listed under *Signed-in devices*
+  and revoked from there. A rotated token stays valid for 24 hours so a lost
+  response cannot lock a phone out.
+- **The activity log is written by the services**, after the change it
+  describes and outside its transaction: a sale that happened must stay
+  recorded even if its log line cannot be written. Entries are only written
+  for real changes — a retried push, or a product re-sent unchanged, is not
+  logged again. Names and device names are copied into each entry so the
+  history still reads correctly after someone is renamed or removed.
+- **Who recorded a sale or expense** is stored on the row from the session,
+  never taken from the device. Staff may re-send their own rows (a retry) but
+  not overwrite anyone else's.
 
 ### Money
 
@@ -191,6 +225,26 @@ The active store and storage mode are Riverpod state, set by the auth
 controller on every session change, and every store-scoped provider rebuilds
 when they change. An earlier version read them once and cached them for the
 app's lifetime, so switching accounts kept writing to the previous store.
+
+**One phone, several stores.** An owner's stores all live in the same SQLite
+file, every row scoped by `store_id`. Switching is instant and works offline.
+Each outbox row records its store, and the coordinator pushes every store's
+rows to that store, so a sale rung up before switching still lands where it
+was made. Each store has its own pull cursor; only the open store is pulled.
+
+**Access on the phone** comes from the server (`/auth/me`), re-read on
+opening, every 15 minutes, and at once when the store's socket says
+`access_changed`. Screens hide what the person cannot do; the server refuses
+it regardless. A staff member who gains or loses `view_profit` has their store
+downloaded again from scratch, and one who loses it has the expenses and
+withdrawals on the phone removed.
+
+**When the server ends a session** — the device was revoked, or its staff
+member removed — the phone shows a *signed out* screen instead of the store,
+with how many entries never reached the cloud. Its records stay. Signing back
+in as the same person carries on with them; anyone else signing in clears the
+phone first. A refresh that fails for lack of signal is *not* a sign-out: only
+the server refusing the refresh token is.
 
 **Signing out always clears the device.** In cloud mode the records come back
 with a full download on the next sign-in. Leaving them — and the outbox —
@@ -354,10 +408,14 @@ sits on.
 
 ```
 owners ──< stores ──< products ──< stock_movements
-                 │
-                 ├──< sales ──< sale_items
-                 ├──< expenses
-                 └──< owner_withdrawals
+   │             │
+   │             ├──< sales ──< sale_items
+   │             ├──< expenses
+   │             ├──< owner_withdrawals
+   │             └──< staff_members ──< staff_invites
+   │
+   ├──< device_sessions ──< refresh_tokens      (a session may belong to staff)
+   └──< audit_events                            (per store, or account-wide)
 ```
 
 Every business table carries `updated_at` and a nullable `deleted_at`.

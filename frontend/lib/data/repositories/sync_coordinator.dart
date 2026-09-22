@@ -74,10 +74,15 @@ class SyncCoordinator extends Notifier<SyncStatus> {
   int _consecutiveFailures = 0;
   DateTime? _retryAfter;
 
+  /// Set when the server refuses this phone's session. Nothing more is sent
+  /// until someone signs back in, which rebuilds the coordinator.
+  bool _sessionLost = false;
+
   @override
   SyncStatus build() {
     final storeId = ref.watch(activeStoreIdProvider);
     final mode = ref.watch(storageModeProvider);
+    _sessionLost = false;
 
     ref.onDispose(_stopWatching);
 
@@ -92,6 +97,7 @@ class SyncCoordinator extends Notifier<SyncStatus> {
   }
 
   bool get _enabled =>
+      !_sessionLost &&
       ref.read(storageModeProvider).isCloud &&
       ref.read(activeStoreIdProvider).isNotEmpty;
 
@@ -161,6 +167,10 @@ class SyncCoordinator extends Notifier<SyncStatus> {
       );
     } on Object catch (error) {
       if (!ref.mounted) return;
+      if (error case AppFailure(kind: FailureKind.unauthorized)) {
+        _sessionLost = true;
+        _stopWatching();
+      }
       _consecutiveFailures++;
       _retryAfter = DateTime.now().add(_backoffFor(_consecutiveFailures));
 
@@ -210,7 +220,10 @@ class SyncCoordinator extends Notifier<SyncStatus> {
     return doubled > _maxBackoff ? _maxBackoff : doubled;
   }
 
-  Future<void> _pushOutbox(String storeId) async {
+  /// Sends every store's queued changes to that store, whichever store is
+  /// open: a sale rung up before the owner switched stores still belongs to
+  /// the store it was rung up in.
+  Future<void> _pushOutbox(String activeStoreId) async {
     final queue = SyncQueueDao(ref.read(databaseProvider));
     final api = ref.read(syncApiProvider);
 
@@ -218,30 +231,41 @@ class SyncCoordinator extends Notifier<SyncStatus> {
       final pending = await queue.pending(limit: _pushBatchSize);
       if (pending.isEmpty) return;
 
-      final body = {
-        for (final entity in QueuedEntity.all) entity: <Map<String, Object?>>[],
-      };
+      final byStore = <String, List<QueuedChange>>{};
       for (final change in pending) {
-        body[change.entity]?.add(change.payload);
+        final storeId = change.storeId.isEmpty ? activeStoreId : change.storeId;
+        (byStore[storeId] ??= []).add(change);
       }
 
-      final result = await api.push(storeId, body);
-
-      final accepted = <int>[];
-      for (final change in pending) {
-        final key = (entity: change.entity, id: change.entityId);
-        final reason = result.rejected[key];
-        if (reason != null) {
-          await queue.recordFailure(change.rowId, reason);
-        } else if (result.applied.contains(key)) {
-          accepted.add(change.rowId);
+      var acceptedAny = false;
+      for (final MapEntry(key: storeId, value: changes) in byStore.entries) {
+        final body = {
+          for (final entity in QueuedEntity.all)
+            entity: <Map<String, Object?>>[],
+        };
+        for (final change in changes) {
+          body[change.entity]?.add(change.payload);
         }
+
+        final result = await api.push(storeId, body);
+
+        final accepted = <int>[];
+        for (final change in changes) {
+          final key = (entity: change.entity, id: change.entityId);
+          final reason = result.rejected[key];
+          if (reason != null) {
+            await queue.recordFailure(change.rowId, reason);
+          } else if (result.applied.contains(key)) {
+            accepted.add(change.rowId);
+          }
+        }
+        await queue.clearRows(accepted);
+        acceptedAny = acceptedAny || accepted.isNotEmpty;
       }
-      await queue.clearRows(accepted);
 
       // Nothing got through: sending the same rows again straight away
       // would get the same answer, so leave them for the next cycle.
-      if (accepted.isEmpty) return;
+      if (!acceptedAny) return;
     }
   }
 
@@ -249,7 +273,7 @@ class SyncCoordinator extends Notifier<SyncStatus> {
   Future<bool> _pullChanges(String storeId) async {
     final preferences = ref.read(preferencesStoreProvider);
     final api = ref.read(syncApiProvider);
-    var cursor = preferences.readSyncCursor();
+    var cursor = preferences.readSyncCursor(storeId);
     var wroteAnything = false;
 
     for (var page = 0; page < _maxPullPages; page++) {
@@ -258,7 +282,7 @@ class SyncCoordinator extends Notifier<SyncStatus> {
 
       wroteAnything = await _apply(storeId, result) || wroteAnything;
       cursor = result.cursor;
-      await preferences.writeSyncCursor(cursor);
+      await preferences.writeSyncCursor(storeId, cursor);
 
       if (!result.hasMore) break;
     }

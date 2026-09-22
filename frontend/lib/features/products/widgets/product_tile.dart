@@ -7,10 +7,20 @@ import '../../../data/models/product.dart';
 import '../../../l10n/l10n.dart';
 
 class ProductTile extends StatelessWidget {
-  const ProductTile({super.key, required this.product, required this.onTap});
+  const ProductTile({
+    super.key,
+    required this.product,
+    this.onTap,
+    this.showMargin = true,
+  });
 
   final Product product;
-  final VoidCallback onTap;
+
+  /// Null for someone who may not edit products.
+  final VoidCallback? onTap;
+
+  /// Off for staff who may not see costs, since a margin reveals them.
+  final bool showMargin;
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +49,13 @@ class ProductTile extends StatelessWidget {
             ),
           ),
           if (product.isLowOnStock) const _LowStockBadge(),
-          Text(
-            context.l10n.productMargin(
-              product.marginPercent.toStringAsFixed(0),
+          if (showMargin)
+            Text(
+              context.l10n.productMargin(
+                product.marginPercent.toStringAsFixed(0),
+              ),
+              style: theme.textTheme.bodySmall,
             ),
-            style: theme.textTheme.bodySmall,
-          ),
         ],
       ),
       trailing: Text(

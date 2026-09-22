@@ -1,6 +1,9 @@
 use chrono::Utc;
+use serde_json::json;
 use uuid::Uuid;
 
+use crate::features::access::{Actor, Permission};
+use crate::features::audit::{AuditAction, AuditEntry, AuditTrail};
 use crate::features::products::ProductRepository;
 use crate::infrastructure::cache::DashboardCache;
 use crate::infrastructure::realtime::{EventBroadcaster, RealtimeEvent, RealtimeTopic};
@@ -9,7 +12,7 @@ use crate::shared::{
 };
 
 use super::sale_payloads::{RecordSaleRequest, SaleDetail, SaleFilter, SaleLineRequest, SaleView};
-use super::sale_repository::{PreparedLine, PreparedSale, SaleRepository};
+use super::sale_repository::{PreparedLine, PreparedSale, Recorder, SaleRepository};
 
 const ALLOWED_PAYMENT_METHODS: [&str; 5] = ["cash", "gcash", "maya", "bank_transfer", "utang"];
 const QUICK_SALE_LABEL: &str = "Quick sale";
@@ -20,6 +23,7 @@ pub struct SaleService {
     products: ProductRepository,
     cache: DashboardCache,
     broadcaster: EventBroadcaster,
+    audit: AuditTrail,
 }
 
 impl SaleService {
@@ -28,20 +32,32 @@ impl SaleService {
         products: ProductRepository,
         cache: DashboardCache,
         broadcaster: EventBroadcaster,
+        audit: AuditTrail,
     ) -> Self {
         Self {
             sales,
             products,
             cache,
             broadcaster,
+            audit,
         }
     }
 
     pub async fn record(
         &self,
         store_id: Uuid,
-        request: RecordSaleRequest,
+        actor: &Actor,
+        mut request: RecordSaleRequest,
     ) -> ApiResult<SaleDetail> {
+        // A device that cannot see costs holds zeros for them. Its figures
+        // are ignored so the sale is costed from the catalogue instead, which
+        // keeps the owner's profit right.
+        if !actor.can(Permission::ViewProfit) {
+            for item in &mut request.items {
+                item.unit_cost = None;
+            }
+        }
+
         let payment_method = normalise_payment_method(request.payment_method.as_deref())?;
         let sale_id = request.id.unwrap_or_else(Uuid::new_v4);
 
@@ -74,8 +90,38 @@ impl SaleService {
             lines,
         };
 
-        let stored = self.sales.record(prepared).await?;
+        let occurred_at = prepared.occurred_at;
+        let recorded = self
+            .sales
+            .record(
+                prepared,
+                Recorder {
+                    staff_id: actor.staff_id(),
+                    is_owner: actor.is_owner(),
+                },
+            )
+            .await?;
+        let stored = recorded.sale;
         let items = self.sales.lines_for(stored.id).await?;
+
+        if recorded.created {
+            self.audit
+                .record(
+                    actor,
+                    AuditEntry::new(
+                        store_id,
+                        AuditAction::SaleRecorded,
+                        stored.id,
+                        json!({
+                            "total": stored.total_amount,
+                            "items": items.len(),
+                            "payment_method": stored.payment_method,
+                        }),
+                    )
+                    .at(occurred_at),
+                )
+                .await;
+        }
 
         self.cache.invalidate_store(store_id).await;
         self.broadcaster
@@ -110,10 +156,26 @@ impl SaleService {
         Ok(SaleDetail::new(sale, items))
     }
 
-    pub async fn void(&self, store_id: Uuid, sale_id: Uuid) -> ApiResult<()> {
-        if !self.sales.void(store_id, sale_id).await? {
-            return Err(ApiError::NotFound("sale"));
-        }
+    pub async fn void(&self, store_id: Uuid, actor: &Actor, sale_id: Uuid) -> ApiResult<()> {
+        actor.require(Permission::DeleteRecords)?;
+
+        let voided = self
+            .sales
+            .void(store_id, sale_id)
+            .await?
+            .ok_or(ApiError::NotFound("sale"))?;
+
+        self.audit
+            .record(
+                actor,
+                AuditEntry::new(
+                    store_id,
+                    AuditAction::SaleVoided,
+                    sale_id,
+                    json!({ "total": voided.total_amount, "sold_at": voided.occurred_at }),
+                ),
+            )
+            .await;
 
         self.cache.invalidate_store(store_id).await;
         self.broadcaster

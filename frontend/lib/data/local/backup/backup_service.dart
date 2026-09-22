@@ -212,11 +212,13 @@ Future<void> installBackup({
   await File(backupPath).copy(databasePath);
 
   // A restored store is an offline store until the owner chooses otherwise:
-  // its records came from a file, not from an account.
+  // its records came from a file, not from an account, and whoever restores
+  // it owns that copy.
   await preferences.writeStorageMode('local');
   await preferences.writeActiveStoreId(storeId);
   await preferences.writeOnboarded(true);
-  await preferences.clearSyncCursor();
+  await preferences.clearAllSyncCursors();
+  await preferences.clearAccess();
 }
 
 final backupServiceProvider = Provider<BackupService>((ref) {

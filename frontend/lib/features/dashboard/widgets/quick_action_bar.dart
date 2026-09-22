@@ -5,17 +5,19 @@ import '../../../l10n/l10n.dart';
 
 /// The three buttons the whole product is built around: Add Sale, Add Expense,
 /// Check Profit. They are the largest tap targets on the screen and never move.
+/// Staff without the matching permission simply get fewer of them, with Add
+/// Sale taking the room.
 class QuickActionBar extends StatelessWidget {
   const QuickActionBar({
     super.key,
     required this.onRecordSale,
-    required this.onRecordExpense,
-    required this.onViewReports,
+    this.onRecordExpense,
+    this.onViewReports,
   });
 
   final VoidCallback onRecordSale;
-  final VoidCallback onRecordExpense;
-  final VoidCallback onViewReports;
+  final VoidCallback? onRecordExpense;
+  final VoidCallback? onViewReports;
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +31,26 @@ class QuickActionBar extends StatelessWidget {
             onPressed: onRecordSale,
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: _SecondaryAction(
-            icon: Icons.remove_circle_outline_rounded,
-            label: context.l10n.actionExpense,
-            onPressed: onRecordExpense,
+        if (onRecordExpense case final onPressed?) ...[
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: _SecondaryAction(
+              icon: Icons.remove_circle_outline_rounded,
+              label: context.l10n.actionExpense,
+              onPressed: onPressed,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: _SecondaryAction(
-            icon: Icons.insights_rounded,
-            label: context.l10n.actionProfit,
-            onPressed: onViewReports,
+        ],
+        if (onViewReports case final onPressed?) ...[
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: _SecondaryAction(
+              icon: Icons.insights_rounded,
+              label: context.l10n.actionProfit,
+              onPressed: onPressed,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

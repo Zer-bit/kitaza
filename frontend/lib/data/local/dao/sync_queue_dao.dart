@@ -33,6 +33,7 @@ abstract final class DeletedEntity {
 class QueuedChange {
   const QueuedChange({
     required this.rowId,
+    required this.storeId,
     required this.entity,
     required this.entityId,
     required this.payload,
@@ -41,6 +42,10 @@ class QueuedChange {
   });
 
   final int rowId;
+
+  /// The store the change was made in. An owner may switch stores before it
+  /// uploads, and it must still land in the store it belongs to.
+  final String storeId;
   final String entity;
   final String entityId;
   final Map<String, Object?> payload;
@@ -67,9 +72,11 @@ class SyncQueueDao {
   Future<void> enqueue(
     String entity,
     String entityId,
-    Map<String, Object?> payload,
-  ) {
+    Map<String, Object?> payload, {
+    required String storeId,
+  }) {
     return _db.insert('sync_queue', {
+      'store_id': storeId,
       'entity': entity,
       'entity_id': entityId,
       'payload': jsonEncode(payload),
@@ -84,13 +91,14 @@ class SyncQueueDao {
   Future<void> enqueueDeletion(
     String deletedEntity,
     String queuedEntity,
-    String id,
-  ) async {
+    String id, {
+    required String storeId,
+  }) async {
     await discard(queuedEntity, id);
     await enqueue(QueuedEntity.deletions, id, {
       'entity': deletedEntity,
       'id': id,
-    });
+    }, storeId: storeId);
   }
 
   Future<void> discard(String entity, String entityId) => _db.delete(
@@ -122,6 +130,10 @@ class SyncQueueDao {
   }
 
   Future<int> pendingCount() => _count('attempts < ?', [maxAttempts]);
+
+  /// Everything not yet in the cloud for one store, parked rows included:
+  /// what would be lost if that store were removed from this phone.
+  Future<int> unsentFor(String storeId) => _count('store_id = ?', [storeId]);
 
   Future<int> parkedCount() => _count('attempts >= ?', [maxAttempts]);
 
@@ -168,6 +180,7 @@ class SyncQueueDao {
 
   static QueuedChange _toChange(Map<String, Object?> row) => QueuedChange(
     rowId: row['id'] as int,
+    storeId: row['store_id'] as String? ?? '',
     entity: row['entity'] as String,
     entityId: row['entity_id'] as String,
     payload: jsonDecode(row['payload'] as String) as Map<String, Object?>,

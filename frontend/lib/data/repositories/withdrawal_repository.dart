@@ -36,6 +36,7 @@ class WithdrawalRepository {
         QueuedEntity.withdrawals,
         withdrawal.id,
         withdrawal.toPushJson(),
+        storeId: _storeId,
       );
     });
 
@@ -49,6 +50,7 @@ class WithdrawalRepository {
         DeletedEntity.withdrawal,
         QueuedEntity.withdrawals,
         withdrawalId,
+        storeId: _storeId,
       );
     });
   }

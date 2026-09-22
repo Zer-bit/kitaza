@@ -3,12 +3,12 @@ use axum::extract::State;
 use axum::http::StatusCode;
 
 use crate::application::AppState;
+use crate::features::access::CurrentActor;
 use crate::shared::{ApiResult, ValidatedJson};
 
 use super::auth_payloads::{
-    AuthenticatedSession, LoginRequest, OwnerProfile, RefreshRequest, RegisterRequest, StoreSummary,
+    AccountView, AuthenticatedSession, JoinRequest, LoginRequest, RefreshRequest, RegisterRequest,
 };
-use super::current_owner::CurrentOwner;
 
 pub async fn register(
     State(state): State<AppState>,
@@ -23,6 +23,13 @@ pub async fn login(
     ValidatedJson(request): ValidatedJson<LoginRequest>,
 ) -> ApiResult<Json<AuthenticatedSession>> {
     Ok(Json(state.auth_service.login(request).await?))
+}
+
+pub async fn join(
+    State(state): State<AppState>,
+    ValidatedJson(request): ValidatedJson<JoinRequest>,
+) -> ApiResult<Json<AuthenticatedSession>> {
+    Ok(Json(state.auth_service.join(request).await?))
 }
 
 pub async fn refresh(
@@ -42,19 +49,11 @@ pub async fn logout(
     Ok(StatusCode::NO_CONTENT)
 }
 
-#[derive(serde::Serialize)]
-pub struct ProfileResponse {
-    owner: OwnerProfile,
-    stores: Vec<StoreSummary>,
-}
-
-pub async fn current_profile(
+/// Who this device is signed in as, and what it may do. Devices re-read this
+/// so a permission the owner changed takes effect without signing out.
+pub async fn current_account(
     State(state): State<AppState>,
-    owner: CurrentOwner,
-) -> ApiResult<Json<ProfileResponse>> {
-    let (profile, stores) = state.auth_service.profile(owner.owner_id).await?;
-    Ok(Json(ProfileResponse {
-        owner: profile,
-        stores,
-    }))
+    CurrentActor(actor): CurrentActor,
+) -> ApiResult<Json<AccountView>> {
+    Ok(Json(state.auth_service.account(&actor).await?))
 }

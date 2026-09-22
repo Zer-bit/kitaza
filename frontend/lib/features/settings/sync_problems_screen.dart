@@ -96,7 +96,7 @@ class _ProblemTile extends ConsumerWidget {
           ),
           AppSpacing.gapXs,
           Text(
-            change.lastError ?? l10n.problemsRefused,
+            refusalText(change.lastError, l10n),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.error,
             ),
@@ -154,4 +154,13 @@ class _ProblemTile extends ConsumerWidget {
           .discardParked(change.rowId);
     }
   }
+}
+
+/// The server's reason for refusing an entry. A permission refusal is the
+/// one a staff member is likely to meet, so it is said in their language;
+/// anything else is the server's own words.
+String refusalText(String? reason, AppLocalizations l10n) {
+  if (reason == null) return l10n.problemsRefused;
+  if (reason.startsWith('only the owner')) return l10n.syncNotAllowed;
+  return reason;
 }

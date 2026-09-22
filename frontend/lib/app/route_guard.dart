@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/models/access_grant.dart';
 import '../data/models/auth_session.dart';
 import 'route_paths.dart';
 
@@ -15,7 +16,15 @@ String? resolveRoute(AsyncValue<AuthSession?> auth, String location) {
   // the owner's typing in it.
   if (auth.isLoading && !auth.hasValue) return null;
 
-  final signedIn = auth.value != null;
+  final session = auth.value;
+
+  if (session != null && session.ended) {
+    return RoutePaths.endedRoutes.contains(location)
+        ? null
+        : RoutePaths.sessionEnded;
+  }
+
+  final signedIn = session != null;
 
   if (location == RoutePaths.splash) {
     return signedIn ? RoutePaths.dashboard : RoutePaths.welcome;
@@ -24,5 +33,30 @@ String? resolveRoute(AsyncValue<AuthSession?> auth, String location) {
   final atPublicRoute = RoutePaths.publicRoutes.contains(location);
   if (!signedIn && !atPublicRoute) return RoutePaths.welcome;
   if (signedIn && atPublicRoute) return RoutePaths.dashboard;
+  if (location == RoutePaths.sessionEnded) {
+    return signedIn ? RoutePaths.dashboard : RoutePaths.welcome;
+  }
+  if (signedIn && !mayOpen(session, location)) return RoutePaths.dashboard;
   return null;
+}
+
+/// Whether this person may open [location]. Buttons for screens they cannot
+/// use are hidden; this catches a stale link or a permission taken away
+/// while the screen was open.
+bool mayOpen(AuthSession session, String location) {
+  final access = session.access;
+  return switch (location) {
+    RoutePaths.reports => access.can(Permission.viewProfit),
+    RoutePaths.withdrawals => access.isOwner,
+    RoutePaths.recordExpense => access.can(Permission.recordExpenses),
+    RoutePaths.expenseHistory =>
+      access.can(Permission.recordExpenses) ||
+          access.can(Permission.viewProfit),
+    RoutePaths.productEditor => access.can(Permission.manageProducts),
+    RoutePaths.cloudUpgrade => !session.isCloud,
+    RoutePaths.staff ||
+    RoutePaths.devices ||
+    RoutePaths.activity => session.isCloud && access.isOwner,
+    _ => true,
+  };
 }

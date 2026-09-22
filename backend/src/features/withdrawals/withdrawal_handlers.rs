@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 use uuid::Uuid;
 
 use crate::application::AppState;
+use crate::features::access::Permission;
 use crate::features::stores::StoreScope;
 use crate::shared::{ApiResult, PageRequest, ValidatedJson};
 
@@ -16,7 +17,7 @@ pub async fn record_withdrawal(
 ) -> ApiResult<(StatusCode, Json<WithdrawalView>)> {
     let withdrawal = state
         .withdrawal_service
-        .record(scope.store_id, request)
+        .record(scope.store_id, &scope.actor, request)
         .await?;
     Ok((StatusCode::CREATED, Json(withdrawal)))
 }
@@ -26,6 +27,7 @@ pub async fn list_withdrawals(
     scope: StoreScope,
     Query(page): Query<PageRequest>,
 ) -> ApiResult<Json<Vec<WithdrawalView>>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state.withdrawal_service.list(scope.store_id, page).await?,
     ))
@@ -38,7 +40,7 @@ pub async fn delete_withdrawal(
 ) -> ApiResult<StatusCode> {
     state
         .withdrawal_service
-        .remove(scope.store_id, withdrawal_id)
+        .remove(scope.store_id, &scope.actor, withdrawal_id)
         .await?;
     Ok(StatusCode::NO_CONTENT)
 }

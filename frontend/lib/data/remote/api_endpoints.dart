@@ -6,6 +6,18 @@ abstract final class ApiEndpoints {
   static const String refresh = '/auth/refresh';
   static const String logout = '/auth/logout';
   static const String profile = '/auth/me';
+  static const String join = '/auth/join';
+  static const String stores = '/stores';
+  static const String devices = '/devices';
+
+  static String store(String storeId) => '/stores/$storeId';
+  static String device(String sessionId) => '/devices/$sessionId';
+  static String staff(String storeId) => '/stores/$storeId/staff';
+  static String staffMember(String storeId, String staffId) =>
+      '/stores/$storeId/staff/$staffId';
+  static String staffInvite(String storeId, String staffId) =>
+      '/stores/$storeId/staff/$staffId/invite';
+  static String activity(String storeId) => '/stores/$storeId/activity';
 
   static String syncPush(String storeId) => '/stores/$storeId/sync/push';
   static String syncPull(String storeId) => '/stores/$storeId/sync/pull';

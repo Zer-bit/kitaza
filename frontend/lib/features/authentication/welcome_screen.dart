@@ -51,6 +51,10 @@ class WelcomeScreen extends ConsumerWidget {
           onPressed: () => context.push(RoutePaths.signIn),
           child: Text(l10n.welcomeHaveAccount),
         ),
+        TextButton(
+          onPressed: () => context.push(RoutePaths.joinStore),
+          child: Text(l10n.welcomeJoinStaff),
+        ),
         // A phone that was lost or replaced: bring the store back from the
         // backup file the owner saved.
         TextButton(

@@ -14,6 +14,9 @@ pub enum RealtimeTopic {
     ProductChanged,
     StockLow,
     DashboardStale,
+    /// A staff member's permissions changed or they were removed: phones in
+    /// the store should re-read what they may do.
+    AccessChanged,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

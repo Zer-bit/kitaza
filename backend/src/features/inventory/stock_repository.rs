@@ -34,6 +34,13 @@ pub struct LedgerEntry<'a> {
     pub occurred_at: DateTime<Utc>,
 }
 
+pub struct AppliedMovement {
+    pub product_name: String,
+    /// What the stock actually moved by: for a count, the difference between
+    /// what was expected and what was found.
+    pub change: Quantity,
+}
+
 #[derive(Clone)]
 pub struct StockRepository {
     pool: PgPool,
@@ -52,12 +59,15 @@ impl StockRepository {
     /// product row is locked first so a counted adjustment and a concurrent
     /// sale cannot interleave.
     ///
-    /// Returns `false` when the movement had already been recorded.
-    pub async fn record_movement(&self, entry: LedgerEntry<'_>) -> ApiResult<bool> {
+    /// Returns `None` when the movement had already been recorded.
+    pub async fn record_movement(
+        &self,
+        entry: LedgerEntry<'_>,
+    ) -> ApiResult<Option<AppliedMovement>> {
         let mut transaction = self.pool.begin().await?;
 
-        let on_hand: Option<(Quantity,)> = sqlx::query_as(
-            "SELECT stock_quantity FROM products
+        let on_hand: Option<(Quantity, String)> = sqlx::query_as(
+            "SELECT stock_quantity, name FROM products
              WHERE id = $1 AND store_id = $2 AND deleted_at IS NULL
              FOR UPDATE",
         )
@@ -66,7 +76,7 @@ impl StockRepository {
         .fetch_optional(&mut *transaction)
         .await?;
 
-        let Some((on_hand,)) = on_hand else {
+        let Some((on_hand, product_name)) = on_hand else {
             return Err(ApiError::NotFound("product"));
         };
 
@@ -95,7 +105,7 @@ impl StockRepository {
 
         if inserted == 0 {
             transaction.rollback().await?;
-            return Ok(false);
+            return Ok(None);
         }
 
         sqlx::query(
@@ -113,7 +123,10 @@ impl StockRepository {
         .await?;
 
         transaction.commit().await?;
-        Ok(true)
+        Ok(Some(AppliedMovement {
+            product_name,
+            change: delta,
+        }))
     }
 
     pub async fn list_movements(

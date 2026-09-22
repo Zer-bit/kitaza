@@ -6,6 +6,8 @@ abstract final class RoutePaths {
   static const String localSetup = '/welcome/offline';
   static const String signIn = '/sign-in';
   static const String signUp = '/sign-up';
+  static const String joinStore = '/join';
+  static const String sessionEnded = '/signed-out';
 
   static const String dashboard = '/';
   static const String recordSale = '/sales/new';
@@ -19,6 +21,19 @@ abstract final class RoutePaths {
   static const String settings = '/settings';
   static const String cloudUpgrade = '/settings/cloud';
   static const String syncProblems = '/settings/sync-problems';
+  static const String staff = '/settings/staff';
+  static const String devices = '/settings/devices';
+  static const String activity = '/settings/activity';
 
-  static const Set<String> publicRoutes = {welcome, localSetup, signIn, signUp};
+  static const Set<String> publicRoutes = {
+    welcome,
+    localSetup,
+    signIn,
+    signUp,
+    joinStore,
+  };
+
+  /// Where a phone whose session the server ended may go: the explanation,
+  /// and the two ways back in.
+  static const Set<String> endedRoutes = {sessionEnded, signIn, joinStore};
 }

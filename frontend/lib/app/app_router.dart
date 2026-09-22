@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/authentication/auth_controller.dart';
+import '../features/authentication/join_store_screen.dart';
 import '../features/authentication/local_setup_screen.dart';
+import '../features/authentication/session_ended_screen.dart';
 import '../features/authentication/sign_in_screen.dart';
 import '../features/authentication/sign_up_screen.dart';
 import '../features/authentication/welcome_screen.dart';
@@ -20,6 +22,9 @@ import '../features/settings/settings_screen.dart';
 import '../features/settings/sync_problems_screen.dart';
 import '../features/shell/home_shell.dart';
 import '../features/splash/splash_screen.dart';
+import '../features/team/activity_screen.dart';
+import '../features/team/devices_screen.dart';
+import '../features/team/staff_screen.dart';
 import '../features/withdrawals/withdrawal_screen.dart';
 import 'route_guard.dart';
 import 'route_paths.dart';
@@ -74,6 +79,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.signUp,
         builder: (context, state) => const SignUpScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.joinStore,
+        builder: (context, state) => const JoinStoreScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.sessionEnded,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: SessionEndedScreen()),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -136,6 +150,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'sync-problems',
             builder: (context, state) => const SyncProblemsScreen(),
+          ),
+          GoRoute(
+            path: 'staff',
+            builder: (context, state) => const StaffScreen(),
+          ),
+          GoRoute(
+            path: 'devices',
+            builder: (context, state) => const DevicesScreen(),
+          ),
+          GoRoute(
+            path: 'activity',
+            builder: (context, state) => const ActivityScreen(),
           ),
         ],
       ),

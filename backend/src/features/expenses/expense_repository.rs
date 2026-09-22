@@ -6,6 +6,14 @@ use crate::shared::{ApiResult, Money, PageRequest};
 
 use super::expense_payloads::{ExpenseFilter, ExpenseView};
 
+#[derive(Debug, sqlx::FromRow)]
+pub struct UpsertedExpense {
+    #[sqlx(flatten)]
+    pub expense: ExpenseView,
+    /// False when an existing row was updated, as on a retried push.
+    pub inserted: bool,
+}
+
 #[derive(Clone)]
 pub struct ExpenseRepository {
     pool: PgPool,
@@ -16,6 +24,10 @@ impl ExpenseRepository {
         Self { pool }
     }
 
+    /// Insert-or-update on the device's id. An existing expense is only
+    /// overwritten by the owner or by whoever first recorded it; `None`
+    /// means the write was refused.
+    #[allow(clippy::too_many_arguments)]
     pub async fn upsert(
         &self,
         store_id: Uuid,
@@ -24,10 +36,13 @@ impl ExpenseRepository {
         description: Option<&str>,
         amount: Money,
         occurred_at: DateTime<Utc>,
-    ) -> ApiResult<ExpenseView> {
-        let expense = sqlx::query_as::<_, ExpenseView>(
-            "INSERT INTO expenses (id, store_id, category, description, amount, occurred_at)
-             VALUES ($1, $2, $3, $4, $5, $6)
+        recorded_by: Option<Uuid>,
+        is_owner: bool,
+    ) -> ApiResult<Option<UpsertedExpense>> {
+        let expense = sqlx::query_as::<_, UpsertedExpense>(
+            "INSERT INTO expenses
+                 (id, store_id, category, description, amount, occurred_at, recorded_by_staff_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
              ON CONFLICT (id) DO UPDATE SET
                  category    = EXCLUDED.category,
                  description = EXCLUDED.description,
@@ -35,7 +50,9 @@ impl ExpenseRepository {
                  occurred_at = EXCLUDED.occurred_at,
                  deleted_at  = NULL,
                  updated_at  = now()
-             RETURNING id, category, description, amount, occurred_at",
+             WHERE expenses.store_id = EXCLUDED.store_id
+               AND ($8 OR expenses.recorded_by_staff_id = EXCLUDED.recorded_by_staff_id)
+             RETURNING id, category, description, amount, occurred_at, (xmax = 0) AS inserted",
         )
         .bind(expense_id)
         .bind(store_id)
@@ -43,7 +60,9 @@ impl ExpenseRepository {
         .bind(description)
         .bind(amount)
         .bind(occurred_at)
-        .fetch_one(&self.pool)
+        .bind(recorded_by)
+        .bind(is_owner)
+        .fetch_optional(&self.pool)
         .await?;
 
         Ok(expense)
@@ -77,16 +96,21 @@ impl ExpenseRepository {
         Ok(expenses)
     }
 
-    pub async fn soft_delete(&self, store_id: Uuid, expense_id: Uuid) -> ApiResult<bool> {
-        let result = sqlx::query(
+    pub async fn soft_delete(
+        &self,
+        store_id: Uuid,
+        expense_id: Uuid,
+    ) -> ApiResult<Option<ExpenseView>> {
+        let removed = sqlx::query_as::<_, ExpenseView>(
             "UPDATE expenses SET deleted_at = now(), updated_at = now()
-             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL",
+             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL
+             RETURNING id, category, description, amount, occurred_at",
         )
         .bind(store_id)
         .bind(expense_id)
-        .execute(&self.pool)
+        .fetch_optional(&self.pool)
         .await?;
 
-        Ok(result.rows_affected() > 0)
+        Ok(removed)
     }
 }

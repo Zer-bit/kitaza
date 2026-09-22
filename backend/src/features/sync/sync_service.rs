@@ -1,6 +1,8 @@
 use chrono::Utc;
+use serde_json::Value;
 use uuid::Uuid;
 
+use crate::features::access::{Actor, Permission};
 use crate::features::expenses::ExpenseService;
 use crate::features::inventory::InventoryService;
 use crate::features::products::ProductService;
@@ -54,14 +56,22 @@ impl SyncService {
         }
     }
 
-    pub async fn push(&self, store_id: Uuid, request: PushRequest) -> ApiResult<PushOutcome> {
+    /// Each row is checked against what `actor` may do, so a staff phone
+    /// that queued something it was not allowed to gets that row refused
+    /// with a reason, and the rest of its batch still goes through.
+    pub async fn push(
+        &self,
+        store_id: Uuid,
+        actor: &Actor,
+        request: PushRequest,
+    ) -> ApiResult<PushOutcome> {
         let mut outcome = Outcome::default();
 
         // Products first: a queued sale or stock count may refer to a product
         // that was created on the same device while it was offline.
         for product in request.products {
             let id = product.id;
-            match self.products.save(store_id, product).await {
+            match self.products.save(store_id, actor, product).await {
                 Ok(saved) => outcome.applied(PushedEntity::Product, saved.id),
                 Err(error) => outcome.rejected(PushedEntity::Product, id, error),
             }
@@ -71,14 +81,14 @@ impl SyncService {
             match event {
                 StockEvent::Sale(sale) => {
                     let id = sale.id;
-                    match self.sales.record(store_id, sale).await {
+                    match self.sales.record(store_id, actor, sale).await {
                         Ok(saved) => outcome.applied(PushedEntity::Sale, saved.sale.id),
                         Err(error) => outcome.rejected(PushedEntity::Sale, id, error),
                     }
                 }
                 StockEvent::Movement(movement) => {
                     let id = movement.id;
-                    match self.inventory.record(store_id, movement).await {
+                    match self.inventory.record(store_id, actor, movement).await {
                         Ok(()) => outcome.applied_if_known(PushedEntity::StockMovement, id),
                         Err(error) => outcome.rejected(PushedEntity::StockMovement, id, error),
                     }
@@ -88,7 +98,7 @@ impl SyncService {
 
         for expense in request.expenses {
             let id = expense.id;
-            match self.expenses.record(store_id, expense).await {
+            match self.expenses.record(store_id, actor, expense).await {
                 Ok(saved) => outcome.applied(PushedEntity::Expense, saved.id),
                 Err(error) => outcome.rejected(PushedEntity::Expense, id, error),
             }
@@ -96,7 +106,7 @@ impl SyncService {
 
         for withdrawal in request.withdrawals {
             let id = withdrawal.id;
-            match self.withdrawals.record(store_id, withdrawal).await {
+            match self.withdrawals.record(store_id, actor, withdrawal).await {
                 Ok(saved) => outcome.applied(PushedEntity::Withdrawal, saved.id),
                 Err(error) => outcome.rejected(PushedEntity::Withdrawal, id, error),
             }
@@ -106,7 +116,7 @@ impl SyncService {
         // up removed.
         for deletion in request.deletions {
             let id = deletion.id;
-            match self.delete(store_id, &deletion).await {
+            match self.delete(store_id, actor, &deletion).await {
                 Ok(()) => outcome.applied(PushedEntity::Deletion, id),
                 Err(error) => outcome.rejected(PushedEntity::Deletion, Some(id), error),
             }
@@ -119,12 +129,27 @@ impl SyncService {
         })
     }
 
-    pub async fn pull(&self, store_id: Uuid, query: PullQuery) -> ApiResult<PullResponse> {
+    /// Staff without profit access get no cost figures, expenses or
+    /// withdrawals: hiding them on screen is not enough when the phone's
+    /// database can be read. Their cursor never advances past the withheld
+    /// tables, so granting access later downloads those in full.
+    pub async fn pull(
+        &self,
+        store_id: Uuid,
+        actor: &Actor,
+        query: PullQuery,
+    ) -> ApiResult<PullResponse> {
+        let sees_costs = actor.can(Permission::ViewProfit);
         let mut cursor = SyncCursor::decode(query.cursor.as_deref());
         let mut has_more = false;
         let mut pages = Vec::with_capacity(SyncTable::ALL.len());
 
         for table in SyncTable::ALL {
+            if !sees_costs && matches!(table, SyncTable::Expenses | SyncTable::Withdrawals) {
+                pages.push(Vec::new());
+                continue;
+            }
+
             let page = self
                 .repository
                 .changed_since(table, store_id, cursor.mark(table), self.page_size)
@@ -139,7 +164,13 @@ impl SyncService {
             pages.push(page.rows);
         }
 
-        let [products, sales, expenses, withdrawals, stock_movements]: [Vec<_>; 5] = pages
+        let [
+            mut products,
+            mut sales,
+            expenses,
+            withdrawals,
+            mut stock_movements,
+        ]: [Vec<_>; 5] = pages
             .try_into()
             .map_err(|_| ApiError::Internal(anyhow::anyhow!("sync table count changed")))?;
 
@@ -147,7 +178,14 @@ impl SyncService {
             .iter()
             .filter_map(|row| row.get("id")?.as_str()?.parse().ok())
             .collect();
-        let sale_items = self.repository.lines_for_sales(&sale_ids).await?;
+        let mut sale_items = self.repository.lines_for_sales(&sale_ids).await?;
+
+        if !sees_costs {
+            zero_field(&mut products, "cost_price");
+            zero_field(&mut sales, "cost_amount");
+            zero_field(&mut sale_items, "unit_cost");
+            zero_field(&mut stock_movements, "unit_cost");
+        }
 
         Ok(PullResponse {
             products,
@@ -163,12 +201,17 @@ impl SyncService {
 
     /// Removing something that is already gone counts as success: the device
     /// may be retrying a deletion the server accepted last time.
-    async fn delete(&self, store_id: Uuid, deletion: &DeletionRequest) -> ApiResult<()> {
+    async fn delete(
+        &self,
+        store_id: Uuid,
+        actor: &Actor,
+        deletion: &DeletionRequest,
+    ) -> ApiResult<()> {
         let result = match deletion.entity.as_str() {
-            "sale" => self.sales.void(store_id, deletion.id).await,
-            "expense" => self.expenses.remove(store_id, deletion.id).await,
-            "withdrawal" => self.withdrawals.remove(store_id, deletion.id).await,
-            "product" => self.products.remove(store_id, deletion.id).await,
+            "sale" => self.sales.void(store_id, actor, deletion.id).await,
+            "expense" => self.expenses.remove(store_id, actor, deletion.id).await,
+            "withdrawal" => self.withdrawals.remove(store_id, actor, deletion.id).await,
+            "product" => self.products.remove(store_id, actor, deletion.id).await,
             other => Err(ApiError::BadRequest(format!(
                 "cannot delete unknown entity '{other}'"
             ))),
@@ -177,6 +220,14 @@ impl SyncService {
         match result {
             Err(ApiError::NotFound(_)) => Ok(()),
             other => other,
+        }
+    }
+}
+
+fn zero_field(rows: &mut [Value], field: &str) {
+    for row in rows {
+        if let Some(value) = row.get_mut(field) {
+            *value = Value::from(0);
         }
     }
 }

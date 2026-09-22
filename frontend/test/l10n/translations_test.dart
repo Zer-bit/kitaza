@@ -147,7 +147,30 @@ void countMessagesShowTheirNumber() {
       'accountSignOutUnsent': l10n.accountSignOutUnsent,
       'starterAdd': l10n.starterAdd,
       'starterAdded': l10n.starterAdded,
+      'sessionEndedUnsent': l10n.sessionEndedUnsent,
+      'sessionEndedClearMessage': l10n.sessionEndedClearMessage,
+      'staffDevices': l10n.staffDevices,
+      'problemsWillRetry': l10n.problemsWillRetry,
+      'reportsTitle': l10n.reportsTitle,
+      'backupConfirmSummary': (count) =>
+          l10n.backupConfirmSummary('Store', count, count),
     };
+
+    // English says "once" rather than "1 time"; the number is still right.
+    const spelledOutAtOne = {'problemsWillRetry'};
+
+    if (code == 'en') {
+      test('every count message is checked here', () {
+        // Filipino groups numbers differently from English, which is how
+        // "1 benta" once showed for 3 sales. A new count message must be
+        // added to the list above to be checked.
+        final plural = _arb('app_en.arb').entries
+            .where((entry) => '${entry.value}'.contains(', plural,'))
+            .map((entry) => entry.key)
+            .toSet();
+        expect(messages.keys.toSet(), plural);
+      });
+    }
 
     test('$code count messages show the real number', () {
       messages.forEach((key, render) {
@@ -158,7 +181,9 @@ void countMessagesShowTheirNumber() {
             reason: '$code $key($count)',
           );
         }
-        expect(render(1), contains('1'), reason: '$code $key(1)');
+        if (code != 'en' || !spelledOutAtOne.contains(key)) {
+          expect(render(1), contains('1'), reason: '$code $key(1)');
+        }
       });
     });
   }

@@ -7,6 +7,8 @@ import '../../data/local/backup/automatic_backup.dart';
 import '../../data/repositories/realtime_connection.dart';
 import '../../data/repositories/sync_coordinator.dart';
 import '../../l10n/l10n.dart';
+import '../authentication/account_watcher.dart';
+import '../authentication/auth_controller.dart';
 import 'navigation_destinations.dart';
 
 /// Holds the persistent navigation around every signed-in screen. A bottom bar
@@ -25,18 +27,24 @@ class HomeShell extends ConsumerWidget {
     // reason to rebuild the navigation.
     ref.listen(syncCoordinatorProvider, (_, _) {});
     ref.watch(realtimeConnectionProvider);
+    ref.watch(accountWatcherProvider);
     ref.listen(automaticBackupProvider, (_, _) {});
 
-    final index = _indexFor(GoRouterState.of(context).matchedLocation);
+    final destinations = destinationsFor(ref.watch(currentAccessProvider));
+    final index = _indexFor(
+      destinations,
+      GoRouterState.of(context).matchedLocation,
+    );
 
     if (context.isCompact) {
       return Scaffold(
         body: child,
         bottomNavigationBar: NavigationBar(
           selectedIndex: index,
-          onDestinationSelected: (target) => _navigate(context, target),
+          onDestinationSelected: (target) =>
+              _navigate(context, destinations[target]),
           destinations: [
-            for (final destination in shellDestinations)
+            for (final destination in destinations)
               NavigationDestination(
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.selectedIcon),
@@ -52,12 +60,13 @@ class HomeShell extends ConsumerWidget {
         children: [
           NavigationRail(
             selectedIndex: index,
-            onDestinationSelected: (target) => _navigate(context, target),
+            onDestinationSelected: (target) =>
+                _navigate(context, destinations[target]),
             labelType: NavigationRailLabelType.all,
             extended: context.isExpanded,
             minExtendedWidth: 180,
             destinations: [
-              for (final destination in shellDestinations)
+              for (final destination in destinations)
                 NavigationRailDestination(
                   icon: Icon(destination.icon),
                   selectedIcon: Icon(destination.selectedIcon),
@@ -72,15 +81,14 @@ class HomeShell extends ConsumerWidget {
     );
   }
 
-  void _navigate(BuildContext context, int target) {
-    final path = shellDestinations[target].path;
-    if (GoRouterState.of(context).matchedLocation != path) {
-      context.go(path);
+  void _navigate(BuildContext context, ShellDestination destination) {
+    if (GoRouterState.of(context).matchedLocation != destination.path) {
+      context.go(destination.path);
     }
   }
 
-  int _indexFor(String location) {
-    final index = shellDestinations.indexWhere(
+  int _indexFor(List<ShellDestination> destinations, String location) {
+    final index = destinations.indexWhere(
       (destination) => destination.path == location,
     );
     return index < 0 ? 0 : index;

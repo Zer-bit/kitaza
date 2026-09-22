@@ -2,7 +2,7 @@ use rust_decimal::Decimal;
 use uuid::Uuid;
 
 use crate::infrastructure::database::PgPool;
-use crate::shared::{ApiResult, Money, PageRequest, Quantity};
+use crate::shared::{ApiError, ApiResult, Money, PageRequest, Quantity};
 
 use super::product_payloads::{ProductFilter, ProductView};
 
@@ -96,6 +96,7 @@ impl ProductRepository {
                  is_active     = TRUE,
                  deleted_at    = NULL,
                  updated_at    = now()
+             WHERE products.store_id = EXCLUDED.store_id
              RETURNING id, name, barcode, unit_label, cost_price, selling_price,
                     stock_quantity, reorder_level, is_active, updated_at",
         )
@@ -108,23 +109,26 @@ impl ProductRepository {
         .bind(selling_price)
         .bind(opening_stock)
         .bind(reorder_level)
-        .fetch_one(&self.pool)
+        .fetch_optional(&self.pool)
         .await?;
 
-        Ok(product)
+        product.ok_or_else(foreign_id)
     }
 
-    pub async fn soft_delete(&self, store_id: Uuid, product_id: Uuid) -> ApiResult<bool> {
-        let result = sqlx::query(
+    /// Returns the removed product's name, or `None` if there was nothing
+    /// to remove.
+    pub async fn soft_delete(&self, store_id: Uuid, product_id: Uuid) -> ApiResult<Option<String>> {
+        let removed: Option<(String,)> = sqlx::query_as(
             "UPDATE products SET deleted_at = now(), is_active = FALSE, updated_at = now()
-             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL",
+             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL
+             RETURNING name",
         )
         .bind(store_id)
         .bind(product_id)
-        .execute(&self.pool)
+        .fetch_optional(&self.pool)
         .await?;
 
-        Ok(result.rows_affected() > 0)
+        Ok(removed.map(|(name,)| name))
     }
 
     pub async fn list_low_stock(&self, store_id: Uuid) -> ApiResult<Vec<ProductView>> {
@@ -152,4 +156,10 @@ impl ProductRepository {
 
         Ok(value.map(|row| row.0).unwrap_or(Decimal::ZERO))
     }
+}
+
+/// Ids are generated on devices, so an id can in principle already exist in
+/// another store. That row must never be overwritten from here.
+pub fn foreign_id() -> ApiError {
+    ApiError::Conflict("this record belongs to another store".into())
 }

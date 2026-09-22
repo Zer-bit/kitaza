@@ -5,6 +5,26 @@ import 'package:dio/dio.dart';
 import '../../core/storage/secure_token_store.dart';
 import 'api_endpoints.dart';
 
+/// How an attempt to renew the access token went.
+sealed class _Renewal {
+  const _Renewal();
+}
+
+class _Renewed extends _Renewal {
+  const _Renewed(this.accessToken);
+  final String accessToken;
+}
+
+/// The server said no: this phone was signed out, or its token is dead.
+class _Refused extends _Renewal {
+  const _Refused();
+}
+
+/// The server could not be asked. Nothing is known about the session.
+class _Unreachable extends _Renewal {
+  const _Unreachable();
+}
+
 /// Attaches the access token and, when it has expired, silently exchanges the
 /// refresh token for a new one and replays the request. This is what keeps a
 /// signed-in device from ever seeing the login screen again.
@@ -20,7 +40,7 @@ class AuthInterceptor extends Interceptor {
   final Future<void> Function() onSessionLost;
 
   /// Concurrent 401s share one refresh instead of each starting their own.
-  Future<String?>? _inFlightRefresh;
+  Future<_Renewal>? _inFlightRefresh;
 
   @override
   Future<void> onRequest(
@@ -52,12 +72,26 @@ class AuthInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    final token = await (_inFlightRefresh ??= _refreshAccessToken());
+    final renewal = await (_inFlightRefresh ??= _refreshAccessToken());
     _inFlightRefresh = null;
 
-    if (token == null) {
-      await onSessionLost();
-      return handler.next(err);
+    final String token;
+    switch (renewal) {
+      case _Renewed(:final accessToken):
+        token = accessToken;
+      case _Refused():
+        await onSessionLost();
+        return handler.next(err);
+      case _Unreachable():
+        // Signal dropped between the request and the renewal. That says
+        // nothing about the session, so the phone stays signed in and the
+        // request fails as an offline one, to be retried later.
+        return handler.next(
+          DioException.connectionError(
+            requestOptions: err.requestOptions,
+            reason: 'could not renew the session',
+          ),
+        );
     }
 
     final options = err.requestOptions
@@ -72,9 +106,9 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  Future<String?> _refreshAccessToken() async {
+  Future<_Renewal> _refreshAccessToken() async {
     final refreshToken = await _tokenStore.readRefreshToken();
-    if (refreshToken == null) return null;
+    if (refreshToken == null) return const _Refused();
 
     try {
       final response = await _refreshClient.post<Map<String, dynamic>>(
@@ -84,16 +118,19 @@ class AuthInterceptor extends Interceptor {
       );
 
       final body = response.data;
-      if (body == null) return null;
+      final access = body?['access_token'];
+      if (access is! String) return const _Unreachable();
 
-      final access = body['access_token'] as String;
       await _tokenStore.saveTokens(
         accessToken: access,
-        refreshToken: body['refresh_token'] as String? ?? refreshToken,
+        refreshToken: body?['refresh_token'] as String? ?? refreshToken,
       );
-      return access;
-    } on DioException {
-      return null;
+      return _Renewed(access);
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      return status == 401 || status == 403
+          ? const _Refused()
+          : const _Unreachable();
     }
   }
 }

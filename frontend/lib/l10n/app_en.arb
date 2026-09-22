@@ -642,5 +642,379 @@
   "printerBluetoothOff": "Bluetooth is off. Turn it on and try again.",
   "printerNoPermission": "Kitaza needs Bluetooth permission to print. Allow it in your phone's settings.",
   "printerCouldNotConnect": "Could not connect to the printer. Check that it is on and nearby.",
-  "printerFailed": "The printer did not accept the receipt. Try again."
+  "printerFailed": "The printer did not accept the receipt. Try again.",
+  "welcomeJoinStaff": "Join a store as staff",
+  "joinTitle": "Join a store",
+  "joinSubtitle": "Ask the store owner for a join code. They make one in Settings, under Staff.",
+  "joinCodeLabel": "Join code",
+  "joinCodeInvalid": "Enter all 10 letters and numbers of the code",
+  "joinAction": "Join store",
+  "joinCodeRefused": "That code did not work. It may have been used already or expired. Ask the owner for a new one.",
+  "joinSharedPhoneNote": "Each code works on one phone. Anything recorded here goes to the store, under your name.",
+  "sessionEndedTitle": "This phone was signed out",
+  "sessionEndedMessage": "{store} was signed out on this phone from another device, or your access to it was removed.",
+  "@sessionEndedMessage": {
+    "placeholders": {
+      "store": {}
+    }
+  },
+  "sessionEndedUnsent": "{count, plural, =0{Everything recorded here had already reached the cloud.} =1{1 entry recorded here has not reached the cloud yet. Sign back in to send it.} other{{count} entries recorded here have not reached the cloud yet. Sign back in to send them.}}",
+  "@sessionEndedUnsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionEndedSignIn": "Sign in again",
+  "sessionEndedJoin": "Enter a new join code",
+  "sessionEndedClear": "Remove this store from the phone",
+  "sessionEndedClearTitle": "Remove this store's records?",
+  "sessionEndedClearMessage": "{count, plural, =0{Everything here is already in the cloud, so nothing will be lost.} =1{1 entry that never reached the cloud will be lost for good.} other{{count} entries that never reached the cloud will be lost for good.}}",
+  "@sessionEndedClearMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionEndedClearConfirm": "Remove",
+  "settingsTeam": "Stores and staff",
+  "storesHint": "Tap a store to open it. Each keeps its own products, sales and staff.",
+  "storesOpenNow": "Open now",
+  "storesAdd": "Add another store",
+  "storesAddTitle": "New store",
+  "storesAddSubmit": "Add store",
+  "storesRename": "Rename store",
+  "storesSwitched": "Now working in {store}",
+  "@storesSwitched": {
+    "placeholders": {
+      "store": {}
+    }
+  },
+  "storesPickerTitle": "Open a store",
+  "storesSwitchHint": "Switch store",
+  "teamLocalTitle": "Staff and more stores",
+  "teamLocalMessage": "Staff accounts, more than one store and signing out a lost phone all need your records in the cloud.",
+  "staffTitle": "Staff",
+  "staffTileHint": "Let helpers sell from their own phone",
+  "staffEmptyTitle": "No staff yet",
+  "staffEmptyMessage": "Add the people who help at the counter. They sell from their own phone, and you choose what else they can do.",
+  "staffAdd": "Add staff",
+  "staffNameLabel": "Their name",
+  "staffAlwaysSells": "Staff can always record sales. Choose what else they may do:",
+  "permissionManageProducts": "Manage products",
+  "permissionManageProductsHint": "Add and edit products and prices, record deliveries and stock counts",
+  "permissionRecordExpenses": "Record expenses",
+  "permissionRecordExpensesHint": "Write down what the store spends",
+  "permissionViewProfit": "See profit and costs",
+  "permissionViewProfitHint": "Cost prices, profit, expenses and the health score. Without this, costs never reach their phone.",
+  "permissionDeleteRecords": "Void and delete",
+  "permissionDeleteRecordsHint": "Void sales and delete expenses. Every void is kept in the activity log.",
+  "staffSells": "Sells",
+  "staffShortProducts": "products",
+  "staffShortExpenses": "expenses",
+  "staffShortProfit": "profit",
+  "staffShortDelete": "voids",
+  "staffDevices": "{count, plural, =0{Not signed in yet} =1{Signed in on 1 phone} other{Signed in on {count} phones}}",
+  "@staffDevices": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "staffCodeWorksUntil": "Join code works until {when}",
+  "@staffCodeWorksUntil": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "staffNewCode": "Make a new join code",
+  "staffNewCodeHint": "For a new or replaced phone. Any earlier code stops working.",
+  "staffRemove": "Remove from store",
+  "staffRemoveTitle": "Remove {name}?",
+  "@staffRemoveTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "staffRemoveMessage": "{name}'s phone will be signed out straight away. Sales on it that have not reached the cloud yet will not arrive.",
+  "@staffRemoveMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "staffRemoved": "{name} was removed",
+  "@staffRemoved": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "staffSaved": "Saved. Their phone picks this up within a few minutes.",
+  "inviteTitle": "Join code for {name}",
+  "@inviteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "inviteSteps": "On {name}'s phone, open Kitaza, tap “Join a store as staff” and enter this code.",
+  "@inviteSteps": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "inviteExpires": "Works on one phone, until {when}.",
+  "@inviteExpires": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "inviteShare": "Share code",
+  "inviteCopy": "Copy",
+  "inviteCopied": "Code copied",
+  "inviteShareText": "Join {store} on Kitaza: open Kitaza, tap “Join a store as staff” and enter {code}. The code works once, for one day.",
+  "@inviteShareText": {
+    "placeholders": {
+      "store": {},
+      "code": {}
+    }
+  },
+  "inviteDone": "Done",
+  "devicesTitle": "Signed-in devices",
+  "devicesTileHint": "Every phone using your stores. Sign out one that was lost.",
+  "devicesIntro": "Every phone that can open your stores. Sign out one that was lost, sold, or belongs to someone who left.",
+  "devicesThisPhone": "This phone",
+  "devicesYou": "You",
+  "devicesStaff": "{name}, staff",
+  "@devicesStaff": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "devicesLastActive": "Last active {when}",
+  "@devicesLastActive": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "devicesSignOut": "Sign out",
+  "devicesSignOutTitle": "Sign out {device}?",
+  "@devicesSignOutTitle": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "devicesSignOutMessage": "It stops syncing straight away and has to sign in again to be used. Anything on it that has not reached the cloud yet will not arrive.",
+  "devicesSignedOut": "{device} was signed out",
+  "@devicesSignedOut": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "activityTitle": "Activity",
+  "activityTileHint": "Who recorded, changed and voided what",
+  "activityFilterAll": "Everything",
+  "activityFilterRemovals": "Voids and deletions",
+  "activityEmptyTitle": "Nothing here yet",
+  "activityEmptyMessage": "Sales, changes and voids from every phone are listed here, with who made them.",
+  "activityShowOlder": "Show older",
+  "activitySaleRecorded": "{name} recorded a sale of {amount}",
+  "@activitySaleRecorded": {
+    "placeholders": {
+      "name": {},
+      "amount": {}
+    }
+  },
+  "activitySaleVoided": "{name} voided a sale of {amount}",
+  "@activitySaleVoided": {
+    "placeholders": {
+      "name": {},
+      "amount": {}
+    }
+  },
+  "activityExpenseRecorded": "{name} recorded {amount} for {category}",
+  "@activityExpenseRecorded": {
+    "placeholders": {
+      "name": {},
+      "amount": {},
+      "category": {}
+    }
+  },
+  "activityExpenseDeleted": "{name} deleted {amount} for {category}",
+  "@activityExpenseDeleted": {
+    "placeholders": {
+      "name": {},
+      "amount": {},
+      "category": {}
+    }
+  },
+  "activityWithdrawalRecorded": "{name} took out {amount} for personal use",
+  "@activityWithdrawalRecorded": {
+    "placeholders": {
+      "name": {},
+      "amount": {}
+    }
+  },
+  "activityWithdrawalDeleted": "{name} deleted a withdrawal of {amount}",
+  "@activityWithdrawalDeleted": {
+    "placeholders": {
+      "name": {},
+      "amount": {}
+    }
+  },
+  "activityProductAdded": "{name} added {product} at {price}",
+  "@activityProductAdded": {
+    "placeholders": {
+      "name": {},
+      "product": {},
+      "price": {}
+    }
+  },
+  "activityProductChanged": "{name} changed {product}",
+  "@activityProductChanged": {
+    "placeholders": {
+      "name": {},
+      "product": {}
+    }
+  },
+  "activityProductRemoved": "{name} removed {product}",
+  "@activityProductRemoved": {
+    "placeholders": {
+      "name": {},
+      "product": {}
+    }
+  },
+  "activityPriceChange": "Price {before} to {after}",
+  "@activityPriceChange": {
+    "placeholders": {
+      "before": {},
+      "after": {}
+    }
+  },
+  "activityCostChange": "Cost {before} to {after}",
+  "@activityCostChange": {
+    "placeholders": {
+      "before": {},
+      "after": {}
+    }
+  },
+  "activityRenamedFrom": "Was “{before}”",
+  "@activityRenamedFrom": {
+    "placeholders": {
+      "before": {}
+    }
+  },
+  "activityStockReceived": "{name} received {quantity} {product}",
+  "@activityStockReceived": {
+    "placeholders": {
+      "name": {},
+      "quantity": {},
+      "product": {}
+    }
+  },
+  "activityStockRemoved": "{name} took out {quantity} {product}",
+  "@activityStockRemoved": {
+    "placeholders": {
+      "name": {},
+      "quantity": {},
+      "product": {}
+    }
+  },
+  "activityStockCounted": "{name} counted {quantity} {product}",
+  "@activityStockCounted": {
+    "placeholders": {
+      "name": {},
+      "quantity": {},
+      "product": {}
+    }
+  },
+  "activityStockDifference": "{change} from what was expected",
+  "@activityStockDifference": {
+    "placeholders": {
+      "change": {}
+    }
+  },
+  "activityStockSpoiled": "{name} marked {quantity} {product} as spoiled",
+  "@activityStockSpoiled": {
+    "placeholders": {
+      "name": {},
+      "quantity": {},
+      "product": {}
+    }
+  },
+  "activityStaffAdded": "{name} added {staff} as staff",
+  "@activityStaffAdded": {
+    "placeholders": {
+      "name": {},
+      "staff": {}
+    }
+  },
+  "activityStaffChanged": "{name} changed what {staff} can do",
+  "@activityStaffChanged": {
+    "placeholders": {
+      "name": {},
+      "staff": {}
+    }
+  },
+  "activityStaffRemoved": "{name} removed {staff}",
+  "@activityStaffRemoved": {
+    "placeholders": {
+      "name": {},
+      "staff": {}
+    }
+  },
+  "activityStaffInvited": "{name} made a join code for {staff}",
+  "@activityStaffInvited": {
+    "placeholders": {
+      "name": {},
+      "staff": {}
+    }
+  },
+  "activityStaffJoined": "{name} joined on {device}",
+  "@activityStaffJoined": {
+    "placeholders": {
+      "name": {},
+      "device": {}
+    }
+  },
+  "activityDeviceSignedOut": "{name} signed out {member}'s {device}",
+  "@activityDeviceSignedOut": {
+    "placeholders": {
+      "name": {},
+      "member": {},
+      "device": {}
+    }
+  },
+  "activityStoreAdded": "{name} opened {store}",
+  "@activityStoreAdded": {
+    "placeholders": {
+      "name": {},
+      "store": {}
+    }
+  },
+  "activityStoreRenamed": "{name} renamed {before} to {store}",
+  "@activityStoreRenamed": {
+    "placeholders": {
+      "name": {},
+      "before": {},
+      "store": {}
+    }
+  },
+  "activityOther": "{name} made a change",
+  "@activityOther": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "activityStaffBadge": "Staff",
+  "accountStaffAt": "Staff at {store}",
+  "@accountStaffAt": {
+    "placeholders": {
+      "store": {}
+    }
+  },
+  "accountStaffSignOutNote": "To use this phone again, you will need a new join code from the owner.",
+  "productCostSetByOwner": "The owner sets the cost price.",
+  "syncNotAllowed": "Your access does not allow this. Ask the owner."
 }

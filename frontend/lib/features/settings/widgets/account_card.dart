@@ -18,13 +18,20 @@ class AccountCard extends ConsumerWidget {
     return Card(
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(Icons.person_outline_rounded),
-            title: Text(session.owner.fullName),
-            subtitle: Text(
-              session.owner.email ?? context.l10n.accountOfflineProfile,
+          if (session.access.isStaff)
+            ListTile(
+              leading: const Icon(Icons.badge_outlined),
+              title: Text(session.access.displayName),
+              subtitle: Text(context.l10n.accountStaffAt(session.store.name)),
+            )
+          else
+            ListTile(
+              leading: const Icon(Icons.person_outline_rounded),
+              title: Text(session.owner.fullName),
+              subtitle: Text(
+                session.owner.email ?? context.l10n.accountOfflineProfile,
+              ),
             ),
-          ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout_rounded),
@@ -50,10 +57,17 @@ class AccountCard extends ConsumerWidget {
     }
     if (!context.mounted) return;
     final l10n = context.l10n;
-    final message = switch ((session.isCloud, unsent)) {
+    final warning = switch ((session.isCloud, unsent)) {
       (false, _) => l10n.accountSignOutLocal,
       (true, 0) => l10n.accountSignOutClean,
       (true, final count) => l10n.accountSignOutUnsent(count),
+    };
+    // "Sign back in on any phone" is the owner's promise; a staff member
+    // needs a fresh code from the owner instead.
+    final message = switch ((session.access.isStaff, unsent)) {
+      (false, _) => warning,
+      (true, 0) => l10n.accountStaffSignOutNote,
+      (true, _) => '$warning\n\n${l10n.accountStaffSignOutNote}',
     };
 
     final destructive = !session.isCloud || unsent > 0;

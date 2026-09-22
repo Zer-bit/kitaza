@@ -2,6 +2,7 @@ use axum::Json;
 use axum::extract::{Query, State};
 
 use crate::application::AppState;
+use crate::features::access::Permission;
 use crate::features::stores::StoreScope;
 use crate::shared::ApiResult;
 
@@ -12,6 +13,7 @@ pub async fn store_summary(
     scope: StoreScope,
     Query(query): Query<DashboardQuery>,
 ) -> ApiResult<Json<DashboardSummary>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .dashboard_service

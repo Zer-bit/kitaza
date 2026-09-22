@@ -3,14 +3,19 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kitaza_app/core/config/storage_mode.dart';
 import 'package:kitaza_app/core/diagnostics/error_reporter.dart';
 import 'package:kitaza_app/core/storage/preferences_store.dart';
 import 'package:kitaza_app/data/local/dao/dashboard_dao.dart';
 import 'package:kitaza_app/data/local/dao/error_report_dao.dart';
 import 'package:kitaza_app/data/local/dao/product_dao.dart';
 import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
+import 'package:kitaza_app/data/models/activity_event.dart';
+import 'package:kitaza_app/data/models/auth_session.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:kitaza_app/data/remote/api_client.dart';
+import 'package:kitaza_app/data/remote/auth_api.dart';
+import 'package:kitaza_app/data/remote/team_api.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
 import 'package:kitaza_app/data/repositories/product_repository.dart';
 import 'package:kitaza_app/data/repositories/sale_repository.dart';
@@ -217,12 +222,126 @@ void main() {
       expect(await counter.stockOf(coke.id), 16);
       expect((await counter.todaysSales()).saleCount, 3);
     },
-    skip: _api == null
-        ? 'set KITAZA_CONTRACT_API to run against a live server'
-        : false,
+    skip: _skip,
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
+  test(
+    "a cashier's phone sells, is held to its limits, and can be cut off",
+    () async {
+      final (ownerToken, storeId) = await _register();
+      final owner = await Device.signIn(ownerToken, storeId);
+      addTearDown(owner.close);
+      final team = TeamApi(_client(ownerToken));
+
+      final coke = await owner.products.save(
+        name: 'Coke 290ml',
+        costPrice: 15,
+        sellingPrice: 20,
+        stockQuantity: 24,
+        reorderLevel: 6,
+      );
+      expect((await owner.sync()).phase, SyncPhase.idle);
+
+      // The owner adds Liza; her phone joins with the code.
+      final added = await team.addStaff(storeId, name: 'Liza', permissions: {});
+      final joined = await AuthApi(_client(null)).join(
+        code: added.invite.code.toLowerCase(),
+        device: (tag: 'android', name: 'Counter phone'),
+      );
+      final session = AuthSession.fromJson(joined, mode: StorageMode.cloud);
+      expect(session.access.isStaff, isTrue);
+      expect(session.store.id, storeId);
+
+      await _outlastSettleWindow();
+      final cashier = await Device.signIn(session.accessToken!, storeId);
+      addTearDown(cashier.close);
+      expect((await cashier.sync()).phase, SyncPhase.idle);
+
+      final seen = (await ProductDao(cashier.db).find(coke.id))!;
+      expect(seen.sellingPrice, 20);
+      expect(seen.costPrice, 0, reason: 'costs never reach a cashier');
+
+      // She sells three, then tries two things she is not allowed to.
+      await cashier.sales.record(
+        cart: [CartLine.fromProduct(seen, quantity: 3)],
+      );
+      await cashier.products.save(
+        id: coke.id,
+        name: 'Coke 290ml',
+        costPrice: 0,
+        sellingPrice: 1,
+        stockQuantity: 21,
+        reorderLevel: 6,
+      );
+      final ownersSale = await owner.sales.record(cart: [CartLine.quick(45)]);
+      await owner.sync();
+      await _outlastSettleWindow();
+      await cashier.sync();
+      await cashier.sales.voidSale(ownersSale.id);
+      await cashier.sync();
+
+      final refused = await SyncQueueDao(cashier.db).problems();
+      expect(refused.map((change) => change.entity).toSet(), {
+        QueuedEntity.products,
+        QueuedEntity.deletions,
+      });
+      expect(
+        refused.every(
+          (change) => change.lastError!.startsWith('only the owner'),
+        ),
+        isTrue,
+      );
+
+      // The owner's books cost her sale from the catalogue, not her zero.
+      await _outlastSettleWindow();
+      await owner.sync();
+      final books = await owner.todaysSales();
+      expect(books.saleCount, 2, reason: "the owner's sale was not voided");
+      expect(books.salesTotal, 60 + 45);
+      expect(books.costTotal, 45, reason: '3 at the catalogue cost of 15');
+      expect((await ProductDao(owner.db).find(coke.id))!.sellingPrice, 20);
+
+      final log = await team.activity(storeId);
+      final sold = log.events.firstWhere(
+        (event) => event.action == ActivityAction.saleRecorded && event.isStaff,
+      );
+      expect(sold.actorName, 'Liza');
+      expect(sold.deviceName, 'Counter phone');
+
+      // Her phone goes missing: the owner signs it out.
+      final phones = await team.devices();
+      final hers = phones.singleWhere((device) => device.isStaff);
+      await team.signOutDevice(hers.id);
+
+      await cashier.sales.record(cart: [CartLine.quick(10)]);
+      final cutOff = await cashier.sync();
+      expect(cutOff.phase, SyncPhase.failed);
+      expect(
+        await SyncQueueDao(cashier.db).pendingCount(),
+        greaterThan(0),
+        reason: 'kept on the phone, not lost',
+      );
+    },
+    skip: _skip,
     timeout: const Timeout(Duration(minutes: 2)),
   );
 }
+
+final Object _skip = _api == null
+    ? 'set KITAZA_CONTRACT_API to run against a live server'
+    : false;
+
+ApiClient _client(String? token) => ApiClient(
+  Dio(
+    BaseOptions(
+      baseUrl: _api!,
+      contentType: 'application/json',
+      headers: {'authorization': ?token == null ? null : 'Bearer $token'},
+      validateStatus: (status) => status != null && status < 400,
+    ),
+  ),
+);
 
 extension<T> on T {
   R let<R>(R Function(T) block) => block(this);

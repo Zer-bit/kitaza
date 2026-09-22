@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/route_paths.dart';
 import '../../core/formatting/peso_formatter.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../data/models/access_grant.dart';
 import '../../data/models/sale.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/sale_repository.dart';
@@ -14,6 +15,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import '../../shared/widgets/money_text.dart';
 import '../../shared/widgets/page_body.dart';
+import '../authentication/auth_controller.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../dashboard/widgets/period_selector.dart';
 import '../receipts/receipt_sheet.dart';
@@ -86,6 +88,8 @@ class _SaleRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final seesProfit = ref.watch(canProvider(Permission.viewProfit));
+    final mayVoid = ref.watch(canProvider(Permission.deleteRecords));
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
@@ -104,16 +108,17 @@ class _SaleRow extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           MoneyText(sale.totalAmount, size: 17),
-          Text(
-            context.l10n.saleProfitAmount(
-              PesoFormatter.plain(sale.profitAmount),
+          if (seesProfit)
+            Text(
+              context.l10n.saleProfitAmount(
+                PesoFormatter.plain(sale.profitAmount),
+              ),
+              style: theme.textTheme.bodySmall,
             ),
-            style: theme.textTheme.bodySmall,
-          ),
         ],
       ),
       onTap: () => ReceiptSheet.show(context, sale),
-      onLongPress: () => _confirmVoid(context, ref),
+      onLongPress: mayVoid ? () => _confirmVoid(context, ref) : null,
     );
   }
 

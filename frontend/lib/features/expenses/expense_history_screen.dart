@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/route_paths.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../data/models/access_grant.dart';
 import '../../data/models/expense.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/expense_repository.dart';
@@ -12,6 +13,7 @@ import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/money_text.dart';
 import '../../shared/widgets/page_body.dart';
+import '../authentication/auth_controller.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../dashboard/widgets/period_selector.dart';
 import 'expense_controller.dart';
@@ -22,14 +24,17 @@ class ExpenseHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expenses = ref.watch(expenseHistoryProvider);
+    final mayRecord = ref.watch(canProvider(Permission.recordExpenses));
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.navExpenses)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(RoutePaths.recordExpense),
-        icon: const Icon(Icons.add_rounded),
-        label: Text(context.l10n.expenseTitle),
-      ),
+      floatingActionButton: mayRecord
+          ? FloatingActionButton.extended(
+              onPressed: () => context.push(RoutePaths.recordExpense),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(context.l10n.expenseTitle),
+            )
+          : null,
       body: Column(
         children: [
           PageBody(
@@ -55,8 +60,12 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                     icon: Icons.receipt_long_rounded,
                     title: context.l10n.expenseHistoryEmptyTitle,
                     message: context.l10n.expenseHistoryEmptyMessage,
-                    actionLabel: context.l10n.expenseHistoryEmptyAction,
-                    onAction: () => context.push(RoutePaths.recordExpense),
+                    actionLabel: mayRecord
+                        ? context.l10n.expenseHistoryEmptyAction
+                        : null,
+                    onAction: mayRecord
+                        ? () => context.push(RoutePaths.recordExpense)
+                        : null,
                   );
                 }
 
@@ -83,9 +92,13 @@ class _ExpenseRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final mayDelete = ref.watch(canProvider(Permission.deleteRecords));
+
     return Dismissible(
       key: ValueKey(expense.id),
-      direction: DismissDirection.endToStart,
+      direction: mayDelete
+          ? DismissDirection.endToStart
+          : DismissDirection.none,
       onDismissed: (_) async {
         await ref.read(expenseRepositoryProvider).remove(expense.id);
         ref.read(dataRevisionProvider.notifier).localWrite();

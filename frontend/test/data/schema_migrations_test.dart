@@ -26,6 +26,13 @@ Future<String> _versionOnePhone(Directory folder) async {
     'occurred_at': '2026-01-01T00:00:00Z',
     'updated_at': '2026-01-01T00:00:00Z',
   });
+  // Waiting to upload when the phone is updated.
+  await db.insert('sync_queue', {
+    'entity': 'sales',
+    'entity_id': 'sale-1',
+    'payload': '{"id":"sale-1"}',
+    'created_at': '2026-01-01T00:00:00Z',
+  });
   await db.execute('PRAGMA user_version = 1');
   await db.close();
   return path;
@@ -81,6 +88,18 @@ void main() {
       reason: 'the new table exists',
     );
   });
+
+  test(
+    'unsent changes survive the upgrade and stay with their store',
+    () async {
+      final db = await _openAsTheAppWould(await _versionOnePhone(folder));
+      addTearDown(db.close);
+
+      final queued = await db.query('sync_queue');
+      expect(queued.single['entity_id'], 'sale-1');
+      expect(queued.single['store_id'], 's');
+    },
+  );
 
   test(
     'a new install and an upgraded phone end up with the same schema',

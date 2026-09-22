@@ -1259,4 +1259,477 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get printerFailed =>
       'Hindi tinanggap ng printer ang resibo. Subukan ulit.';
+
+  @override
+  String get welcomeJoinStaff => 'Sumali sa tindahan bilang staff';
+
+  @override
+  String get joinTitle => 'Sumali sa tindahan';
+
+  @override
+  String get joinSubtitle =>
+      'Humingi ng join code sa may-ari ng tindahan. Gagawa sila nito sa Settings, sa Staff.';
+
+  @override
+  String get joinCodeLabel => 'Join code';
+
+  @override
+  String get joinCodeInvalid =>
+      'Ilagay ang lahat ng 10 letra at numero ng code';
+
+  @override
+  String get joinAction => 'Sumali';
+
+  @override
+  String get joinCodeRefused =>
+      'Hindi gumana ang code na iyan. Baka nagamit na o expired na. Humingi ng bago sa may-ari.';
+
+  @override
+  String get joinSharedPhoneNote =>
+      'Isang phone lang ang puwede sa bawat code. Mapupunta sa tindahan ang lahat ng itatala mo rito, sa pangalan mo.';
+
+  @override
+  String get sessionEndedTitle => 'Na-sign out ang phone na ito';
+
+  @override
+  String sessionEndedMessage(Object store) {
+    return 'Na-sign out ang $store sa phone na ito mula sa ibang device, o tinanggal ang access mo rito.';
+  }
+
+  @override
+  String sessionEndedUnsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count na entry na naitala rito ang hindi pa nakakarating sa cloud. Mag-sign in ulit para maipadala.',
+      zero: 'Nakarating na sa cloud ang lahat ng naitala rito.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionEndedSignIn => 'Mag-sign in ulit';
+
+  @override
+  String get sessionEndedJoin => 'Maglagay ng bagong join code';
+
+  @override
+  String get sessionEndedClear => 'Alisin ang tindahan sa phone na ito';
+
+  @override
+  String get sessionEndedClearTitle => 'Alisin ang records ng tindahan?';
+
+  @override
+  String sessionEndedClearMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tuluyang mawawala ang $count na entry na hindi nakarating sa cloud.',
+      zero: 'Nasa cloud na ang lahat ng narito, kaya walang mawawala.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionEndedClearConfirm => 'Alisin';
+
+  @override
+  String get settingsTeam => 'Mga tindahan at staff';
+
+  @override
+  String get storesHint =>
+      'I-tap ang tindahan para buksan. May sariling produkto, benta at staff ang bawat isa.';
+
+  @override
+  String get storesOpenNow => 'Bukas ngayon';
+
+  @override
+  String get storesAdd => 'Magdagdag ng tindahan';
+
+  @override
+  String get storesAddTitle => 'Bagong tindahan';
+
+  @override
+  String get storesAddSubmit => 'Idagdag';
+
+  @override
+  String get storesRename => 'Palitan ang pangalan';
+
+  @override
+  String storesSwitched(Object store) {
+    return 'Nasa $store ka na ngayon';
+  }
+
+  @override
+  String get storesPickerTitle => 'Magbukas ng tindahan';
+
+  @override
+  String get storesSwitchHint => 'Lumipat ng tindahan';
+
+  @override
+  String get teamLocalTitle => 'Staff at iba pang tindahan';
+
+  @override
+  String get teamLocalMessage =>
+      'Kailangang nasa cloud ang records mo para sa staff accounts, higit sa isang tindahan, at pag-sign out ng nawalang phone.';
+
+  @override
+  String get staffTitle => 'Staff';
+
+  @override
+  String get staffTileHint =>
+      'Hayaang magbenta ang katulong gamit ang sariling phone';
+
+  @override
+  String get staffEmptyTitle => 'Wala pang staff';
+
+  @override
+  String get staffEmptyMessage =>
+      'Idagdag ang mga tumutulong sa tindahan. Magbebenta sila gamit ang sariling phone, at ikaw ang pipili kung ano pa ang puwede nilang gawin.';
+
+  @override
+  String get staffAdd => 'Magdagdag ng staff';
+
+  @override
+  String get staffNameLabel => 'Pangalan niya';
+
+  @override
+  String get staffAlwaysSells =>
+      'Laging puwedeng magtala ng benta ang staff. Piliin kung ano pa ang puwede niyang gawin:';
+
+  @override
+  String get permissionManageProducts => 'Mag-ayos ng produkto';
+
+  @override
+  String get permissionManageProductsHint =>
+      'Magdagdag at magbago ng produkto at presyo, magtala ng deliveries at bilang ng stock';
+
+  @override
+  String get permissionRecordExpenses => 'Magtala ng gastos';
+
+  @override
+  String get permissionRecordExpensesHint => 'Itala ang ginagastos ng tindahan';
+
+  @override
+  String get permissionViewProfit => 'Makita ang kita at puhunan';
+
+  @override
+  String get permissionViewProfitHint =>
+      'Puhunan, kita, gastos at ang health score. Kung wala ito, hindi makakarating sa phone niya ang puhunan.';
+
+  @override
+  String get permissionDeleteRecords => 'Mag-void at magbura';
+
+  @override
+  String get permissionDeleteRecordsHint =>
+      'Mag-void ng benta at magbura ng gastos. Nakatala sa activity log ang bawat void.';
+
+  @override
+  String get staffSells => 'Nagbebenta';
+
+  @override
+  String get staffShortProducts => 'produkto';
+
+  @override
+  String get staffShortExpenses => 'gastos';
+
+  @override
+  String get staffShortProfit => 'kita';
+
+  @override
+  String get staffShortDelete => 'void';
+
+  @override
+  String staffDevices(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Naka-sign in sa $count phone',
+      zero: 'Hindi pa naka-sign in',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffCodeWorksUntil(Object when) {
+    return 'Gumagana ang join code hanggang $when';
+  }
+
+  @override
+  String get staffNewCode => 'Gumawa ng bagong join code';
+
+  @override
+  String get staffNewCodeHint =>
+      'Para sa bago o pinalitang phone. Hindi na gagana ang naunang code.';
+
+  @override
+  String get staffRemove => 'Alisin sa tindahan';
+
+  @override
+  String staffRemoveTitle(Object name) {
+    return 'Alisin si $name?';
+  }
+
+  @override
+  String staffRemoveMessage(Object name) {
+    return 'Agad na masa-sign out ang phone ni $name. Hindi na darating ang mga benta roon na hindi pa nakakarating sa cloud.';
+  }
+
+  @override
+  String staffRemoved(Object name) {
+    return 'Inalis si $name';
+  }
+
+  @override
+  String get staffSaved =>
+      'Na-save. Makukuha ito ng phone niya sa loob ng ilang minuto.';
+
+  @override
+  String inviteTitle(Object name) {
+    return 'Join code para kay $name';
+  }
+
+  @override
+  String inviteSteps(Object name) {
+    return 'Sa phone ni $name, buksan ang Kitaza, i-tap ang “Sumali sa tindahan bilang staff” at ilagay ang code na ito.';
+  }
+
+  @override
+  String inviteExpires(Object when) {
+    return 'Gagana sa isang phone lang, hanggang $when.';
+  }
+
+  @override
+  String get inviteShare => 'Ibahagi ang code';
+
+  @override
+  String get inviteCopy => 'Kopyahin';
+
+  @override
+  String get inviteCopied => 'Nakopya ang code';
+
+  @override
+  String inviteShareText(Object store, Object code) {
+    return 'Sumali sa $store sa Kitaza: buksan ang Kitaza, i-tap ang “Sumali sa tindahan bilang staff” at ilagay ang $code. Isang beses lang gagana ang code, sa loob ng isang araw.';
+  }
+
+  @override
+  String get inviteDone => 'Tapos na';
+
+  @override
+  String get devicesTitle => 'Mga naka-sign in na device';
+
+  @override
+  String get devicesTileHint =>
+      'Bawat phone na gumagamit ng tindahan mo. I-sign out ang nawala.';
+
+  @override
+  String get devicesIntro =>
+      'Bawat phone na nakakabukas ng mga tindahan mo. I-sign out ang nawala, naibenta, o sa taong umalis na.';
+
+  @override
+  String get devicesThisPhone => 'Ang phone na ito';
+
+  @override
+  String get devicesYou => 'Ikaw';
+
+  @override
+  String devicesStaff(Object name) {
+    return '$name, staff';
+  }
+
+  @override
+  String devicesLastActive(Object when) {
+    return 'Huling ginamit $when';
+  }
+
+  @override
+  String get devicesSignOut => 'I-sign out';
+
+  @override
+  String devicesSignOutTitle(Object device) {
+    return 'I-sign out ang $device?';
+  }
+
+  @override
+  String get devicesSignOutMessage =>
+      'Agad itong titigil sa pag-sync at kailangang mag-sign in ulit para magamit. Hindi na darating ang anumang nasa kanya na hindi pa nakakarating sa cloud.';
+
+  @override
+  String devicesSignedOut(Object device) {
+    return 'Na-sign out ang $device';
+  }
+
+  @override
+  String get activityTitle => 'Aktibidad';
+
+  @override
+  String get activityTileHint => 'Sino ang nagtala, nagbago at nag-void ng ano';
+
+  @override
+  String get activityFilterAll => 'Lahat';
+
+  @override
+  String get activityFilterRemovals => 'Mga void at binura';
+
+  @override
+  String get activityEmptyTitle => 'Wala pa rito';
+
+  @override
+  String get activityEmptyMessage =>
+      'Nakalista rito ang mga benta, pagbabago at void mula sa bawat phone, pati kung sino ang gumawa.';
+
+  @override
+  String get activityShowOlder => 'Ipakita ang mas luma';
+
+  @override
+  String activitySaleRecorded(Object name, Object amount) {
+    return 'Nagtala si $name ng benta na $amount';
+  }
+
+  @override
+  String activitySaleVoided(Object name, Object amount) {
+    return 'Nag-void si $name ng benta na $amount';
+  }
+
+  @override
+  String activityExpenseRecorded(Object name, Object amount, Object category) {
+    return 'Nagtala si $name ng $amount para sa $category';
+  }
+
+  @override
+  String activityExpenseDeleted(Object name, Object amount, Object category) {
+    return 'Binura ni $name ang $amount para sa $category';
+  }
+
+  @override
+  String activityWithdrawalRecorded(Object name, Object amount) {
+    return 'Kumuha si $name ng $amount para sa sarili';
+  }
+
+  @override
+  String activityWithdrawalDeleted(Object name, Object amount) {
+    return 'Binura ni $name ang withdrawal na $amount';
+  }
+
+  @override
+  String activityProductAdded(Object name, Object product, Object price) {
+    return 'Idinagdag ni $name ang $product sa halagang $price';
+  }
+
+  @override
+  String activityProductChanged(Object name, Object product) {
+    return 'Binago ni $name ang $product';
+  }
+
+  @override
+  String activityProductRemoved(Object name, Object product) {
+    return 'Inalis ni $name ang $product';
+  }
+
+  @override
+  String activityPriceChange(Object before, Object after) {
+    return 'Presyo $before papuntang $after';
+  }
+
+  @override
+  String activityCostChange(Object before, Object after) {
+    return 'Puhunan $before papuntang $after';
+  }
+
+  @override
+  String activityRenamedFrom(Object before) {
+    return 'Dating “$before”';
+  }
+
+  @override
+  String activityStockReceived(Object name, Object quantity, Object product) {
+    return 'Tumanggap si $name ng $quantity $product';
+  }
+
+  @override
+  String activityStockRemoved(Object name, Object quantity, Object product) {
+    return 'Naglabas si $name ng $quantity $product';
+  }
+
+  @override
+  String activityStockCounted(Object name, Object quantity, Object product) {
+    return 'Nagbilang si $name ng $quantity $product';
+  }
+
+  @override
+  String activityStockDifference(Object change) {
+    return '$change kumpara sa inaasahan';
+  }
+
+  @override
+  String activityStockSpoiled(Object name, Object quantity, Object product) {
+    return 'Minarkahan ni $name na sira ang $quantity $product';
+  }
+
+  @override
+  String activityStaffAdded(Object name, Object staff) {
+    return 'Idinagdag ni $name si $staff bilang staff';
+  }
+
+  @override
+  String activityStaffChanged(Object name, Object staff) {
+    return 'Binago ni $name ang puwedeng gawin ni $staff';
+  }
+
+  @override
+  String activityStaffRemoved(Object name, Object staff) {
+    return 'Inalis ni $name si $staff';
+  }
+
+  @override
+  String activityStaffInvited(Object name, Object staff) {
+    return 'Gumawa si $name ng join code para kay $staff';
+  }
+
+  @override
+  String activityStaffJoined(Object name, Object device) {
+    return 'Sumali si $name gamit ang $device';
+  }
+
+  @override
+  String activityDeviceSignedOut(Object name, Object member, Object device) {
+    return 'Na-sign out ni $name ang $device ni $member';
+  }
+
+  @override
+  String activityStoreAdded(Object name, Object store) {
+    return 'Binuksan ni $name ang $store';
+  }
+
+  @override
+  String activityStoreRenamed(Object name, Object before, Object store) {
+    return 'Pinalitan ni $name ang pangalan ng $before ng $store';
+  }
+
+  @override
+  String activityOther(Object name) {
+    return 'May binago si $name';
+  }
+
+  @override
+  String get activityStaffBadge => 'Staff';
+
+  @override
+  String accountStaffAt(Object store) {
+    return 'Staff sa $store';
+  }
+
+  @override
+  String get accountStaffSignOutNote =>
+      'Para magamit ulit ang phone na ito, kailangan mo ng bagong join code mula sa may-ari.';
+
+  @override
+  String get productCostSetByOwner => 'Ang may-ari ang nagtatakda ng puhunan.';
+
+  @override
+  String get syncNotAllowed =>
+      'Hindi ito pinapayagan ng access mo. Magtanong sa may-ari.';
 }

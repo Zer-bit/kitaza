@@ -51,7 +51,10 @@ void main() {
     final stores = await db.query('stores');
     expect(stores.single['id'], cloudStore.id);
 
-    // The whole history is still queued, ready for the first upload.
+    // The whole history is still queued, ready for the first upload - and
+    // addressed to the cloud store, not the local one that no longer exists.
     expect(await SyncQueueDao(db).pendingCount(), queuedBefore);
+    final queued = await SyncQueueDao(db).pending();
+    expect(queued.map((change) => change.storeId).toSet(), {cloudStore.id});
   });
 }

@@ -5,6 +5,7 @@ import '../../core/config/app_config.dart';
 import '../../core/errors/app_failure.dart';
 import '../../core/storage/secure_token_store.dart';
 import 'auth_interceptor.dart';
+import 'session_signal.dart';
 
 /// The single HTTP entry point. Nothing else in the app constructs a Dio.
 class ApiClient {
@@ -39,6 +40,25 @@ class ApiClient {
         options: Options(extra: {'skipAuth': !authenticated}),
       );
       return response.data ?? const {};
+    });
+  }
+
+  Future<Map<String, dynamic>> patch(String path, {Object? body}) async {
+    return _guard(() async {
+      final response = await _dio.patch<Map<String, dynamic>>(path, data: body);
+      return response.data ?? const {};
+    });
+  }
+
+  Future<void> delete(String path) async {
+    await _guard(() => _dio.delete<void>(path));
+  }
+
+  /// For endpoints that answer with a list rather than an object.
+  Future<List<dynamic>> getList(String path) async {
+    return _guard(() async {
+      final response = await _dio.get<List<dynamic>>(path);
+      return response.data ?? const [];
     });
   }
 
@@ -114,7 +134,10 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     AuthInterceptor(
       tokenStore: ref.read(secureTokenStoreProvider),
       refreshClient: refreshClient,
-      onSessionLost: () => ref.read(secureTokenStoreProvider).clear(),
+      onSessionLost: () async {
+        await ref.read(secureTokenStoreProvider).clear();
+        ref.read(sessionLostSignalProvider.notifier).raise();
+      },
     ),
   );
 

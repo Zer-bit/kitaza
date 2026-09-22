@@ -9,8 +9,10 @@ use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::config::ServerSettings;
+use crate::features::audit::audit_routes;
 use crate::features::authentication::auth_routes;
 use crate::features::dashboard::dashboard_routes;
+use crate::features::devices::device_routes;
 use crate::features::diagnostics::diagnostics_routes;
 use crate::features::expenses::expense_routes;
 use crate::features::health::health_routes;
@@ -18,6 +20,8 @@ use crate::features::inventory::inventory_routes;
 use crate::features::products::product_routes;
 use crate::features::reports::report_routes;
 use crate::features::sales::sale_routes;
+use crate::features::staff::staff_routes;
+use crate::features::stores::store_routes;
 use crate::features::sync::sync_routes;
 use crate::features::withdrawals::withdrawal_routes;
 use crate::infrastructure::realtime::realtime_routes;
@@ -29,6 +33,10 @@ const API_PREFIX: &str = "/api/v1";
 pub fn build_router(state: AppState, settings: &ServerSettings) -> Router {
     let api = Router::new()
         .merge(auth_routes())
+        .merge(store_routes())
+        .merge(staff_routes())
+        .merge(device_routes())
+        .merge(audit_routes())
         .merge(product_routes())
         .merge(inventory_routes())
         .merge(sale_routes())

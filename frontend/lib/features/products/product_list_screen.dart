@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../app/route_paths.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/debouncer.dart';
+import '../../data/models/access_grant.dart';
 import '../../data/models/product.dart';
 import '../../l10n/l10n.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/page_body.dart';
+import '../authentication/auth_controller.dart';
 import 'product_controller.dart';
 import 'widgets/product_tile.dart';
 import 'widgets/starter_catalog_sheet.dart';
@@ -35,14 +37,18 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     final products = ref.watch(productListProvider);
+    final canManage = ref.watch(canProvider(Permission.manageProducts));
+    final seesCosts = ref.watch(canProvider(Permission.viewProfit));
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.navProducts)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(RoutePaths.productEditor),
-        icon: const Icon(Icons.add_rounded),
-        label: Text(context.l10n.productAdd),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              onPressed: () => context.push(RoutePaths.productEditor),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(context.l10n.productAdd),
+            )
+          : null,
       body: Column(
         children: [
           PageBody(
@@ -74,11 +80,16 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     icon: Icons.inventory_2_outlined,
                     title: context.l10n.productEmptyTitle,
                     message: context.l10n.productEmptyMessage,
-                    actionLabel: context.l10n.starterOffer,
-                    onAction: () => StarterCatalogSheet.show(context),
-                    secondaryActionLabel: context.l10n.productEmptyAction,
-                    onSecondaryAction: () =>
-                        context.push(RoutePaths.productEditor),
+                    actionLabel: canManage ? context.l10n.starterOffer : null,
+                    onAction: canManage
+                        ? () => StarterCatalogSheet.show(context)
+                        : null,
+                    secondaryActionLabel: canManage
+                        ? context.l10n.productEmptyAction
+                        : null,
+                    onSecondaryAction: canManage
+                        ? () => context.push(RoutePaths.productEditor)
+                        : null,
                   );
                 }
 
@@ -88,9 +99,12 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, index) => ProductTile(
                     product: items[index],
-                    onTap: () => context.push(
-                      '${RoutePaths.productEditor}?id=${items[index].id}',
-                    ),
+                    showMargin: seesCosts,
+                    onTap: canManage
+                        ? () => context.push(
+                            '${RoutePaths.productEditor}?id=${items[index].id}',
+                          )
+                        : null,
                   ),
                 );
               },

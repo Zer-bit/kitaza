@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'generated/app_localizations.dart';
 
+export 'activity_text.dart';
 export 'failure_text.dart';
 export 'generated/app_localizations.dart';
 export 'health_text.dart';

@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
+use crate::features::products::foreign_id;
 use crate::infrastructure::database::PgPool;
-use crate::shared::{ApiResult, Money, PageRequest, Quantity};
+use crate::shared::{ApiError, ApiResult, Money, PageRequest, Quantity};
 
 use super::sale_payloads::{SaleFilter, SaleLineView, SaleView};
 
@@ -31,6 +32,26 @@ pub struct PreparedSale {
     pub lines: Vec<PreparedLine>,
 }
 
+/// Who is recording, as far as the sales table cares.
+#[derive(Debug, Clone, Copy)]
+pub struct Recorder {
+    pub staff_id: Option<Uuid>,
+    pub is_owner: bool,
+}
+
+pub struct RecordedSale {
+    pub sale: SaleView,
+    /// False for a replay of a sale the server already had.
+    pub created: bool,
+}
+
+#[derive(sqlx::FromRow)]
+struct ExistingSale {
+    store_id: Uuid,
+    recorded_by_staff_id: Option<Uuid>,
+    voided: bool,
+}
+
 #[derive(Clone)]
 pub struct SaleRepository {
     pool: PgPool,
@@ -44,20 +65,41 @@ impl SaleRepository {
     /// Writes the sale, its lines, the stock deduction and the stock ledger in
     /// a single transaction. A half-recorded sale would silently corrupt both
     /// profit and inventory, so this is all-or-nothing.
-    pub async fn record(&self, sale: PreparedSale) -> ApiResult<SaleView> {
+    pub async fn record(&self, sale: PreparedSale, by: Recorder) -> ApiResult<RecordedSale> {
         let mut transaction = self.pool.begin().await?;
 
-        // Re-pushing a sale from an offline device must not deduct stock
-        // twice, so any previous effect of this sale id is reversed first and
-        // then reapplied from the lines we are about to write.
-        let already_recorded: Option<(Uuid,)> =
-            sqlx::query_as("SELECT id FROM sales WHERE id = $1 AND store_id = $2")
-                .bind(sale.id)
-                .bind(sale.store_id)
-                .fetch_optional(&mut *transaction)
-                .await?;
+        let existing: Option<ExistingSale> = sqlx::query_as(
+            "SELECT store_id, recorded_by_staff_id, deleted_at IS NOT NULL AS voided
+             FROM sales WHERE id = $1 FOR UPDATE",
+        )
+        .bind(sale.id)
+        .fetch_optional(&mut *transaction)
+        .await?;
 
-        if already_recorded.is_some() {
+        if let Some(existing) = &existing {
+            if existing.store_id != sale.store_id {
+                return Err(foreign_id());
+            }
+            // A voided sale is final. Replaying it - a phone retrying an old
+            // push after the owner voided it elsewhere - must not bring it
+            // back, and must not hand its stock back a second time.
+            if existing.voided {
+                let stored = find_any(&mut transaction, sale.id).await?;
+                transaction.commit().await?;
+                return Ok(RecordedSale {
+                    sale: stored,
+                    created: false,
+                });
+            }
+            if !by.is_owner && existing.recorded_by_staff_id != by.staff_id {
+                return Err(ApiError::Forbidden(
+                    "only the owner can change a sale someone else recorded".into(),
+                ));
+            }
+
+            // Re-pushing a sale from an offline device must not deduct stock
+            // twice, so any previous effect of this sale id is reversed first
+            // and then reapplied from the lines we are about to write.
             restore_stock_for(&mut transaction, sale.id, sale.store_id).await?;
             retire_movements_for(&mut transaction, sale.id, sale.store_id).await?;
         }
@@ -65,8 +107,8 @@ impl SaleRepository {
         let stored = sqlx::query_as::<_, SaleView>(
             "INSERT INTO sales
                  (id, store_id, payment_method, total_amount, cost_amount,
-                  discount_amount, note, occurred_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                  discount_amount, note, occurred_at, recorded_by_staff_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
              ON CONFLICT (id) DO UPDATE SET
                  payment_method  = EXCLUDED.payment_method,
                  total_amount    = EXCLUDED.total_amount,
@@ -86,6 +128,7 @@ impl SaleRepository {
         .bind(sale.discount_amount)
         .bind(sale.note.as_deref())
         .bind(sale.occurred_at)
+        .bind(by.staff_id)
         .fetch_one(&mut *transaction)
         .await?;
 
@@ -144,7 +187,10 @@ impl SaleRepository {
         }
 
         transaction.commit().await?;
-        Ok(stored)
+        Ok(RecordedSale {
+            sale: stored,
+            created: existing.is_none(),
+        })
     }
 
     pub async fn list(
@@ -205,33 +251,47 @@ impl SaleRepository {
 
     /// Voiding puts the stock back, so a mistaken entry does not leave the
     /// inventory count wrong.
-    pub async fn void(&self, store_id: Uuid, sale_id: Uuid) -> ApiResult<bool> {
+    /// Returns the voided sale, or `None` if there was nothing to void.
+    pub async fn void(&self, store_id: Uuid, sale_id: Uuid) -> ApiResult<Option<SaleView>> {
         let mut transaction = self.pool.begin().await?;
 
-        let affected = sqlx::query(
+        let voided = sqlx::query_as::<_, SaleView>(
             "UPDATE sales SET deleted_at = now(), updated_at = now()
-             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL",
+             WHERE store_id = $1 AND id = $2 AND deleted_at IS NULL
+             RETURNING id, reference, payment_method, total_amount, cost_amount,
+                       discount_amount, note, occurred_at",
         )
         .bind(store_id)
         .bind(sale_id)
-        .execute(&mut *transaction)
-        .await?
-        .rows_affected();
+        .fetch_optional(&mut *transaction)
+        .await?;
 
-        if affected == 0 {
+        if voided.is_none() {
             transaction.rollback().await?;
-            return Ok(false);
+            return Ok(None);
         }
 
         restore_stock_for(&mut transaction, sale_id, store_id).await?;
         retire_movements_for(&mut transaction, sale_id, store_id).await?;
 
         transaction.commit().await?;
-        Ok(true)
+        Ok(voided)
     }
 }
 
 type Transaction<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
+
+async fn find_any(transaction: &mut Transaction<'_>, sale_id: Uuid) -> ApiResult<SaleView> {
+    let sale = sqlx::query_as::<_, SaleView>(
+        "SELECT id, reference, payment_method, total_amount, cost_amount,
+                discount_amount, note, occurred_at FROM sales WHERE id = $1",
+    )
+    .bind(sale_id)
+    .fetch_one(&mut **transaction)
+    .await?;
+
+    Ok(sale)
+}
 
 /// Gives back the stock that the sale's current lines took out.
 async fn restore_stock_for(

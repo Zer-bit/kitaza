@@ -20,6 +20,9 @@ import '../support/in_memory_database.dart';
 /// Stands in for the server. Tests script what it accepts and returns.
 class FakeSyncApi implements SyncApi {
   final List<Map<String, List<Map<String, Object?>>>> pushes = [];
+  final List<String> pushedTo = [];
+  final List<String> pulledFrom = [];
+  int attempts = 0;
   final List<String?> pullCursors = [];
   final List<PullPage> pages = [];
   Set<String> refuse = {};
@@ -31,8 +34,10 @@ class FakeSyncApi implements SyncApi {
     String storeId,
     Map<String, List<Map<String, Object?>>> batch,
   ) async {
+    attempts++;
     if (failWith case final error?) throw error;
     pushes.add(batch);
+    pushedTo.add(storeId);
     await duringPush?.call();
 
     final applied = <QueueKey>{};
@@ -52,7 +57,9 @@ class FakeSyncApi implements SyncApi {
 
   @override
   Future<PullPage> pull(String storeId, String? cursor) async {
+    attempts++;
     if (failWith case final error?) throw error;
+    pulledFrom.add(storeId);
     pullCursors.add(cursor);
     if (pages.isEmpty) {
       return const PullPage(
@@ -104,10 +111,14 @@ void main() {
   late ProviderContainer container;
   late FakeDiagnosticsApi diagnostics;
 
-  Future<ProviderContainer> start({String mode = 'cloud'}) async {
+  Future<ProviderContainer> start({
+    String mode = 'cloud',
+    Map<String, Object> savedPreferences = const {},
+  }) async {
     SharedPreferences.setMockInitialValues({
       'kitaza.storage_mode': mode,
       'kitaza.active_store_id': testStoreId,
+      ...savedPreferences,
     });
     final preferences = PreferencesStore(await SharedPreferences.getInstance());
 
@@ -152,8 +163,11 @@ void main() {
     await queue.enqueue(QueuedEntity.expenses, 'e1', {
       'id': 'e1',
       'amount': 10,
-    });
-    await queue.enqueue(QueuedEntity.sales, 's1', {'id': 's1', 'items': []});
+    }, storeId: testStoreId);
+    await queue.enqueue(QueuedEntity.sales, 's1', {
+      'id': 's1',
+      'items': [],
+    }, storeId: testStoreId);
 
     container = await start();
     container.read(syncCoordinatorProvider);
@@ -167,8 +181,12 @@ void main() {
 
   test('a refused row is kept with its reason, the rest are cleared', () async {
     final queue = SyncQueueDao(db);
-    await queue.enqueue(QueuedEntity.sales, 'bad', {'id': 'bad'});
-    await queue.enqueue(QueuedEntity.expenses, 'good', {'id': 'good'});
+    await queue.enqueue(QueuedEntity.sales, 'bad', {
+      'id': 'bad',
+    }, storeId: testStoreId);
+    await queue.enqueue(QueuedEntity.expenses, 'good', {
+      'id': 'good',
+    }, storeId: testStoreId);
     api.refuse = {'bad'};
 
     container = await start();
@@ -181,19 +199,84 @@ void main() {
     expect(await queue.pendingCount(), 1);
   });
 
+  test('each queued change goes to the store it was made in', () async {
+    // A sale rung up in the branch, then the owner switched back home
+    // before it uploaded.
+    final queue = SyncQueueDao(db);
+    await queue.enqueue(QueuedEntity.sales, 'home-sale', {
+      'id': 'home-sale',
+    }, storeId: testStoreId);
+    await queue.enqueue(QueuedEntity.sales, 'branch-sale', {
+      'id': 'branch-sale',
+    }, storeId: 'branch');
+
+    container = await start();
+    container.read(syncCoordinatorProvider);
+    await settle();
+
+    expect(api.pushedTo.toSet(), {testStoreId, 'branch'});
+    for (final (index, storeId) in api.pushedTo.indexed) {
+      final sent = api.pushes[index][QueuedEntity.sales]!.single['id'];
+      expect(sent, storeId == 'branch' ? 'branch-sale' : 'home-sale');
+    }
+    expect(await queue.pendingCount(), 0);
+    expect(api.pulledFrom.toSet(), {
+      testStoreId,
+    }, reason: 'only the open store');
+  });
+
+  test('each store keeps its own place in the download', () async {
+    // A phone from before stores could be switched had one cursor.
+    container = await start(
+      savedPreferences: {'kitaza.sync_cursor': 'old-place'},
+    );
+    container.read(syncCoordinatorProvider);
+    await settle();
+
+    expect(api.pullCursors.first, 'old-place');
+    final preferences = container.read(preferencesStoreProvider);
+    expect(preferences.readSyncCursor(testStoreId), 'done');
+    expect(
+      preferences.readSyncCursor('branch'),
+      isNull,
+      reason: 'another store starts from the beginning',
+    );
+  });
+
+  test('a phone the server signed out stops trying', () async {
+    await SyncQueueDao(db)
+        .enqueue(QueuedEntity.sales, 's1', {'id': 's1'}, storeId: testStoreId);
+    api.failWith = const AppFailure.unauthorized();
+
+    container = await start();
+    container.read(syncCoordinatorProvider);
+    await settle();
+    final attempts = api.attempts;
+
+    await container.read(syncCoordinatorProvider.notifier).syncNow(force: true);
+
+    expect(api.attempts, attempts, reason: 'no request after the refusal');
+    expect(container.read(syncCoordinatorProvider).phase, SyncPhase.failed);
+    expect(
+      await SyncQueueDao(db).pendingCount(),
+      1,
+      reason: 'kept to send later',
+    );
+  });
+
   test('an entry written during an upload is not lost', () async {
     final queue = SyncQueueDao(db);
     await queue.enqueue(QueuedEntity.products, 'p1', {
       'id': 'p1',
       'name': 'Old',
-    });
+    }, storeId: testStoreId);
 
     api.duringPush = () async {
       api.duringPush = null;
       await queue.enqueue(QueuedEntity.products, 'p1', {
         'id': 'p1',
         'name': 'New',
-      });
+      }, storeId: testStoreId);
     };
 
     container = await start();
@@ -234,7 +317,10 @@ void main() {
 
     expect(api.pullCursors, [null, 'c1', 'c2']);
     expect(await db.query('expenses'), hasLength(3));
-    expect(container.read(preferencesStoreProvider).readSyncCursor(), 'c3');
+    expect(
+      container.read(preferencesStoreProvider).readSyncCursor(testStoreId),
+      'c3',
+    );
     expect(
       container.read(dataRevisionProvider),
       greaterThan(revisionBefore),
@@ -280,7 +366,9 @@ void main() {
   test(
     'when the server is unreachable it backs off instead of hammering',
     () async {
-      await SyncQueueDao(db).enqueue(QueuedEntity.expenses, 'e1', {'id': 'e1'});
+      await SyncQueueDao(db).enqueue(QueuedEntity.expenses, 'e1', {
+        'id': 'e1',
+      }, storeId: testStoreId);
       api.failWith = const AppFailure.offline();
 
       container = await start();
@@ -308,7 +396,9 @@ void main() {
   test(
     'a phone that only keeps records locally never talks to the server',
     () async {
-      await SyncQueueDao(db).enqueue(QueuedEntity.expenses, 'e1', {'id': 'e1'});
+      await SyncQueueDao(db).enqueue(QueuedEntity.expenses, 'e1', {
+        'id': 'e1',
+      }, storeId: testStoreId);
 
       container = await start(mode: 'local');
       container.read(syncCoordinatorProvider);

@@ -104,6 +104,16 @@ impl SaleDetail {
             items,
         }
     }
+
+    /// For staff who may not see what things cost.
+    pub fn without_costs(mut self) -> Self {
+        self.sale.cost_amount = Money::ZERO;
+        self.profit_amount = Money::ZERO;
+        for item in &mut self.items {
+            item.unit_cost = Money::ZERO;
+        }
+        self
+    }
 }
 
 #[derive(Debug, Deserialize, Default)]

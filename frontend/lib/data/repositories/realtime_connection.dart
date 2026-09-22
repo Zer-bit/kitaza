@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/storage/secure_token_store.dart';
 import '../../core/utils/debouncer.dart';
 import '../remote/realtime_channel.dart';
+import '../remote/session_signal.dart';
 import 'store_scope.dart';
 import 'sync_coordinator.dart';
 
@@ -28,7 +29,11 @@ final realtimeConnectionProvider = Provider<void>((ref) {
 
   // A push of fifty queued sales produces fifty events; they become one sync.
   final debouncer = Debouncer(delay: const Duration(seconds: 1));
-  final subscription = channel.events.listen((_) {
+  final subscription = channel.events.listen((event) {
+    if (event.topic == RealtimeTopic.accessChanged) {
+      ref.read(accessChangedSignalProvider.notifier).raise();
+      return;
+    }
     debouncer.run(() => ref.read(syncCoordinatorProvider.notifier).syncNow());
   });
 

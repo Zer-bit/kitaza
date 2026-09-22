@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api_client.dart';
 import 'api_endpoints.dart';
 
+/// How a phone describes itself when it signs in.
+typedef DeviceLabel = ({String tag, String name});
+
 class AuthApi {
   const AuthApi(this._client);
 
@@ -13,7 +16,7 @@ class AuthApi {
     required String password,
     required String fullName,
     required String storeName,
-    required String deviceTag,
+    required DeviceLabel device,
   }) {
     return _client.post(
       ApiEndpoints.register,
@@ -23,7 +26,8 @@ class AuthApi {
         'password': password,
         'full_name': fullName,
         'store_name': storeName,
-        'device_tag': deviceTag,
+        'device_tag': device.tag,
+        'device_name': device.name,
       },
     );
   }
@@ -31,16 +35,38 @@ class AuthApi {
   Future<Map<String, dynamic>> signIn({
     required String email,
     required String password,
-    required String deviceTag,
+    required DeviceLabel device,
   }) {
     return _client.post(
       ApiEndpoints.login,
       authenticated: false,
-      body: {'email': email, 'password': password, 'device_tag': deviceTag},
+      body: {
+        'email': email,
+        'password': password,
+        'device_tag': device.tag,
+        'device_name': device.name,
+      },
     );
   }
 
-  Future<Map<String, dynamic>> profile() => _client.get(ApiEndpoints.profile);
+  /// A staff member's phone joining with the code the owner shared.
+  Future<Map<String, dynamic>> join({
+    required String code,
+    required DeviceLabel device,
+  }) {
+    return _client.post(
+      ApiEndpoints.join,
+      authenticated: false,
+      body: {
+        'code': code,
+        'device_tag': device.tag,
+        'device_name': device.name,
+      },
+    );
+  }
+
+  /// Who this phone is signed in as now: stores, and what it may do.
+  Future<Map<String, dynamic>> account() => _client.get(ApiEndpoints.profile);
 
   Future<void> signOut(String refreshToken) => _client.post(
     ApiEndpoints.logout,

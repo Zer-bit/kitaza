@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 use uuid::Uuid;
 
 use crate::application::AppState;
+use crate::features::access::Permission;
 use crate::features::stores::StoreScope;
 use crate::shared::{ApiResult, PageRequest, ValidatedJson};
 
@@ -16,7 +17,7 @@ pub async fn record_expense(
 ) -> ApiResult<(StatusCode, Json<ExpenseView>)> {
     let expense = state
         .expense_service
-        .record(scope.store_id, request)
+        .record(scope.store_id, &scope.actor, request)
         .await?;
     Ok((StatusCode::CREATED, Json(expense)))
 }
@@ -27,6 +28,7 @@ pub async fn list_expenses(
     Query(filter): Query<ExpenseFilter>,
     Query(page): Query<PageRequest>,
 ) -> ApiResult<Json<Vec<ExpenseView>>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .expense_service
@@ -42,7 +44,7 @@ pub async fn delete_expense(
 ) -> ApiResult<StatusCode> {
     state
         .expense_service
-        .remove(scope.store_id, expense_id)
+        .remove(scope.store_id, &scope.actor, expense_id)
         .await?;
     Ok(StatusCode::NO_CONTENT)
 }

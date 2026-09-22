@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/formatting/quantity_formatter.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../data/models/access_grant.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/data_revision.dart';
 import '../../data/repositories/product_repository.dart';
 import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import '../../shared/widgets/page_body.dart';
+import '../authentication/auth_controller.dart';
 import '../scanning/barcode_scanner.dart';
 import 'product_controller.dart';
 import 'widgets/margin_preview.dart';
@@ -84,7 +86,9 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
           .save(
             id: widget.productId,
             name: _name.text,
-            costPrice: double.parse(_cost.text),
+            // A phone that cannot see costs holds zero for them; the server
+            // keeps the owner's figure whatever is sent.
+            costPrice: double.tryParse(_cost.text) ?? 0,
             sellingPrice: double.parse(_price.text),
             stockQuantity: double.tryParse(_stock.text) ?? 0,
             reorderLevel: double.tryParse(_reorder.text) ?? 0,
@@ -111,6 +115,7 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
         : ref.watch(productByIdProvider(widget.productId!)).value;
 
     if (existing != null) _fillFrom(existing);
+    final seesCosts = ref.watch(canProvider(Permission.viewProfit));
 
     return Scaffold(
       appBar: AppBar(
@@ -158,28 +163,40 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
                     ),
                   ),
                   AppSpacing.gapLg,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _MoneyInput(
-                          controller: _cost,
-                          label: context.l10n.productCost,
+                  if (seesCosts) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _MoneyInput(
+                            controller: _cost,
+                            label: context.l10n.productCost,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: _MoneyInput(
-                          controller: _price,
-                          label: context.l10n.productPrice,
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: _MoneyInput(
+                            controller: _price,
+                            label: context.l10n.productPrice,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  AppSpacing.gapMd,
-                  MarginPreview(
-                    cost: double.tryParse(_cost.text) ?? 0,
-                    price: double.tryParse(_price.text) ?? 0,
-                  ),
+                      ],
+                    ),
+                    AppSpacing.gapMd,
+                    MarginPreview(
+                      cost: double.tryParse(_cost.text) ?? 0,
+                      price: double.tryParse(_price.text) ?? 0,
+                    ),
+                  ] else ...[
+                    _MoneyInput(
+                      controller: _price,
+                      label: context.l10n.productPrice,
+                    ),
+                    AppSpacing.gapSm,
+                    Text(
+                      context.l10n.productCostSetByOwner,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                   AppSpacing.gapLg,
                   Row(
                     children: [

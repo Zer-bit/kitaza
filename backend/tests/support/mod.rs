@@ -27,9 +27,33 @@ pub struct TestApp {
     pub pool: PgPool,
 }
 
+/// A signed-in device: the owner's, or a staff member's.
 pub struct Owner {
     pub token: String,
+    pub refresh_token: String,
+    pub session_id: Uuid,
     pub store_id: Uuid,
+}
+
+impl Owner {
+    fn from_session(body: &Value) -> Self {
+        Owner {
+            token: body["access_token"].as_str().unwrap().to_owned(),
+            refresh_token: body["refresh_token"].as_str().unwrap().to_owned(),
+            session_id: body["session_id"].as_str().unwrap().parse().unwrap(),
+            store_id: body["stores"][0]["id"].as_str().unwrap().parse().unwrap(),
+        }
+    }
+
+    /// The same person on another store of theirs.
+    pub fn in_store(&self, store_id: Uuid) -> Owner {
+        Owner {
+            token: self.token.clone(),
+            refresh_token: self.refresh_token.clone(),
+            session_id: self.session_id,
+            store_id,
+        }
+    }
 }
 
 impl TestApp {
@@ -100,11 +124,80 @@ impl TestApp {
             )
             .await;
         assert_eq!(status, StatusCode::CREATED, "register failed: {body}");
+        Owner::from_session(&body)
+    }
 
-        Owner {
-            token: body["access_token"].as_str().unwrap().to_owned(),
-            store_id: body["stores"][0]["id"].as_str().unwrap().parse().unwrap(),
-        }
+    /// The same owner signing in on another phone.
+    pub async fn sign_in(&self, email: &str, device_name: &str) -> Owner {
+        let (status, body) = self
+            .call(
+                Method::POST,
+                "/auth/login",
+                None,
+                Some(json!({
+                    "email": email,
+                    "password": "a-good-password",
+                    "device_name": device_name,
+                })),
+            )
+            .await;
+        assert_eq!(status, StatusCode::OK, "sign-in failed: {body}");
+        Owner::from_session(&body)
+    }
+
+    /// Adds a staff member and returns their id and join code.
+    pub async fn add_staff(
+        &self,
+        owner: &Owner,
+        name: &str,
+        permissions: &[&str],
+    ) -> (Uuid, String) {
+        let (status, body) = self
+            .call(
+                Method::POST,
+                &format!("/stores/{}/staff", owner.store_id),
+                Some(&owner.token),
+                Some(json!({ "display_name": name, "permissions": permissions })),
+            )
+            .await;
+        assert_eq!(status, StatusCode::CREATED, "adding staff failed: {body}");
+        (
+            body["staff"]["id"].as_str().unwrap().parse().unwrap(),
+            body["invite"]["code"].as_str().unwrap().to_owned(),
+        )
+    }
+
+    pub async fn try_join(&self, code: &str) -> (StatusCode, Value) {
+        self.call(
+            Method::POST,
+            "/auth/join",
+            None,
+            Some(json!({ "code": code, "device_name": "Counter phone" })),
+        )
+        .await
+    }
+
+    /// A staff member's phone joining with a code.
+    pub async fn join(&self, code: &str) -> Owner {
+        let (status, body) = self.try_join(code).await;
+        assert_eq!(status, StatusCode::OK, "join failed: {body}");
+        Owner::from_session(&body)
+    }
+
+    /// A staff member with the given permissions, already signed in.
+    pub async fn staff(&self, owner: &Owner, name: &str, permissions: &[&str]) -> Owner {
+        let (_, code) = self.add_staff(owner, name, permissions).await;
+        self.join(&code).await
+    }
+
+    pub async fn refresh(&self, refresh_token: &str) -> (StatusCode, Value) {
+        self.call(
+            Method::POST,
+            "/auth/refresh",
+            None,
+            Some(json!({ "refresh_token": refresh_token })),
+        )
+        .await
     }
 
     pub async fn push(&self, owner: &Owner, batch: Value) -> Value {
@@ -117,6 +210,39 @@ impl TestApp {
             )
             .await;
         assert_eq!(status, StatusCode::OK, "push failed: {body}");
+        body
+    }
+
+    /// The server's verdict on each row, as `(entity, id)` pairs.
+    pub async fn push_verdicts(&self, device: &Owner, batch: Value) -> (Vec<String>, Vec<String>) {
+        let result = self.push(device, batch).await;
+        let pairs = |key: &str| {
+            result[key]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|row| {
+                    format!(
+                        "{}:{}",
+                        row["entity"].as_str().unwrap(),
+                        row["id"].as_str().unwrap_or("-")
+                    )
+                })
+                .collect::<Vec<_>>()
+        };
+        (pairs("applied"), pairs("rejected"))
+    }
+
+    pub async fn activity(&self, owner: &Owner, query: &str) -> Value {
+        let (status, body) = self
+            .call(
+                Method::GET,
+                &format!("/stores/{}/activity{query}", owner.store_id),
+                Some(&owner.token),
+                None,
+            )
+            .await;
+        assert_eq!(status, StatusCode::OK, "activity failed: {body}");
         body
     }
 

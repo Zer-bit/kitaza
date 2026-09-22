@@ -1,9 +1,9 @@
 # Kitaza — Implementation Plan
 
 This is the build order for Kitaza, from the scaffold that exists today through
-to a product small businesses pay for monthly. Phases 0–5 are **done and
-verified** as far as they can be without real phones and real stores (Phase 5
-lists exactly what that leaves); 6 onward are planned.
+to a product small businesses pay for monthly. Phases 0–6 are **done and
+verified** as far as they can be without real phones and real stores (Phases
+5 and 6 list exactly what that leaves); 7 onward are planned.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -258,15 +258,72 @@ yours to run.
 
 ---
 
-## Phase 6 — Multi-device and staff
+## Phase 6 — Multi-device and staff ✅ Done
 
-- [ ] Multiple stores per owner (the schema already supports it; the UI assumes
-      one).
-- [ ] Staff accounts with limited permissions — record sales, but not view
-      profit or delete history.
-- [ ] Audit log of who recorded and who voided what.
-- [ ] A "signed-in devices" screen with remote revoke. Refresh tokens already
-      carry a device tag for exactly this.
+All of it needs a cloud account; an offline store's Settings says so and
+links to the cloud upgrade. That matches Phase 7, where these are what people
+pay for.
+
+- [x] **Multiple stores per owner.** Add and rename stores in Settings, switch
+      from the store name on the dashboard. Every store's records stay on the
+      phone, so switching is instant and works offline. Each queued change
+      remembers its store and uploads there even after a switch; each store
+      has its own download cursor.
+- [x] **Staff accounts.** The owner adds someone by name and gets a one-time
+      join code (`ABCDE-FGHJK`, one phone, one day). No email or password.
+      Staff always sell; four switches add managing products, recording
+      expenses, seeing profit and costs, and voiding or deleting.
+- [x] **Enforced by the server, not just hidden.** Every sync row is checked
+      against the sender's permissions. A phone without profit access is
+      never sent a cost figure, an expense or a withdrawal, and its sales are
+      costed from the catalogue so the owner's profit stays right. Staff may
+      retry their own entries but never rewrite someone else's.
+- [x] **Activity log.** Who recorded, changed, counted, voided and deleted
+      what, on which phone and when it happened, with a "voids and
+      deletions" filter. Written once per real change, so retries are not
+      double-counted.
+- [x] **Signed-in devices** with remote sign-out. Revoking a phone, removing a
+      staff member or changing a permission takes effect on the next request,
+      not when the access token expires.
+- [x] **A signed-out phone says so.** It shows how many entries never reached
+      the cloud and offers the way back in; the same person signing back in
+      keeps those entries, anyone else starts clean.
+
+### Defects found and fixed
+
+| Defect | Effect | Caught by |
+|---|---|---|
+| Upserts matched on id alone | **A phone could overwrite another store's product, sale, expense or withdrawal** by sending its id | Reading the push path, now tested |
+| A voided sale sent again was re-applied | A live stock deduction for a sale that no longer exists: the ledger disagreed with the stock count | Test, confirmed by removing the fix |
+| Any failed session renewal wiped the phone's tokens | **An owner on weak signal was signed out** when their hourly token lapsed | Reading the interceptor, confirmed by removing the fix |
+| A renewal whose answer was lost locked the phone out | The server had retired the token the phone still held | Reading the refresh path |
+| A phone whose session ended had no way back | Syncing failed silently; after a restart, signing in as someone else **uploaded the previous person's unsent entries into the new account** | Reading session restore |
+| Three count messages were missing from the plural check | Their wording was right, but nothing guarded it | A new check that lists every count message |
+
+One more was caught in my own change before it shipped: moving a local store
+to the cloud did not re-address its queued changes to the cloud store.
+
+### What is not verified, and why
+
+- **On a real phone**, as in Phase 5, including the device names shown in the
+  device list.
+- **More than one server instance.** A revoke or permission change reaches
+  other instances within 20 seconds by design; only one instance was run.
+- **The live socket.** The `access_changed` nudge and closing a revoked
+  phone's socket are built and their parts tested, but not over a real
+  WebSocket.
+- **The Filipino wording** of the 115 new strings, which needs the same
+  native review as Phase 5's.
+- **The Docker image**, still not rebuilt since Phase 4.
+
+Not built, deliberately: deleting a store (its history would go with it), and
+switching between owner and staff on one shared phone.
+
+**Exit criteria:** an owner and a cashier on separate phones trade for a day,
+the owner's books are right to the centavo, and the log names who did what.
+✅ Proven by the contract test against the live API: the cashier's phone
+never holds a cost, its sale is costed correctly, its forbidden edits are
+refused, and signing it out stops it.
 
 ---
 

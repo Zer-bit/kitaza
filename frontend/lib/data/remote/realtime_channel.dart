@@ -14,7 +14,10 @@ enum RealtimeTopic {
   withdrawalRecorded,
   productChanged,
   stockLow,
-  dashboardStale;
+  dashboardStale,
+
+  /// The owner changed what staff may do, or removed someone.
+  accessChanged;
 
   static RealtimeTopic parse(String? raw) => switch (raw) {
     'sale_recorded' => RealtimeTopic.saleRecorded,
@@ -24,6 +27,7 @@ enum RealtimeTopic {
     'withdrawal_recorded' => RealtimeTopic.withdrawalRecorded,
     'product_changed' => RealtimeTopic.productChanged,
     'stock_low' => RealtimeTopic.stockLow,
+    'access_changed' => RealtimeTopic.accessChanged,
     _ => RealtimeTopic.dashboardStale,
   };
 }

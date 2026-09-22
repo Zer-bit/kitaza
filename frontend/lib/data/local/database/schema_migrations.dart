@@ -27,6 +27,13 @@ abstract final class SchemaMigrations {
       ''',
       'CREATE UNIQUE INDEX error_reports_fingerprint_idx ON error_reports (fingerprint)',
     ],
+    3: [
+      // One phone can now hold several stores, so each queued change
+      // remembers which store it belongs to. Before this, a phone only ever
+      // had one store, which is where every existing row goes.
+      "ALTER TABLE sync_queue ADD COLUMN store_id TEXT NOT NULL DEFAULT ''",
+      "UPDATE sync_queue SET store_id = COALESCE((SELECT id FROM stores LIMIT 1), '')",
+    ],
   };
 
   static int get latestVersion => _steps.keys.fold(

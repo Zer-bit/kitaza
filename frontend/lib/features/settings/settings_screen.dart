@@ -13,6 +13,8 @@ import 'widgets/language_selector.dart';
 import 'widgets/printer_card.dart';
 import 'widgets/problem_reports_tile.dart';
 import 'widgets/storage_status_card.dart';
+import 'widgets/stores_card.dart';
+import 'widgets/team_card.dart';
 import 'widgets/theme_mode_selector.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -22,6 +24,8 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final session = ref.watch(currentSessionProvider);
+    final isOwner = session?.access.isOwner ?? true;
+    final isCloud = session?.isCloud ?? false;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.commonSettings)),
       body: ListView(
@@ -67,11 +71,22 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
                 AppSpacing.gapXl,
+                if (isOwner) ...[
+                  SectionHeader(title: l10n.settingsTeam),
+                  if (isCloud) ...[
+                    const StoresCard(),
+                    AppSpacing.gapMd,
+                    const TeamCard(),
+                  ] else
+                    const TeamNeedsCloudCard(),
+                  AppSpacing.gapXl,
+                ],
                 SectionHeader(title: l10n.settingsYourData),
                 const StorageStatusCard(),
                 AppSpacing.gapMd,
-                const BackupCard(),
-                AppSpacing.gapMd,
+                // A staff phone holds a working copy of someone else's
+                // store: exporting or replacing it is the owner's call.
+                if (isOwner) ...[const BackupCard(), AppSpacing.gapMd],
                 const ProblemReportsTile(),
                 AppSpacing.gapXl,
                 SectionHeader(title: l10n.printerSection),

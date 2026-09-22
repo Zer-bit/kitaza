@@ -20,6 +20,14 @@ pub struct ProductView {
     pub updated_at: DateTime<Utc>,
 }
 
+impl ProductView {
+    /// For staff who may not see what things cost.
+    pub fn without_cost(mut self) -> Self {
+        self.cost_price = Money::ZERO;
+        self
+    }
+}
+
 #[derive(Debug, Deserialize, Validate)]
 pub struct SaveProductRequest {
     /// Supplied by the client so a product created offline keeps its identity

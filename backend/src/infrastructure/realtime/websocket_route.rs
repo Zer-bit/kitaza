@@ -10,6 +10,8 @@ use tokio::sync::broadcast::error::RecvError;
 use uuid::Uuid;
 
 use crate::application::AppState;
+use crate::features::access::actor_for_token;
+use crate::features::stores::authorise;
 use crate::shared::{ApiError, ApiResult};
 
 const KEEPALIVE_INTERVAL: Duration = Duration::from_secs(25);
@@ -31,18 +33,17 @@ async fn upgrade_connection(
     axum::extract::Path(store_id): axum::extract::Path<Uuid>,
     Query(query): Query<RealtimeQuery>,
 ) -> ApiResult<Response> {
-    let claims = state.token_issuer.verify_access_token(&query.token)?;
+    let actor = actor_for_token(&state, &query.token).await?;
 
-    state
-        .store_directory
-        .assert_owner_of(claims.owner_id(), store_id)
+    authorise(&state, &actor, store_id)
         .await
         .map_err(|_| ApiError::Forbidden("this store does not belong to you".into()))?;
 
-    Ok(upgrade.on_upgrade(move |socket| pump_events(socket, state, store_id)))
+    let session_id = actor.session_id;
+    Ok(upgrade.on_upgrade(move |socket| pump_events(socket, state, store_id, session_id)))
 }
 
-async fn pump_events(mut socket: WebSocket, state: AppState, store_id: Uuid) {
+async fn pump_events(mut socket: WebSocket, state: AppState, store_id: Uuid, session_id: Uuid) {
     let mut events = state.broadcaster.subscribe(store_id);
     let mut keepalive = tokio::time::interval(KEEPALIVE_INTERVAL);
 
@@ -68,6 +69,12 @@ async fn pump_events(mut socket: WebSocket, state: AppState, store_id: Uuid) {
                 Err(RecvError::Closed) => break,
             },
             _ = keepalive.tick() => {
+                // A socket outlives the check made when it opened. A device
+                // signed out since then stops hearing the store's events.
+                if !matches!(state.session_directory.resolve(session_id).await, Ok(Some(_))) {
+                    let _ = socket.send(Message::Close(None)).await;
+                    break;
+                }
                 if socket.send(Message::Ping(Vec::new().into())).await.is_err() {
                     break;
                 }

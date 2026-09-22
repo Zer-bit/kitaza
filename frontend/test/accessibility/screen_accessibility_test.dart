@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kitaza_app/app/route_paths.dart';
+import 'package:kitaza_app/data/models/access_grant.dart';
+import 'package:kitaza_app/data/models/activity_event.dart';
+import 'package:kitaza_app/data/models/auth_session.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:kitaza_app/data/models/payment_method.dart';
+import 'package:kitaza_app/data/models/staff_member.dart';
+import 'package:kitaza_app/data/remote/team_api.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
 import 'package:kitaza_app/data/repositories/product_repository.dart';
 import 'package:kitaza_app/data/repositories/sale_repository.dart';
 import 'package:kitaza_app/data/repositories/withdrawal_repository.dart';
+import 'package:kitaza_app/features/authentication/auth_controller.dart';
+import 'package:kitaza_app/features/authentication/join_store_screen.dart';
+import 'package:kitaza_app/features/authentication/session_ended_screen.dart';
 import 'package:kitaza_app/features/dashboard/dashboard_screen.dart';
 import 'package:kitaza_app/features/expenses/expense_history_screen.dart';
 import 'package:kitaza_app/features/expenses/record_expense_screen.dart';
@@ -16,10 +24,14 @@ import 'package:kitaza_app/features/reports/reports_screen.dart';
 import 'package:kitaza_app/features/sales/record_sale_screen.dart';
 import 'package:kitaza_app/features/sales/sale_history_screen.dart';
 import 'package:kitaza_app/features/settings/settings_screen.dart';
+import 'package:kitaza_app/features/team/activity_screen.dart';
+import 'package:kitaza_app/features/team/devices_screen.dart';
+import 'package:kitaza_app/features/team/staff_screen.dart';
 import 'package:kitaza_app/features/withdrawals/withdrawal_screen.dart';
 
 import '../support/app_harness.dart';
 import '../support/in_memory_database.dart';
+import '../support/team_fakes.dart';
 
 /// Every main screen, checked the way an older owner with large text on a
 /// small phone - or someone using a screen reader - would meet it.
@@ -90,30 +102,89 @@ Future<void> _seedBusyDay(TestPhone phone) async {
   ).record(amount: 25000, reason: 'Tuition for the eldest, second semester');
 }
 
+/// The owner's cloud-only screens, and screens as a cashier sees them. Each
+/// runs with a fake server: empty on a quiet day, full on a busy one.
+final Map<String, (String, WidgetBuilder, AuthSession)> _signedInScreens = {
+  'staff': (RoutePaths.staff, (_) => const StaffScreen(), cloudOwner()),
+  'devices': (RoutePaths.devices, (_) => const DevicesScreen(), cloudOwner()),
+  'activity': (
+    RoutePaths.activity,
+    (_) => const ActivityScreen(),
+    cloudOwner(),
+  ),
+  'settings, cloud owner': (
+    RoutePaths.settings,
+    (_) => const SettingsScreen(),
+    cloudOwner(),
+  ),
+  'home, cashier': (
+    RoutePaths.dashboard,
+    (_) => const DashboardScreen(),
+    staffMember({}),
+  ),
+  'settings, cashier': (
+    RoutePaths.settings,
+    (_) => const SettingsScreen(),
+    staffMember({}),
+  ),
+  'signed out': (
+    RoutePaths.sessionEnded,
+    (_) => const SessionEndedScreen(),
+    cloudOwner(ended: true),
+  ),
+  'join a store': (
+    RoutePaths.joinStore,
+    (_) => const JoinStoreScreen(),
+    cloudOwner(),
+  ),
+};
+
+FakeTeamApi _busyTeam() => FakeTeamApi()
+  ..staffList.addAll([
+    const StaffMember(
+      id: 'liza',
+      displayName: 'Liza Dela Cruz-Santos',
+      permissions: {Permission.manageProducts, Permission.recordExpenses},
+      signedInDevices: 2,
+    ),
+    StaffMember(
+      id: 'ben',
+      displayName: 'Ben',
+      permissions: const {},
+      inviteExpiresAt: DateTime.now().add(const Duration(hours: 20)),
+    ),
+  ])
+  ..deviceList = sampleDevices()
+  ..activityPages = [ActivityPage(events: sampleActivity(), nextBefore: 1)];
+
+const _configurations = [
+  ('normal text, light', 1.0, Brightness.light, Locale('en'), false),
+  ('large text, light', 1.4, Brightness.light, Locale('en'), false),
+  ('large text, dark', 1.4, Brightness.dark, Locale('en'), false),
+  // Filipino strings run longer than English; they must fit too.
+  ('large text, Filipino', 1.4, Brightness.light, Locale('fil'), false),
+  (
+    'busy day, large text, Filipino',
+    1.4,
+    Brightness.light,
+    Locale('fil'),
+    true,
+  ),
+  ('busy day, large text, dark', 1.4, Brightness.dark, Locale('en'), true),
+];
+
+Future<void> _meetsGuidelines(WidgetTester tester) async {
+  // A layout overflow is reported as an exception and fails the test by
+  // itself; these add the platform accessibility guidelines.
+  await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+  await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+  await expectLater(tester, meetsGuideline(textContrastGuideline));
+}
+
 void main() {
   for (final entry in _screens.entries) {
     group(entry.key, () {
-      for (final (label, scale, brightness, locale, busy) in const [
-        ('normal text, light', 1.0, Brightness.light, Locale('en'), false),
-        ('large text, light', 1.4, Brightness.light, Locale('en'), false),
-        ('large text, dark', 1.4, Brightness.dark, Locale('en'), false),
-        // Filipino strings run longer than English; they must fit too.
-        ('large text, Filipino', 1.4, Brightness.light, Locale('fil'), false),
-        (
-          'busy day, large text, Filipino',
-          1.4,
-          Brightness.light,
-          Locale('fil'),
-          true,
-        ),
-        (
-          'busy day, large text, dark',
-          1.4,
-          Brightness.dark,
-          Locale('en'),
-          true,
-        ),
-      ]) {
+      for (final (label, scale, brightness, locale, busy) in _configurations) {
         testWidgets(label, (tester) async {
           final phone = await TestPhone.open(
             tester,
@@ -125,11 +196,34 @@ void main() {
           if (busy) await _seedBusyDay(phone);
           await phone.goTo(tester, entry.key);
 
-          // A layout overflow is reported as an exception and fails the test
-          // by itself; these add the platform accessibility guidelines.
-          await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-          await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-          await expectLater(tester, meetsGuideline(textContrastGuideline));
+          await _meetsGuidelines(tester);
+        });
+      }
+    });
+  }
+
+  for (final MapEntry(key: name, value: (path, screen, session))
+      in _signedInScreens.entries) {
+    group(name, () {
+      for (final (label, scale, brightness, locale, busy) in _configurations) {
+        testWidgets(label, (tester) async {
+          final phone = await TestPhone.open(
+            tester,
+            screens: {path: screen},
+            textScale: scale,
+            brightness: brightness,
+            locale: locale,
+            overrides: (_, _) => [
+              currentSessionProvider.overrideWithValue(session),
+              teamApiProvider.overrideWithValue(
+                busy ? _busyTeam() : FakeTeamApi(),
+              ),
+            ],
+          );
+          if (busy) await _seedBusyDay(phone);
+          await phone.goTo(tester, path);
+
+          await _meetsGuidelines(tester);
         });
       }
     });

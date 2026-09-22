@@ -21,4 +21,23 @@ extension RelativeDay on AppLocalizations {
       _ => DayFormatter.fullDate(local),
     };
   }
+
+  /// A day on its own, for headings in a list: "Today", "Yesterday", the
+  /// weekday, then the full date.
+  String dayHeading(DateTime value) {
+    final local = value.toLocal();
+    final now = DateTime.now();
+    final daysAgo = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).difference(DateTime(local.year, local.month, local.day)).inDays;
+
+    return switch (daysAgo) {
+      0 => commonToday,
+      1 => commonYesterday,
+      > 1 && < 7 => DayFormatter.weekday(local),
+      _ => DayFormatter.fullDate(local),
+    };
+  }
 }

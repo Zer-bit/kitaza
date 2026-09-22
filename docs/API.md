@@ -25,26 +25,124 @@ Codes: `bad_request`, `unauthorized`, `forbidden`, `not_found`, `conflict`,
 |---|---|---|
 | POST | `/auth/register` | Creates the owner and their first store in one transaction. |
 | POST | `/auth/login` | Rate limited per email. |
-| POST | `/auth/refresh` | Rotates the refresh token; the old one is revoked on use. |
-| POST | `/auth/logout` | Revokes one refresh token. |
-| GET | `/auth/me` | Current owner and their stores. |
+| POST | `/auth/join` | A staff member's phone joining with a join code. `{ "code": "ABCDE-FGHJK" }`, typed any way. |
+| POST | `/auth/refresh` | New token pair within the same device session. |
+| POST | `/auth/logout` | Ends this device's session and every token it holds. |
+| GET | `/auth/me` | Who this device is signed in as: stores and access. Staff included. |
 
-`register` and `login` return:
+`register`, `login`, `join` and `refresh` all send `device_tag` and
+`device_name` (optional, shown in the owner's device list) and return:
 
 ```json
 {
   "access_token": "...",
   "refresh_token": "...",
   "expires_in_seconds": 3600,
+  "session_id": "...",
   "owner":  { "id": "...", "email": "...", "full_name": "..." },
-  "stores": [ { "id": "...", "name": "...", "business_type": "sari_sari", "currency_code": "PHP" } ]
+  "stores": [ { "id": "...", "name": "...", "business_type": "sari_sari", "currency_code": "PHP" } ],
+  "access": { "role": "owner", "display_name": "Nena", "permissions": ["manage_products", "record_expenses", "view_profit", "delete_records"] }
 }
 ```
 
+For staff, `access.role` is `staff`, `access.staff_id` is set, `stores` holds
+their one store, and `owner.email` is left out.
+
+**Sessions.** Each sign-in opens a device session; the access token names
+it, and the server looks it up on every request (remembered for up to 20
+seconds per instance). Revoking a device, removing a staff member or changing
+their permissions therefore takes effect on the next request, not when the
+hour-long access token expires.
+
+**Refresh** exchanges a refresh token for a new pair in the same session. The
+old token keeps working for 24 hours after it was exchanged, so a phone whose
+refresh response was lost in transit can ask again instead of being locked
+out. Signing out or revoking the device ends every token at once.
+
+## Permissions
+
+Owners can do everything. Staff can always record sales, plus whatever the
+owner grants:
+
+| Permission | Allows |
+|---|---|
+| `manage_products` | Save and remove products, record stock movements. |
+| `record_expenses` | Record expenses. |
+| `view_profit` | Cost prices, profit, expenses, withdrawals, dashboard and reports. |
+| `delete_records` | Void sales and delete expenses. |
+
+Withdrawals, stores, staff, devices and the activity log are owner-only. A
+refusal is `403 forbidden` with a message starting `only the owner`.
+
+## Stores
+
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/stores` | Owner only. `{ "name": "...", "business_type": "carinderia" }` |
+| PATCH | `/stores/{store_id}` | Owner only. Rename: `{ "name": "..." }` |
+
+An owner's stores are listed by `/auth/me`.
+
+## Staff
+
+All owner-only, under `/stores/{store_id}`:
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/staff` | Each with `permissions`, `signed_in_devices` and `invite_expires_at` if a code is outstanding. |
+| POST | `/staff` | `{ "display_name": "Liza", "permissions": [] }`. Returns the staff member and an `invite` with a `code`. |
+| PATCH | `/staff/{staff_id}` | Same body. Applies to their phones on the next request. |
+| DELETE | `/staff/{staff_id}` | Removes them and signs out their phones in the same transaction. |
+| POST | `/staff/{staff_id}/invite` | A new code for a new phone. Any earlier unused code stops working. |
+
+Join codes are ten characters from an alphabet without look-alikes
+(`ABCDE-FGHJK`), work once, expire after 24 hours, and are stored hashed.
+
+## Devices
+
+Owner-only:
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/devices` | Every live session on the owner's account and their staff's, the caller's marked `is_current`. |
+| DELETE | `/devices/{session_id}` | Signs that device out. |
+
+## Activity
+
+```
+GET /stores/{store_id}/activity?before=<id>&limit=50&filter=removals
+```
+
+Owner-only. Newest first; pass `next_before` back as `before` for older
+entries. `filter=removals` keeps only voids and deletions.
+
+```json
+{
+  "events": [ {
+    "id": 812, "action": "sale_voided", "actor_name": "Liza", "is_staff": true,
+    "device_name": "Samsung SM-A125F", "entity_id": "...",
+    "details": { "total": 150.0, "sold_at": "..." },
+    "occurred_at": "...", "recorded_at": "..."
+  } ],
+  "next_before": 790
+}
+```
+
+Actions: `sale_recorded`, `sale_voided`, `expense_recorded`, `expense_deleted`,
+`withdrawal_recorded`, `withdrawal_deleted`, `product_added`,
+`product_changed` (with `details.changes`), `product_removed`,
+`stock_received`, `stock_removed`, `stock_counted` (with `counted` and
+`change`), `stock_spoiled`, `staff_added`, `staff_changed`, `staff_removed`,
+`staff_invited`, `staff_joined`, `device_signed_out`, `store_added`,
+`store_renamed`. Entries are written when something actually changes, so a
+retried push is logged once. `occurred_at` is when it happened on the phone.
+
 ## Store-scoped endpoints
 
-Every path below is prefixed `/stores/{store_id}`, and ownership is verified
-before the handler runs.
+Every path below is prefixed `/stores/{store_id}`, and access to the store is
+verified before the handler runs: owners reach their own stores, staff only
+theirs. Reads that show costs or profit need `view_profit`; product reads are
+open to all staff with `cost_price` zeroed for those without it.
 
 | Method | Path | Notes |
 |---|---|---|
@@ -114,6 +212,17 @@ Rules the server applies:
   `expense`, `withdrawal` or `product`. Deleting something already gone is a
   success.
 - **Rows are independent.** One refused row never blocks the rest.
+- **Each row is checked against the sender's permissions.** A staff phone
+  that queued something it may not do gets that row refused with a reason
+  starting `only the owner`.
+- **Staff may retry their own rows but not rewrite anyone else's.** A sale
+  or expense id that already exists is only overwritten by the owner or by
+  whoever recorded it first.
+- **An id belonging to another store is refused**, never overwritten.
+- **A voided sale is final.** Sending it again changes nothing and is not an
+  error.
+- **Cost figures from a phone without `view_profit` are ignored**: a sale is
+  costed from the catalogue, and a product keeps the cost the owner set.
 
 ```json
 {
@@ -161,12 +270,17 @@ Omit `cursor` for a full download. Keep pulling with the returned cursor while
   2 s) are held back until the next pull. `updated_at` is set when a
   transaction starts, not when it commits; without the margin, a slow
   transaction could commit behind a cursor that has already moved past it.
+- **Staff without `view_profit` get no costs.** `cost_price`, `cost_amount`
+  and `unit_cost` arrive as 0, and `expenses` and `withdrawals` are empty.
+  Their cursor does not advance past those two tables, so granting the
+  permission later brings them in full; the phone also restarts its download
+  from scratch when the permission changes, to replace the zeroed costs.
 
 ## Diagnostics
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/diagnostics/errors` | Error reports from a signed-in phone. |
+| POST | `/diagnostics/errors` | Error reports from a signed-in phone, owner's or staff's. |
 
 ```json
 {
@@ -205,7 +319,13 @@ websocket handshake — use TLS in production. Frames:
 ```
 
 Topics: `sale_recorded`, `sale_voided`, `expense_recorded`, `expense_removed`,
-`withdrawal_recorded`, `product_changed`, `stock_low`, `dashboard_stale`.
+`withdrawal_recorded`, `product_changed`, `stock_low`, `dashboard_stale`,
+`access_changed` (a staff member's permissions changed or they were removed:
+re-read `/auth/me`).
+
+Staff may only open their own store's socket. The session is re-checked on
+every keepalive, so a signed-out device stops hearing events within about
+half a minute.
 
 The server pings every 25 seconds. A client that falls behind receives
 `dashboard_stale` and should re-pull rather than assume it has everything.

@@ -5,6 +5,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::application::AppState;
+use crate::features::access::Permission;
 use crate::features::stores::StoreScope;
 use crate::shared::{ApiResult, PageRequest, ValidatedJson};
 
@@ -23,7 +24,7 @@ pub async fn record_movement(
 ) -> ApiResult<StatusCode> {
     state
         .inventory_service
-        .record(scope.store_id, request)
+        .record(scope.store_id, &scope.actor, request)
         .await?;
     Ok(StatusCode::CREATED)
 }
@@ -34,6 +35,7 @@ pub async fn list_movements(
     Query(filter): Query<MovementFilter>,
     Query(page): Query<PageRequest>,
 ) -> ApiResult<Json<Vec<MovementView>>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state
             .inventory_service
@@ -46,6 +48,7 @@ pub async fn inventory_valuation(
     State(state): State<AppState>,
     scope: StoreScope,
 ) -> ApiResult<Json<InventoryValuation>> {
+    scope.actor.require(Permission::ViewProfit)?;
     Ok(Json(
         state.inventory_service.valuation(scope.store_id).await?,
     ))

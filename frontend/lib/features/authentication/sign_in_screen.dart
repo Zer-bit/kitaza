@@ -24,6 +24,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _submitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Signing back in after this phone was signed out: it is almost always
+    // the same owner, so save them typing their email again.
+    final ended = ref.read(currentSessionProvider);
+    if (ended != null && ended.ended) _email.text = ended.owner.email ?? '';
+  }
+
+  @override
   void dispose() {
     _email.dispose();
     _password.dispose();

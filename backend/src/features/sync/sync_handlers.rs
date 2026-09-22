@@ -13,7 +13,10 @@ pub async fn push_changes(
     ValidatedJson(request): ValidatedJson<PushRequest>,
 ) -> ApiResult<Json<PushOutcome>> {
     Ok(Json(
-        state.sync_service.push(scope.store_id, request).await?,
+        state
+            .sync_service
+            .push(scope.store_id, &scope.actor, request)
+            .await?,
     ))
 }
 
@@ -22,5 +25,10 @@ pub async fn pull_changes(
     scope: StoreScope,
     Query(query): Query<PullQuery>,
 ) -> ApiResult<Json<PullResponse>> {
-    Ok(Json(state.sync_service.pull(scope.store_id, query).await?))
+    Ok(Json(
+        state
+            .sync_service
+            .pull(scope.store_id, &scope.actor, query)
+            .await?,
+    ))
 }
