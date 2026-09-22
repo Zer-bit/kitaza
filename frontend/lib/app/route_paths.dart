@@ -1,6 +1,7 @@
 /// Every route name in one place. Screens navigate by these constants so a
 /// path change never means hunting through the widget tree.
 abstract final class RoutePaths {
+  static const String splash = '/splash';
   static const String welcome = '/welcome';
   static const String localSetup = '/welcome/offline';
   static const String signIn = '/sign-in';
@@ -16,6 +17,8 @@ abstract final class RoutePaths {
   static const String withdrawals = '/withdrawals';
   static const String reports = '/reports';
   static const String settings = '/settings';
+  static const String cloudUpgrade = '/settings/cloud';
+  static const String syncProblems = '/settings/sync-problems';
 
   static const Set<String> publicRoutes = {welcome, localSetup, signIn, signUp};
 }

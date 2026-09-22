@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/formatting/quantity_formatter.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/models/product.dart';
 import '../../data/repositories/data_revision.dart';
@@ -50,8 +51,8 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
     _name.text = product.name;
     _cost.text = product.costPrice.toStringAsFixed(2);
     _price.text = product.sellingPrice.toStringAsFixed(2);
-    _stock.text = product.stockQuantity.toStringAsFixed(0);
-    _reorder.text = product.reorderLevel.toStringAsFixed(0);
+    _stock.text = QuantityFormatter.exact(product.stockQuantity);
+    _reorder.text = QuantityFormatter.exact(product.reorderLevel);
   }
 
   Future<void> _save() async {
@@ -71,7 +72,7 @@ class _ProductEditorScreenState extends ConsumerState<ProductEditorScreen> {
             reorderLevel: double.tryParse(_reorder.text) ?? 0,
           );
 
-      ref.read(dataRevisionProvider.notifier).bump();
+      ref.read(dataRevisionProvider.notifier).localWrite();
 
       if (!mounted) return;
       FeedbackMessenger.success(context, 'Product saved.');

@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/utils/responsive.dart';
 import '../../data/models/dashboard_summary.dart';
 import '../../data/repositories/data_revision.dart';
+import '../../data/repositories/sync_coordinator.dart';
 import '../../shared/widgets/async_content.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/page_body.dart';
@@ -49,7 +50,12 @@ class DashboardScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.read(dataRevisionProvider.notifier).bump(),
+        onRefresh: () async {
+          // Pulling down is the owner asking "is this up to date?", so in
+          // cloud mode it syncs first rather than just re-reading SQLite.
+          await ref.read(syncCoordinatorProvider.notifier).syncNow(force: true);
+          ref.read(dataRevisionProvider.notifier).bump();
+        },
         child: AsyncContent<DashboardSummary>(
           value: summary,
           onRetry: () => ref.invalidate(dashboardSummaryProvider),

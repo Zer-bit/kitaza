@@ -3,6 +3,11 @@ name = "kitaza-server"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+# Enables the tests in `tests/`, which need a Postgres they can create
+# databases in: `DATABASE_URL=... cargo test --features integration`.
+integration = []
+
 [dependencies]
 anyhow = "1.0.104"
 argon2 = "0.6.0"
@@ -11,7 +16,7 @@ chrono = { version = "0.4.45", features = ["serde"] }
 dotenvy = "0.15.7"
 futures-util = "0.3.34"
 hex = "0.4.3"
-jsonwebtoken = "11.1.0"
+jsonwebtoken = { version = "11", features = ["rust_crypto"] }
 rand = "0.10.3"
 redis = { version = "1.7.0", features = ["tokio-comp", "connection-manager", "json"] }
 rust_decimal = { version = "1.43.0", features = ["serde-float", "db-postgres"] }
@@ -28,3 +33,6 @@ tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 validator = { version = "0.21.0", features = ["derive"] }
+
+[dev-dependencies]
+http-body-util = "0.1.5"

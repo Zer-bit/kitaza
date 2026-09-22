@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/utils/responsive.dart';
+import '../../data/repositories/realtime_connection.dart';
+import '../../data/repositories/sync_coordinator.dart';
 import 'navigation_destinations.dart';
 
 /// Holds the persistent navigation around every signed-in screen. A bottom bar
 /// on a phone, a rail once there is room for one, so the same code serves a
 /// counter tablet and a laptop without a second layout.
-class HomeShell extends StatelessWidget {
+class HomeShell extends ConsumerWidget {
   const HomeShell({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // The shell exists exactly while someone is signed in, which makes it
+    // the right owner for the background sync and the live connection.
+    // Listened to, not watched: it must stay alive, but its progress is no
+    // reason to rebuild the navigation.
+    ref.listen(syncCoordinatorProvider, (_, _) {});
+    ref.watch(realtimeConnectionProvider);
+
     final index = _indexFor(GoRouterState.of(context).matchedLocation);
 
     if (context.isCompact) {

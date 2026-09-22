@@ -4,7 +4,7 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::infrastructure::database::PgPool;
-use crate::shared::{ApiResult, Money, PageRequest, Quantity};
+use crate::shared::{ApiError, ApiResult, Money, PageRequest, Quantity};
 
 use super::inventory_payloads::{InventoryValuation, MovementView};
 
@@ -14,6 +14,24 @@ struct ValuationRow {
     low_stock_count: i64,
     stock_value_at_cost: Decimal,
     stock_value_at_selling: Decimal,
+}
+
+/// How a movement changes stock: by an amount, or to a counted total.
+#[derive(Debug, Clone, Copy)]
+pub enum StockEffect {
+    Change(Quantity),
+    SetTo(Quantity),
+}
+
+pub struct LedgerEntry<'a> {
+    pub store_id: Uuid,
+    pub movement_id: Uuid,
+    pub product_id: Uuid,
+    pub movement: &'a str,
+    pub effect: StockEffect,
+    pub unit_cost: Money,
+    pub note: Option<&'a str>,
+    pub occurred_at: DateTime<Utc>,
 }
 
 #[derive(Clone)]
@@ -26,38 +44,59 @@ impl StockRepository {
         Self { pool }
     }
 
-    /// The ledger row and the product's running total are written together so
-    /// the two can never disagree.
-    #[allow(clippy::too_many_arguments)]
-    pub async fn record_movement(
-        &self,
-        store_id: Uuid,
-        movement_id: Uuid,
-        product_id: Uuid,
-        movement: &str,
-        signed_quantity: Quantity,
-        unit_cost: Money,
-        note: Option<&str>,
-        occurred_at: DateTime<Utc>,
-    ) -> ApiResult<()> {
+    /// Writes one ledger row and moves the product's running total to match,
+    /// in a single transaction.
+    ///
+    /// Idempotent on `movement_id`: a device that loses signal mid-sync will
+    /// resend the same movement, and the second copy must change nothing. The
+    /// product row is locked first so a counted adjustment and a concurrent
+    /// sale cannot interleave.
+    ///
+    /// Returns `false` when the movement had already been recorded.
+    pub async fn record_movement(&self, entry: LedgerEntry<'_>) -> ApiResult<bool> {
         let mut transaction = self.pool.begin().await?;
 
-        sqlx::query(
+        let on_hand: Option<(Quantity,)> = sqlx::query_as(
+            "SELECT stock_quantity FROM products
+             WHERE id = $1 AND store_id = $2 AND deleted_at IS NULL
+             FOR UPDATE",
+        )
+        .bind(entry.product_id)
+        .bind(entry.store_id)
+        .fetch_optional(&mut *transaction)
+        .await?;
+
+        let Some((on_hand,)) = on_hand else {
+            return Err(ApiError::NotFound("product"));
+        };
+
+        let delta = match entry.effect {
+            StockEffect::Change(delta) => delta,
+            StockEffect::SetTo(counted) => counted - on_hand,
+        };
+
+        let inserted = sqlx::query(
             "INSERT INTO stock_movements
                  (id, store_id, product_id, movement, quantity, unit_cost, note, occurred_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              ON CONFLICT (id) DO NOTHING",
         )
-        .bind(movement_id)
-        .bind(store_id)
-        .bind(product_id)
-        .bind(movement)
-        .bind(signed_quantity)
-        .bind(unit_cost)
-        .bind(note)
-        .bind(occurred_at)
+        .bind(entry.movement_id)
+        .bind(entry.store_id)
+        .bind(entry.product_id)
+        .bind(entry.movement)
+        .bind(delta)
+        .bind(entry.unit_cost)
+        .bind(entry.note)
+        .bind(entry.occurred_at)
         .execute(&mut *transaction)
-        .await?;
+        .await?
+        .rows_affected();
+
+        if inserted == 0 {
+            transaction.rollback().await?;
+            return Ok(false);
+        }
 
         sqlx::query(
             "UPDATE products
@@ -66,15 +105,15 @@ impl StockRepository {
                  updated_at = now()
              WHERE id = $3 AND store_id = $4",
         )
-        .bind(signed_quantity)
-        .bind(unit_cost)
-        .bind(product_id)
-        .bind(store_id)
+        .bind(delta)
+        .bind(entry.unit_cost)
+        .bind(entry.product_id)
+        .bind(entry.store_id)
         .execute(&mut *transaction)
         .await?;
 
         transaction.commit().await?;
-        Ok(())
+        Ok(true)
     }
 
     pub async fn list_movements(

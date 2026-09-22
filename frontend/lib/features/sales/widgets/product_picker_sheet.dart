@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/formatting/peso_formatter.dart';
+import '../../../core/formatting/quantity_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/debouncer.dart';
 import '../../../data/models/product.dart';
@@ -124,7 +125,7 @@ class _ProductRow extends StatelessWidget {
       subtitle: Text(
         product.isOutOfStock
             ? 'Out of stock'
-            : '${product.stockQuantity.toStringAsFixed(0)} ${product.unitLabel} left',
+            : '${QuantityFormatter.exact(product.stockQuantity)} ${product.unitLabel} left',
         style: theme.textTheme.bodySmall?.copyWith(
           color: product.isLowOnStock ? theme.colorScheme.error : null,
         ),

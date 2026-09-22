@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 use uuid::Uuid;
@@ -5,122 +7,110 @@ use uuid::Uuid;
 use crate::infrastructure::database::PgPool;
 use crate::shared::ApiResult;
 
-/// Rows are returned as JSON built in the database. The sync endpoint is a
-/// pass-through to the client's local SQLite, so shaping each table into a Rust
+use super::sync_cursor::{SyncTable, TableMark};
+
+/// One page of changed rows, plus where that page ended.
+pub struct ChangedPage {
+    pub rows: Vec<Value>,
+    pub last: Option<TableMark>,
+}
+
+/// Rows are returned as JSON built in the database. The pull is a
+/// pass-through to the device's SQLite, so shaping each table into a Rust
 /// struct first would be pure overhead.
 #[derive(Clone)]
 pub struct SyncRepository {
     pool: PgPool,
+    settle_window: Duration,
 }
 
 impl SyncRepository {
-    pub fn new(pool: PgPool) -> Self {
-        Self { pool }
+    pub fn new(pool: PgPool, settle_window: Duration) -> Self {
+        Self {
+            pool,
+            settle_window,
+        }
     }
 
-    pub async fn changed_products(
+    /// Keyset pagination on `(updated_at, id)`. Unlike "everything since a
+    /// timestamp", this never skips rows when a page is full, and never
+    /// splits a group of rows that share a timestamp.
+    pub async fn changed_since(
         &self,
+        table: SyncTable,
         store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        self.changed_rows(
-            "SELECT to_jsonb(p) - 'store_id' FROM products p
-             WHERE p.store_id = $1 AND p.updated_at > $2
-             ORDER BY p.updated_at LIMIT 2000",
-            store_id,
-            since,
-        )
-        .await
-    }
-
-    pub async fn changed_sales(
-        &self,
-        store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        self.changed_rows(
-            "SELECT to_jsonb(s) - 'store_id' FROM sales s
-             WHERE s.store_id = $1 AND s.updated_at > $2
-             ORDER BY s.updated_at LIMIT 2000",
-            store_id,
-            since,
-        )
-        .await
-    }
-
-    pub async fn changed_sale_items(
-        &self,
-        store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        self.changed_rows(
-            "SELECT to_jsonb(i) FROM sale_items i
-             JOIN sales s ON s.id = i.sale_id
-             WHERE s.store_id = $1 AND s.updated_at > $2
-             ORDER BY s.updated_at LIMIT 5000",
-            store_id,
-            since,
-        )
-        .await
-    }
-
-    pub async fn changed_expenses(
-        &self,
-        store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        self.changed_rows(
-            "SELECT to_jsonb(e) - 'store_id' FROM expenses e
-             WHERE e.store_id = $1 AND e.updated_at > $2
-             ORDER BY e.updated_at LIMIT 2000",
-            store_id,
-            since,
-        )
-        .await
-    }
-
-    pub async fn changed_withdrawals(
-        &self,
-        store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        self.changed_rows(
-            "SELECT to_jsonb(w) - 'store_id' FROM owner_withdrawals w
-             WHERE w.store_id = $1 AND w.updated_at > $2
-             ORDER BY w.updated_at LIMIT 2000",
-            store_id,
-            since,
-        )
-        .await
-    }
-
-    pub async fn changed_stock_movements(
-        &self,
-        store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        self.changed_rows(
-            "SELECT to_jsonb(m) - 'store_id' FROM stock_movements m
-             WHERE m.store_id = $1 AND m.updated_at > $2
-             ORDER BY m.updated_at LIMIT 5000",
-            store_id,
-            since,
-        )
-        .await
-    }
-
-    async fn changed_rows(
-        &self,
-        query: &'static str,
-        store_id: Uuid,
-        since: DateTime<Utc>,
-    ) -> ApiResult<Vec<Value>> {
-        let rows: Vec<(Value,)> = sqlx::query_as(query)
+        after: TableMark,
+        limit: i64,
+    ) -> ApiResult<ChangedPage> {
+        let rows: Vec<(Value, DateTime<Utc>, Uuid)> = sqlx::query_as(page_query(table))
             .bind(store_id)
-            .bind(since)
+            .bind(after.updated_at)
+            .bind(after.id)
+            .bind(self.settle_window.as_secs_f64())
+            .bind(limit)
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(rows.into_iter().map(|row| row.0).collect())
+        let last = rows.last().map(|(_, updated_at, id)| TableMark {
+            updated_at: *updated_at,
+            id: *id,
+        });
+
+        Ok(ChangedPage {
+            rows: rows.into_iter().map(|(row, _, _)| row).collect(),
+            last,
+        })
+    }
+
+    pub async fn lines_for_sales(&self, sale_ids: &[Uuid]) -> ApiResult<Vec<Value>> {
+        if sale_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let rows: Vec<(Value,)> = sqlx::query_as(
+            "SELECT to_jsonb(i) FROM sale_items i WHERE i.sale_id = ANY($1) ORDER BY i.sale_id",
+        )
+        .bind(sale_ids)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows.into_iter().map(|(row,)| row).collect())
+    }
+}
+
+/// One literal query per table: sqlx rejects SQL assembled at runtime, and the
+/// five differ only in the table name.
+fn page_query(table: SyncTable) -> &'static str {
+    match table {
+        SyncTable::Products => {
+            "SELECT to_jsonb(t) - 'store_id', t.updated_at, t.id FROM products t
+             WHERE t.store_id = $1 AND (t.updated_at, t.id) > ($2, $3)
+               AND t.updated_at < now() - ($4 * interval '1 second')
+             ORDER BY t.updated_at, t.id LIMIT $5"
+        }
+        SyncTable::Sales => {
+            "SELECT to_jsonb(t) - 'store_id', t.updated_at, t.id FROM sales t
+             WHERE t.store_id = $1 AND (t.updated_at, t.id) > ($2, $3)
+               AND t.updated_at < now() - ($4 * interval '1 second')
+             ORDER BY t.updated_at, t.id LIMIT $5"
+        }
+        SyncTable::Expenses => {
+            "SELECT to_jsonb(t) - 'store_id', t.updated_at, t.id FROM expenses t
+             WHERE t.store_id = $1 AND (t.updated_at, t.id) > ($2, $3)
+               AND t.updated_at < now() - ($4 * interval '1 second')
+             ORDER BY t.updated_at, t.id LIMIT $5"
+        }
+        SyncTable::Withdrawals => {
+            "SELECT to_jsonb(t) - 'store_id', t.updated_at, t.id FROM owner_withdrawals t
+             WHERE t.store_id = $1 AND (t.updated_at, t.id) > ($2, $3)
+               AND t.updated_at < now() - ($4 * interval '1 second')
+             ORDER BY t.updated_at, t.id LIMIT $5"
+        }
+        SyncTable::StockMovements => {
+            "SELECT to_jsonb(t) - 'store_id', t.updated_at, t.id FROM stock_movements t
+             WHERE t.store_id = $1 AND (t.updated_at, t.id) > ($2, $3)
+               AND t.updated_at < now() - ($4 * interval '1 second')
+             ORDER BY t.updated_at, t.id LIMIT $5"
+        }
     }
 }

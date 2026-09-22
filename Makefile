@@ -1,8 +1,8 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup check test fmt lint run-api run-app stack stack-down clean
+.PHONY: help setup check test test-integration test-contract brand fmt lint run-api run-app stack stack-down clean
 
 help: ## Show this help
-	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 setup: ## Install dependencies for both codebases
 	cd backend && cargo fetch
@@ -14,8 +14,23 @@ test: ## Run all tests
 	cd backend && cargo test
 	cd frontend && flutter test
 
+# Integration tests create a fresh database per test, so the user needs
+# CREATEDB. The default points at the docker-compose Postgres.
+TEST_DATABASE_URL ?= postgres://kitaza:kitaza@localhost:5432/kitaza
+
+test-integration: ## Backend tests against a real Postgres (TEST_DATABASE_URL)
+	cd backend && DATABASE_URL=$(TEST_DATABASE_URL) cargo test --features integration
+
+CONTRACT_API ?= http://localhost:8080/api/v1
+
+test-contract: ## Two simulated phones syncing through a running API (CONTRACT_API)
+	cd frontend && KITAZA_CONTRACT_API=$(CONTRACT_API) flutter test test/contract
+
+brand: ## Regenerate logo, launcher icons and splash from the source glyph
+	cd frontend && ./tool/generate_brand_assets.sh
+
 lint: ## Analyse and check formatting
-	cd backend && cargo clippy --all-targets -- -D warnings && cargo fmt --check
+	cd backend && cargo clippy --all-targets --features integration -- -D warnings && cargo fmt --check
 	cd frontend && flutter analyze && dart format --set-exit-if-changed lib test
 
 fmt: ## Format both codebases

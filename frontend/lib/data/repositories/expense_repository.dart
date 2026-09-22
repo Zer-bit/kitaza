@@ -52,7 +52,7 @@ class ExpenseRepository {
     await _db.transaction((txn) async {
       await ExpenseDao(txn).upsert(_storeId, expense);
       await SyncQueueDao(txn)
-          .enqueue('expenses', expense.id, expense.toPushJson());
+          .enqueue(QueuedEntity.expenses, expense.id, expense.toPushJson());
     });
 
     return expense;
@@ -61,7 +61,11 @@ class ExpenseRepository {
   Future<void> remove(String expenseId) async {
     await _db.transaction((txn) async {
       await ExpenseDao(txn).softDelete(expenseId);
-      await SyncQueueDao(txn).clearAccepted([expenseId]);
+      await SyncQueueDao(txn).enqueueDeletion(
+        DeletedEntity.expense,
+        QueuedEntity.expenses,
+        expenseId,
+      );
     });
   }
 }

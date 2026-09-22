@@ -15,36 +15,48 @@ import '../features/products/product_list_screen.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/sales/record_sale_screen.dart';
 import '../features/sales/sale_history_screen.dart';
+import '../features/settings/cloud_upgrade_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/settings/sync_problems_screen.dart';
 import '../features/shell/home_shell.dart';
+import '../features/splash/splash_screen.dart';
 import '../features/withdrawals/withdrawal_screen.dart';
+import 'route_guard.dart';
 import 'route_paths.dart';
 
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Bridges Riverpod's auth state to go_router's `refreshListenable`, so the
+/// redirect re-runs on sign-in and sign-out without the router itself being
+/// rebuilt.
+class _AuthChangeNotifier extends ChangeNotifier {
+  _AuthChangeNotifier(Ref ref) {
+    ref.listen(authControllerProvider, (_, _) => notifyListeners());
+  }
+}
+
 /// Routing is derived from the session: there is no imperative "go to login"
 /// anywhere in the app, only a redirect that reacts to auth state.
+///
+/// The router is created once. Recreating it on every auth change would reset
+/// the navigation stack and replay the initial route, which shows up as a
+/// flicker between the splash and the first real screen.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final auth = ref.watch(authControllerProvider);
+  final authChanges = _AuthChangeNotifier(ref);
+  ref.onDispose(authChanges.dispose);
 
   return GoRouter(
-    initialLocation: RoutePaths.dashboard,
+    initialLocation: RoutePaths.splash,
     debugLogDiagnostics: false,
-    redirect: (context, state) {
-      // While the stored session is still being read, hold position rather
-      // than bouncing the user to a screen we may immediately leave.
-      if (auth.isLoading) return null;
-
-      final signedIn = auth.value != null;
-      final atPublicRoute = RoutePaths.publicRoutes.contains(
-        state.matchedLocation,
-      );
-
-      if (!signedIn && !atPublicRoute) return RoutePaths.welcome;
-      if (signedIn && atPublicRoute) return RoutePaths.dashboard;
-      return null;
-    },
+    refreshListenable: authChanges,
+    redirect: (context, state) =>
+        resolveRoute(ref.read(authControllerProvider), state.matchedLocation),
     routes: [
+      GoRoute(
+        path: RoutePaths.splash,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: SplashScreen()),
+      ),
       GoRoute(
         path: RoutePaths.welcome,
         builder: (context, state) => const WelcomeScreen(),
@@ -114,6 +126,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.settings,
         builder: (context, state) => const SettingsScreen(),
+        routes: [
+          GoRoute(
+            path: 'cloud',
+            builder: (context, state) => const CloudUpgradeScreen(),
+          ),
+          GoRoute(
+            path: 'sync-problems',
+            builder: (context, state) => const SyncProblemsScreen(),
+          ),
+        ],
       ),
     ],
   );

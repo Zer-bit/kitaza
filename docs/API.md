@@ -51,7 +51,7 @@ before the handler runs.
 | GET/POST | `/products` | `POST` upserts on a client-supplied `id`. |
 | GET | `/products/low-stock` | At or below the reorder level. |
 | GET/DELETE | `/products/{product_id}` | Delete is a soft delete. |
-| GET/POST | `/stock-movements` | `stock_in`, `stock_out`, `adjustment`, `spoilage`. |
+| GET/POST | `/stock-movements` | `stock_in`, `stock_out`, `adjustment`, `spoilage`. Idempotent on `id`. |
 | GET | `/inventory/valuation` | Stock value at cost and at selling price. |
 | GET/POST | `/sales` | Totals are recomputed server-side from the line items. |
 | GET/DELETE | `/sales/{sale_id}` | Voiding restores stock. |
@@ -66,7 +66,7 @@ before the handler runs.
 | GET | `/reports/expense-breakdown` | |
 | GET | `/reports/unusual-expenses` | |
 | POST | `/sync/push` | |
-| GET | `/sync/pull` | `?since=<ISO8601>` |
+| GET | `/sync/pull` | `?cursor=<opaque>` |
 
 `GET /expense-categories` (not store-scoped) returns the closed category list.
 
@@ -78,27 +78,89 @@ an 11pm sale in Manila lands on the right day.
 
 ## Sync
 
-**Push** sends everything queued while offline. Each list is processed
-independently, so one bad row never blocks the batch:
+Devices write locally first and reconcile through these two endpoints. The
+contract is exercised end to end by `frontend/test/contract/`.
 
-```json
-{ "products": [...], "sales": [...], "expenses": [...], "withdrawals": [...] }
-```
+### Push
+
+Everything a device queued while offline:
 
 ```json
 {
-  "applied":  ["<uuid>", "..."],
-  "rejected": [ { "entity": "sale", "id": "<uuid>", "reason": "product not found" } ],
+  "products":        [ { "id": "…", "name": "Coke", "cost_price": 15, "selling_price": 20, "opening_stock": 0, "reorder_level": 6 } ],
+  "stock_movements": [ { "id": "…", "product_id": "…", "movement": "stock_in", "quantity": 24, "unit_cost": 15, "occurred_at": "…" } ],
+  "sales":           [ { "id": "…", "occurred_at": "…", "items": [ { "id": "…", "product_id": "…", "quantity": 3 } ] } ],
+  "expenses":        [ … ],
+  "withdrawals":     [ … ],
+  "deletions":       [ { "entity": "sale", "id": "…" } ]
+}
+```
+
+Rules the server applies:
+
+- **Every row carries a client-generated id**, and every write is an upsert
+  on it. Replaying a batch changes nothing the second time — including stock.
+- **Products first**, since a sale or movement may reference a product
+  created offline in the same batch.
+- **Stock never travels on the product.** Devices send `opening_stock: 0` and
+  move stock only through `stock_movements` and sales.
+- **Sales and stock movements are replayed in `occurred_at` order**, however
+  the device lists them. An `adjustment` carries a *counted total* (which may
+  be zero), so order decides the outcome: sell 2, count 10, sell 1 must end
+  at 9.
+- **Sale lines keep the device's ids** when sent, so pulling a sale back never
+  duplicates its lines.
+- **Deletions run last.** `entity` is `sale` (voids and restores stock),
+  `expense`, `withdrawal` or `product`. Deleting something already gone is a
+  success.
+- **Rows are independent.** One refused row never blocks the rest.
+
+```json
+{
+  "applied":  [ { "entity": "sale", "id": "…" }, { "entity": "deletion", "id": "…" } ],
+  "rejected": [ { "entity": "sale", "id": "…", "reason": "product not found" } ],
   "server_time": "2026-09-22T04:10:00Z"
 }
 ```
 
-Writes are upserts on client-generated ids, so replaying a batch is safe.
+`entity` is one of `product`, `stock_movement`, `sale`, `expense`,
+`withdrawal`, `deletion` — so a device can tell a sale from the deletion of
+that same sale. Unexpected server errors are reported with a generic reason;
+the detail goes to the server log, not the owner's screen.
 
-**Pull** returns every row changed after `since`, plus a `cursor` to send next
-time. Omitting `since` downloads everything. The cursor is read *before* the
-queries run, so a row written mid-pull is picked up next time rather than
-skipped.
+### Pull
+
+```
+GET /stores/{store_id}/sync/pull?cursor=<opaque>
+```
+
+Omit `cursor` for a full download. Keep pulling with the returned cursor while
+`has_more` is true.
+
+```json
+{
+  "products": [ … ], "sales": [ … ], "sale_items": [ … ],
+  "expenses": [ … ], "withdrawals": [ … ], "stock_movements": [ … ],
+  "cursor": "7b22…",
+  "has_more": false
+}
+```
+
+- **The cursor is opaque.** Internally it tracks a `(updated_at, id)`
+  position per table; clients store it and send it back unchanged. An
+  unreadable cursor falls back to a full download, which is slow but never
+  wrong.
+- **Keyset pagination** means a full page never skips rows, and rows that
+  share a timestamp — everything written in one transaction — are never split
+  across a gap.
+- **`sale_items` holds every line of every sale in `sales`.** Replace a
+  pulled sale's lines wholesale rather than merging them.
+- **Deleted rows are included** with `deleted_at` set, so deletions
+  propagate.
+- **Rows younger than the settle window** (`KITAZA_SYNC_SETTLE_MS`, default
+  2 s) are held back until the next pull. `updated_at` is set when a
+  transaction starts, not when it commits; without the margin, a slow
+  transaction could commit behind a cursor that has already moved past it.
 
 ## WebSocket
 

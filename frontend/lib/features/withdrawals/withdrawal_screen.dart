@@ -114,7 +114,7 @@ class _WithdrawalRow extends ConsumerWidget {
       direction: DismissDirection.endToStart,
       onDismissed: (_) async {
         await ref.read(withdrawalRepositoryProvider).remove(withdrawal.id);
-        ref.read(dataRevisionProvider.notifier).bump();
+        ref.read(dataRevisionProvider.notifier).localWrite();
       },
       background: Container(
         alignment: Alignment.centerRight,
@@ -177,7 +177,7 @@ class _RecordWithdrawalSheetState
     await ref
         .read(withdrawalRepositoryProvider)
         .record(amount: double.parse(_amount.text), reason: _reason.text);
-    ref.read(dataRevisionProvider.notifier).bump();
+    ref.read(dataRevisionProvider.notifier).localWrite();
 
     if (!mounted) return;
     Navigator.pop(context);

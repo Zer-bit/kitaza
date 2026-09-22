@@ -8,7 +8,9 @@ Future<Database> openTestDatabase() async {
 
   final db = await databaseFactoryFfi.openDatabase(
     inMemoryDatabasePath,
-    options: OpenDatabaseOptions(version: 1),
+    // Without this, every in-memory open returns the same shared database,
+    // and two simulated devices would silently be one.
+    options: OpenDatabaseOptions(version: 1, singleInstance: false),
   );
 
   await LocalDatabase.applySchema(db);

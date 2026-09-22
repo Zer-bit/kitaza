@@ -41,10 +41,14 @@ class RealtimeEvent {
 /// Reconnects with backoff and simply stays quiet when there is no network -
 /// the app is fully usable without it.
 class RealtimeChannel {
-  RealtimeChannel({required this.storeId, required this.accessToken});
+  RealtimeChannel({required this.storeId, required this.readAccessToken});
 
   final String storeId;
-  final String accessToken;
+
+  /// Read afresh on every connection attempt. Access tokens are short-lived
+  /// and renewed by the HTTP layer, so one captured at construction would
+  /// leave a reconnecting socket knocking with an expired token forever.
+  final Future<String?> Function() readAccessToken;
 
   static const Duration _minBackoff = Duration(seconds: 2);
   static const Duration _maxBackoff = Duration(seconds: 60);
@@ -60,14 +64,21 @@ class RealtimeChannel {
 
   Stream<RealtimeEvent> get events => _events.stream;
 
-  void connect() {
+  Future<void> connect() async {
     if (_disposed) return;
 
     _reconnectTimer?.cancel();
 
+    final token = await readAccessToken();
+    if (_disposed) return;
+    if (token == null || token.isEmpty) {
+      _scheduleReconnect();
+      return;
+    }
+
     try {
       final uri = Uri.parse(
-        ApiEndpoints.realtime(AppConfig.realtimeBaseUrl, storeId, accessToken),
+        ApiEndpoints.realtime(AppConfig.realtimeBaseUrl, storeId, token),
       );
       final channel = WebSocketChannel.connect(uri);
       _channel = channel;

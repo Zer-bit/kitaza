@@ -64,3 +64,57 @@ impl TokenIssuer {
             .map_err(|_| ApiError::Unauthorized("your session has expired, please sign in".into()))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn issuer() -> TokenIssuer {
+        TokenIssuer::new(&SecuritySettings {
+            jwt_secret: "a-test-secret-that-is-comfortably-over-32-chars".into(),
+            access_token_lifetime: Duration::minutes(5),
+            refresh_token_lifetime: Duration::days(1),
+        })
+    }
+
+    /// Guards the crypto backend: jsonwebtoken 11 panics at runtime, not at
+    /// compile time, when no provider feature is enabled.
+    #[test]
+    fn an_issued_token_verifies_and_names_its_owner() {
+        let issuer = issuer();
+        let owner_id = Uuid::new_v4();
+
+        let token = issuer
+            .issue_access_token(owner_id, "nena@example.com")
+            .unwrap();
+        let claims = issuer.verify_access_token(&token).unwrap();
+
+        assert_eq!(claims.owner_id(), owner_id);
+        assert_eq!(claims.email, "nena@example.com");
+    }
+
+    #[test]
+    fn a_token_signed_with_another_secret_is_rejected() {
+        let foreign = TokenIssuer::new(&SecuritySettings {
+            jwt_secret: "a-completely-different-secret-over-32-characters".into(),
+            access_token_lifetime: Duration::minutes(5),
+            refresh_token_lifetime: Duration::days(1),
+        });
+        let token = foreign
+            .issue_access_token(Uuid::new_v4(), "x@example.com")
+            .unwrap();
+
+        assert!(issuer().verify_access_token(&token).is_err());
+    }
+
+    #[test]
+    fn a_tampered_token_is_rejected() {
+        let issuer = issuer();
+        let mut token = issuer
+            .issue_access_token(Uuid::new_v4(), "x@example.com")
+            .unwrap();
+        token.push('x');
+
+        assert!(issuer.verify_access_token(&token).is_err());
+    }
+}

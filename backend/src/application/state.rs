@@ -7,7 +7,7 @@ use crate::features::products::{ProductRepository, ProductService};
 use crate::features::reports::{ReportRepository, ReportService};
 use crate::features::sales::{SaleRepository, SaleService};
 use crate::features::stores::StoreDirectory;
-use crate::features::sync::{SyncRepository, SyncService};
+use crate::features::sync::{SyncDependencies, SyncRepository, SyncService};
 use crate::features::withdrawals::{WithdrawalRepository, WithdrawalService};
 use crate::infrastructure::cache::{CacheHandle, DashboardCache, RateLimiter};
 use crate::infrastructure::database::PgPool;
@@ -55,7 +55,6 @@ impl AppState {
         let product_service = ProductService::new(product_repository.clone(), broadcaster.clone());
         let inventory_service = InventoryService::new(
             StockRepository::new(pool.clone()),
-            product_repository.clone(),
             dashboard_cache.clone(),
             broadcaster.clone(),
         );
@@ -76,11 +75,15 @@ impl AppState {
             broadcaster.clone(),
         );
         let sync_service = SyncService::new(
-            SyncRepository::new(pool.clone()),
-            product_service.clone(),
-            sale_service.clone(),
-            expense_service.clone(),
-            withdrawal_service.clone(),
+            SyncRepository::new(pool.clone(), settings.sync.settle_window),
+            settings.sync.page_size,
+            SyncDependencies {
+                products: product_service.clone(),
+                inventory: inventory_service.clone(),
+                sales: sale_service.clone(),
+                expenses: expense_service.clone(),
+                withdrawals: withdrawal_service.clone(),
+            },
         );
 
         Self {

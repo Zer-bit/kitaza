@@ -32,8 +32,11 @@ class WithdrawalRepository {
 
     await _db.transaction((txn) async {
       await WithdrawalDao(txn).upsert(_storeId, withdrawal);
-      await SyncQueueDao(txn)
-          .enqueue('withdrawals', withdrawal.id, withdrawal.toPushJson());
+      await SyncQueueDao(txn).enqueue(
+        QueuedEntity.withdrawals,
+        withdrawal.id,
+        withdrawal.toPushJson(),
+      );
     });
 
     return withdrawal;
@@ -42,7 +45,11 @@ class WithdrawalRepository {
   Future<void> remove(String withdrawalId) async {
     await _db.transaction((txn) async {
       await WithdrawalDao(txn).softDelete(withdrawalId);
-      await SyncQueueDao(txn).clearAccepted([withdrawalId]);
+      await SyncQueueDao(txn).enqueueDeletion(
+        DeletedEntity.withdrawal,
+        QueuedEntity.withdrawals,
+        withdrawalId,
+      );
     });
   }
 }

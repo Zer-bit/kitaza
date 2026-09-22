@@ -1,0 +1,19 @@
+<!--
+  Kitaza placeholder mark: a sari-sari storefront, awning over a shop with an
+  open door. Drawn in white on a transparent square so every generated asset
+  can place it on its own background.
+
+  To use a real logo, replace this file with a square SVG that has the same
+  intent (single colour, transparent background, artwork filling the canvas)
+  and run `tool/generate_brand_assets.sh`.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="232 240 560 560">
+  <path fill="#FFFFFF" d="
+    M 260 300 H 764 A 28 28 0 0 1 792 328 V 420
+    A 70 70 0 0 1 652 420 A 70 70 0 0 1 512 420
+    A 70 70 0 0 1 372 420 A 70 70 0 0 1 232 420
+    V 328 A 28 28 0 0 1 260 300 Z" />
+  <path fill="#FFFFFF" fill-rule="evenodd" d="
+    M 272 520 H 752 V 716 A 24 24 0 0 1 728 740 H 296 A 24 24 0 0 1 272 716 Z
+    M 452 740 V 610 A 28 28 0 0 1 480 582 H 544 A 28 28 0 0 1 572 610 V 740 Z" />
+</svg>

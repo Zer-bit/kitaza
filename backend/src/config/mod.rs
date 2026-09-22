@@ -2,11 +2,13 @@ mod database_settings;
 mod redis_settings;
 mod security_settings;
 mod server_settings;
+mod sync_settings;
 
 pub use database_settings::DatabaseSettings;
 pub use redis_settings::RedisSettings;
 pub use security_settings::SecuritySettings;
 pub use server_settings::ServerSettings;
+pub use sync_settings::SyncSettings;
 
 use anyhow::Context;
 
@@ -16,6 +18,7 @@ pub struct AppSettings {
     pub database: DatabaseSettings,
     pub redis: RedisSettings,
     pub security: SecuritySettings,
+    pub sync: SyncSettings,
 }
 
 impl AppSettings {
@@ -25,6 +28,7 @@ impl AppSettings {
             database: DatabaseSettings::from_environment()?,
             redis: RedisSettings::from_environment()?,
             security: SecuritySettings::from_environment()?,
+            sync: SyncSettings::from_environment()?,
         })
     }
 }

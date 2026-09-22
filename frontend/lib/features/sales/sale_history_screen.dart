@@ -135,7 +135,7 @@ class _SaleRow extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     await ref.read(saleRepositoryProvider).voidSale(sale.id);
-    ref.read(dataRevisionProvider.notifier).bump();
+    ref.read(dataRevisionProvider.notifier).localWrite();
 
     if (context.mounted) {
       FeedbackMessenger.success(context, 'Sale voided.');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/kitaza_logo.dart';
 
 /// Shared chrome for every onboarding screen: the mark, a heading, and a body
 /// that stays centred and readable at any window size.
@@ -70,19 +71,7 @@ class _BrandMark extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          height: 44,
-          width: 44,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary,
-            borderRadius: AppRadius.fieldAll,
-          ),
-          child: Icon(
-            Icons.storefront_rounded,
-            color: theme.colorScheme.onPrimary,
-            size: 24,
-          ),
-        ),
+        const KitazaLogo(),
         const SizedBox(width: AppSpacing.md),
         Text('Kitaza', style: theme.textTheme.headlineSmall),
       ],

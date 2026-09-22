@@ -34,6 +34,12 @@ pub struct RecordSaleRequest {
 // `Serialize` is required by validator to report the failing line back.
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct SaleLineRequest {
+    /// Supplied by devices so a line keeps one identity everywhere. Without
+    /// it, the server would mint new ids and a device pulling the sale back
+    /// would hold two copies of every line.
+    #[serde(default)]
+    pub id: Option<Uuid>,
+
     /// Omitted for a quick sale that is not tied to a tracked product.
     #[serde(default)]
     pub product_id: Option<Uuid>,

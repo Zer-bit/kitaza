@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:math' as math;
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../core/config/app_config.dart';
-import '../../core/config/storage_mode.dart';
+import '../../core/errors/app_failure.dart';
 import '../../core/storage/preferences_store.dart';
 import '../local/dao/sync_queue_dao.dart';
 import '../remote/sync_api.dart';
+import 'data_revision.dart';
 import 'store_scope.dart';
 import 'sync_row_mapper.dart';
 
@@ -18,26 +19,33 @@ class SyncStatus {
   const SyncStatus({
     this.phase = SyncPhase.idle,
     this.pendingCount = 0,
+    this.parkedCount = 0,
     this.lastSyncedAt,
     this.lastError,
   });
 
   final SyncPhase phase;
   final int pendingCount;
+
+  /// Rows the server refused repeatedly, waiting for the owner to look.
+  final int parkedCount;
   final DateTime? lastSyncedAt;
   final String? lastError;
 
   bool get hasPendingWork => pendingCount > 0;
+  bool get needsAttention => parkedCount > 0;
 
   SyncStatus copyWith({
     SyncPhase? phase,
     int? pendingCount,
+    int? parkedCount,
     DateTime? lastSyncedAt,
     String? lastError,
   }) {
     return SyncStatus(
       phase: phase ?? this.phase,
       pendingCount: pendingCount ?? this.pendingCount,
+      parkedCount: parkedCount ?? this.parkedCount,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
       lastError: lastError,
     );
@@ -47,128 +55,210 @@ class SyncStatus {
 /// Drains the outbox to the cloud and folds the cloud's changes back into
 /// SQLite.
 ///
-/// It is safe to call [syncNow] as often as you like: pushes are idempotent
-/// upserts keyed on client-generated ids, and pulls resume from a stored
-/// cursor.
+/// Safe to trigger as often as you like: pushes are idempotent on
+/// client-generated ids, and pulls resume from a stored cursor.
 class SyncCoordinator extends Notifier<SyncStatus> {
+  static const int _pushBatchSize = 200;
+  static const int _maxPushBatches = 50;
+  static const int _maxPullPages = 200;
+  static const Duration _pushDebounce = Duration(milliseconds: 1500);
+  static const Duration _firstBackoff = Duration(seconds: 30);
+  static const Duration _maxBackoff = Duration(minutes: 15);
+
   Timer? _periodicTimer;
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  Timer? _pushTimer;
+  StreamSubscription<bool>? _connectivitySubscription;
   bool _running = false;
+  int _consecutiveFailures = 0;
+  DateTime? _retryAfter;
 
   @override
   SyncStatus build() {
-    if (_isCloudMode) {
+    final storeId = ref.watch(activeStoreIdProvider);
+    final mode = ref.watch(storageModeProvider);
+
+    ref.onDispose(_stopWatching);
+
+    if (mode.isCloud && storeId.isNotEmpty) {
       _startWatching();
-      ref.onDispose(_stopWatching);
-      Future.microtask(syncNow);
+      Future.microtask(() => syncNow(force: true));
+    } else {
+      Future.microtask(refreshCounts);
     }
+
     return const SyncStatus();
   }
 
-  bool get _isCloudMode =>
-      StorageMode.parse(ref.read(preferencesStoreProvider).readStorageMode())
-          .isCloud;
+  bool get _enabled =>
+      ref.read(storageModeProvider).isCloud &&
+      ref.read(activeStoreIdProvider).isNotEmpty;
 
   void _startWatching() {
     _periodicTimer = Timer.periodic(AppConfig.syncInterval, (_) => syncNow());
 
-    // Coming back onto a network is the moment a queued sale should leave the
-    // device, so sync is triggered by connectivity rather than only by time.
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
-      results,
+    // Coming back onto a network is the moment a queued sale should leave
+    // the device, so reconnecting skips any backoff in progress.
+    _connectivitySubscription = ref.read(connectivityChangesProvider).listen((
+      online,
     ) {
-      final online = results.any((result) => result != ConnectivityResult.none);
-      if (online) syncNow();
+      if (online) syncNow(force: true);
     });
   }
 
   void _stopWatching() {
     _periodicTimer?.cancel();
+    _pushTimer?.cancel();
     _connectivitySubscription?.cancel();
   }
 
-  Future<void> refreshPendingCount() async {
-    final pending = await SyncQueueDao(ref.read(databaseProvider))
-        .pendingCount();
-    state = state.copyWith(pendingCount: pending);
+  /// Called after every local write. Coalesces a burst of entries - a cashier
+  /// ringing up five sales in a row - into one push shortly after the last.
+  void schedulePush() {
+    refreshCounts();
+    if (!_enabled) return;
+
+    _pushTimer?.cancel();
+    _pushTimer = Timer(_pushDebounce, syncNow);
   }
 
-  Future<void> syncNow() async {
-    if (_running || !_isCloudMode) return;
+  Future<void> refreshCounts() async {
+    final queue = SyncQueueDao(ref.read(databaseProvider));
+    final pending = await queue.pendingCount();
+    final parked = await queue.parkedCount();
+    if (!ref.mounted) return;
+    state = state.copyWith(pendingCount: pending, parkedCount: parked);
+  }
+
+  /// [force] skips the backoff: used when the owner taps "Sync now" and when
+  /// the network comes back, the two moments a retry is most likely to work.
+  Future<void> syncNow({bool force = false}) async {
+    if (_running || !_enabled) return;
+    if (!force &&
+        _retryAfter != null &&
+        DateTime.now().isBefore(_retryAfter!)) {
+      return;
+    }
 
     final storeId = ref.read(activeStoreIdProvider);
-    if (storeId.isEmpty) return;
-
     _running = true;
     state = state.copyWith(phase: SyncPhase.syncing);
 
     try {
       await _pushOutbox(storeId);
-      await _pullChanges(storeId);
+      final pulledAnything = await _pullChanges(storeId);
+      if (!ref.mounted) return;
 
-      state = SyncStatus(
+      _consecutiveFailures = 0;
+      _retryAfter = null;
+      if (pulledAnything) ref.read(dataRevisionProvider.notifier).bump();
+
+      state = state.copyWith(
         phase: SyncPhase.idle,
-        pendingCount: await SyncQueueDao(ref.read(databaseProvider))
-            .pendingCount(),
         lastSyncedAt: DateTime.now(),
       );
     } on Object catch (error) {
+      if (!ref.mounted) return;
+      _consecutiveFailures++;
+      _retryAfter = DateTime.now().add(_backoffFor(_consecutiveFailures));
+
       state = state.copyWith(
-        phase: SyncPhase.offline,
-        lastError: error.toString(),
+        phase: switch (error) {
+          AppFailure(isTransient: true) => SyncPhase.offline,
+          _ => SyncPhase.failed,
+        },
+        lastError: error is AppFailure ? error.message : error.toString(),
       );
     } finally {
       _running = false;
+      if (ref.mounted) await refreshCounts();
     }
+  }
+
+  /// Parked rows the owner has chosen to try again.
+  Future<void> retryParked(int rowId) async {
+    await SyncQueueDao(ref.read(databaseProvider)).retry(rowId);
+    await refreshCounts();
+    await syncNow(force: true);
+  }
+
+  Future<void> discardParked(int rowId) async {
+    await SyncQueueDao(ref.read(databaseProvider)).drop(rowId);
+    await refreshCounts();
+  }
+
+  static Duration _backoffFor(int failures) {
+    final doubled = _firstBackoff * math.pow(2, failures - 1).toInt();
+    return doubled > _maxBackoff ? _maxBackoff : doubled;
   }
 
   Future<void> _pushOutbox(String storeId) async {
     final queue = SyncQueueDao(ref.read(databaseProvider));
-    final pending = await queue.pending();
-    if (pending.isEmpty) return;
+    final api = ref.read(syncApiProvider);
 
-    final batch = <String, List<Map<String, Object?>>>{
-      'products': [],
-      'sales': [],
-      'expenses': [],
-      'withdrawals': [],
-    };
+    for (var batch = 0; batch < _maxPushBatches; batch++) {
+      final pending = await queue.pending(limit: _pushBatchSize);
+      if (pending.isEmpty) return;
 
-    for (final change in pending) {
-      batch[change.entity]?.add(change.payload);
-    }
-
-    final result = await ref.read(syncApiProvider).push(storeId, batch);
-    await queue.clearAccepted(result.applied);
-
-    for (final change in pending) {
-      final reason = result.rejected[change.entityId];
-      if (reason != null) {
-        await queue.recordFailure(change.rowId, reason);
+      final body = {
+        for (final entity in QueuedEntity.all) entity: <Map<String, Object?>>[],
+      };
+      for (final change in pending) {
+        body[change.entity]?.add(change.payload);
       }
+
+      final result = await api.push(storeId, body);
+
+      final accepted = <int>[];
+      for (final change in pending) {
+        final key = (entity: change.entity, id: change.entityId);
+        final reason = result.rejected[key];
+        if (reason != null) {
+          await queue.recordFailure(change.rowId, reason);
+        } else if (result.applied.contains(key)) {
+          accepted.add(change.rowId);
+        }
+      }
+      await queue.clearRows(accepted);
+
+      // Nothing got through: sending the same rows again straight away
+      // would get the same answer, so leave them for the next cycle.
+      if (accepted.isEmpty) return;
     }
   }
 
-  Future<void> _pullChanges(String storeId) async {
+  /// Returns whether any row was written locally.
+  Future<bool> _pullChanges(String storeId) async {
     final preferences = ref.read(preferencesStoreProvider);
-    final result = await ref
-        .read(syncApiProvider)
-        .pull(storeId, preferences.readSyncCursor());
+    final api = ref.read(syncApiProvider);
+    var cursor = preferences.readSyncCursor();
+    var wroteAnything = false;
 
-    await _applyPulledRows(storeId, result);
-    await preferences.writeSyncCursor(result.cursor);
+    for (var page = 0; page < _maxPullPages; page++) {
+      final result = await api.pull(storeId, cursor);
+      if (!ref.mounted) return wroteAnything;
+
+      wroteAnything = await _apply(storeId, result) || wroteAnything;
+      cursor = result.cursor;
+      await preferences.writeSyncCursor(cursor);
+
+      if (!result.hasMore) break;
+    }
+
+    return wroteAnything;
   }
 
-  /// Server rows win over local copies of the same id: the cloud is the
-  /// authority once a device is online, and anything the device changed more
-  /// recently is still sitting in the outbox to be pushed next round.
-  Future<void> _applyPulledRows(String storeId, PullResult result) async {
-    final db = ref.read(databaseProvider);
+  /// Server rows win over local copies of the same id: once a change has been
+  /// pushed the cloud holds the authoritative version, and anything newer on
+  /// this device is still in the outbox for the next round.
+  Future<bool> _apply(String storeId, PullPage page) async {
+    final tables = page.tables;
+    final total = tables.values.fold<int>(0, (sum, rows) => sum + rows.length);
+    if (total == 0) return false;
 
-    await db.transaction((txn) async {
+    await ref.read(databaseProvider).transaction((txn) async {
       final batch = txn.batch();
 
-      void insertAll(
+      void upsertAll(
         String table,
         List<Map<String, dynamic>> rows,
         Map<String, Object?> Function(Map<String, dynamic>) map,
@@ -182,39 +272,51 @@ class SyncCoordinator extends Notifier<SyncStatus> {
         }
       }
 
-      insertAll(
+      upsertAll(
         'products',
-        result.tables['products']!,
+        tables['products']!,
         (row) => SyncRowMapper.product(row, storeId),
       );
-      insertAll(
+      upsertAll(
         'sales',
-        result.tables['sales']!,
+        tables['sales']!,
         (row) => SyncRowMapper.sale(row, storeId),
       );
-      insertAll(
-        'sale_items',
-        result.tables['sale_items']!,
-        SyncRowMapper.saleItem,
-      );
-      insertAll(
+
+      // A pulled sale carries its complete set of lines, so the local lines
+      // are replaced rather than merged.
+      final saleIds = tables['sales']!
+          .map((row) => row['id'] as String)
+          .toList();
+      if (saleIds.isNotEmpty) {
+        final placeholders = List.filled(saleIds.length, '?').join(', ');
+        batch.rawDelete(
+          'DELETE FROM sale_items WHERE sale_id IN ($placeholders)',
+          saleIds,
+        );
+      }
+      upsertAll('sale_items', tables['sale_items']!, SyncRowMapper.saleItem);
+
+      upsertAll(
         'expenses',
-        result.tables['expenses']!,
+        tables['expenses']!,
         (row) => SyncRowMapper.expense(row, storeId),
       );
-      insertAll(
+      upsertAll(
         'owner_withdrawals',
-        result.tables['withdrawals']!,
+        tables['withdrawals']!,
         (row) => SyncRowMapper.withdrawal(row, storeId),
       );
-      insertAll(
+      upsertAll(
         'stock_movements',
-        result.tables['stock_movements']!,
+        tables['stock_movements']!,
         (row) => SyncRowMapper.stockMovement(row, storeId),
       );
 
       await batch.commit(noResult: true);
     });
+
+    return true;
   }
 }
 

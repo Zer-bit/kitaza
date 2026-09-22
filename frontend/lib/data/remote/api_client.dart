@@ -62,9 +62,10 @@ class ApiClient {
         401 => const AppFailure.unauthorized(),
         final int status when status >= 500 => AppFailure(
           'The Kitaza server is having trouble. Your data is safe on this device.',
+          kind: FailureKind.server,
           cause: error,
         ),
-        _ => AppFailure(_messageFrom(error), cause: error, isRetryable: false),
+        _ => AppFailure(_messageFrom(error), cause: error),
       },
     };
   }

@@ -1,0 +1,21 @@
+# The in-app splash (lib/features/splash/splash_screen.dart) draws the same
+# background and logo at the same size, so the hand-off from the native splash
+# to Flutter's first frame is invisible.
+flutter_native_splash:
+  color: "#F4F7F6"
+  color_dark: "#0E1614"
+  image: assets/brand/splash_logo.png
+  image_dark: assets/brand/splash_logo.png
+
+  android_12:
+    image: assets/brand/splash_android12.png
+    image_dark: assets/brand/splash_android12.png
+    icon_background_color: "#0F766E"
+    icon_background_color_dark: "#0F766E"
+    color: "#F4F7F6"
+    color_dark: "#0E1614"
+
+  android: true
+  ios: true
+  web: true
+  fullscreen: false

@@ -67,7 +67,7 @@ class _RecordSaleScreenState extends ConsumerState<RecordSaleScreen> {
             paymentMethod: ref.read(selectedPaymentMethodProvider),
           );
 
-      ref.read(dataRevisionProvider.notifier).bump();
+      ref.read(dataRevisionProvider.notifier).localWrite();
       ref.read(saleCartProvider.notifier).clear();
 
       if (!mounted) return;

@@ -26,7 +26,7 @@ take about five seconds each.
 | **Reports** | Profit trend, which products earn, where money goes, unusual spending. |
 | **Offline or cloud** | Chosen at setup. Both are fully usable with no signal. |
 
-## The two things that shape the whole design
+## The three things that shape the whole design
 
 **1. Every write is local first.** A sale is written to SQLite on the device and
 returned to the UI immediately; syncing to the cloud is a separate, background
@@ -35,7 +35,11 @@ SQLite too — including the dashboard, which recomputes its own totals rather
 than asking the server. A phone in airplane mode behaves identically to one on
 wifi.
 
-**2. Sign in once per device.** A refresh token valid for six months lives in
+**2. Stock is a ledger, not a number.** Deliveries, counts and sales are all
+movements, replayed in the order they happened. That is what lets two phones
+sell the same product offline and still agree on the count afterwards.
+
+**3. Sign in once per device.** A refresh token valid for six months lives in
 the platform keystore. On launch the app restores the session from local
 storage and goes straight to the dashboard; the access token is renewed
 silently by an HTTP interceptor on the first request that needs it. In offline
@@ -129,12 +133,44 @@ Railway, a VPS — and keep Redis alongside it.
 ## Verifying
 
 ```bash
-cd backend  && cargo test && cargo clippy --all-targets && cargo fmt --check
-cd frontend && flutter test && flutter analyze
+make check              # unit tests, clippy, analyzer, formatting — no services needed
+make test-integration   # 15 backend tests against a real Postgres
+make test-contract      # two simulated phones syncing through a running API
 ```
 
-Current state: **16 Rust tests**, **27 Flutter tests**, no analyzer or clippy
-warnings in either codebase.
+| Suite | Tests | Needs |
+|---|---|---|
+| Rust unit | 22 | nothing |
+| Rust integration | 15 | Postgres (`TEST_DATABASE_URL`, defaults to the compose one) |
+| Flutter | 62 | nothing — SQLite runs in memory |
+| Sync contract | 1 | a running API (`CONTRACT_API`) |
+
+The integration and contract suites are what prove sync works: pushes replay
+safely, stock counts converge across devices, and a new device receives every
+row. See `docs/IMPLEMENTATION_PLAN.md` for the defects they caught.
+
+---
+
+## Logo and splash screen
+
+The current logo is a **placeholder**: a storefront with an awning. Every icon,
+splash and in-app logo is generated from one file:
+
+```
+frontend/assets/brand/source/kitaza_glyph.svg
+```
+
+To use a real logo, replace that SVG with a single-colour, square artwork on a
+transparent background and run:
+
+```bash
+make brand
+```
+
+This regenerates the Android (including adaptive and Android 12+ splash), iOS
+and web launcher icons and native splash screens. It needs `rsvg-convert` and
+ImageMagick 7. The brand colour and backgrounds are set at the top of
+`frontend/tool/generate_brand_assets.sh` and in `flutter_native_splash.yaml`.
 
 ---
 
@@ -150,6 +186,8 @@ The ones that matter:
 | `REDIS_URL` | `redis://127.0.0.1:6379` | Optional — the API degrades gracefully without it. |
 | `KITAZA_REFRESH_TOKEN_DAYS` | `180` | How long a device stays signed in. |
 | `KITAZA_ALLOWED_ORIGINS` | `*` | Set to real origins in production. |
+| `KITAZA_SYNC_SETTLE_MS` | `2000` | Holds back rows still being committed from a pull. |
+| `KITAZA_SYNC_PAGE_SIZE` | `500` | Rows per table per pull; devices keep pulling while `has_more`. |
 
 Frontend settings are `--dart-define` values, so one binary can target staging
 or production: `KITAZA_API_URL`, `KITAZA_WS_URL`.

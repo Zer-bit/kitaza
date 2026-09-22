@@ -54,6 +54,7 @@ class SaleLine {
   );
 
   Map<String, Object?> toPushJson() => {
+    'id': id,
     'product_id': productId,
     'product_name': productName,
     'quantity': quantity,

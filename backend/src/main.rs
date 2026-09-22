@@ -1,11 +1,6 @@
-mod application;
-mod config;
-mod features;
-mod infrastructure;
-mod shared;
-
-use config::AppSettings;
-use infrastructure::observability::install_tracing;
+use kitaza_server::application;
+use kitaza_server::config::AppSettings;
+use kitaza_server::infrastructure::observability::install_tracing;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

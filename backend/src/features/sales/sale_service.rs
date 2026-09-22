@@ -176,7 +176,7 @@ impl SaleService {
         };
 
         Ok(PreparedLine {
-            id: Uuid::new_v4(),
+            id: item.id.unwrap_or_else(Uuid::new_v4),
             product_id: item.product_id,
             product_name: name,
             quantity,

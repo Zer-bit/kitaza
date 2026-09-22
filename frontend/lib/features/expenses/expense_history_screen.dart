@@ -90,7 +90,7 @@ class _ExpenseRow extends ConsumerWidget {
       direction: DismissDirection.endToStart,
       onDismissed: (_) async {
         await ref.read(expenseRepositoryProvider).remove(expense.id);
-        ref.read(dataRevisionProvider.notifier).bump();
+        ref.read(dataRevisionProvider.notifier).localWrite();
       },
       background: Container(
         alignment: Alignment.centerRight,

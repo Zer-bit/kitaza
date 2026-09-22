@@ -114,26 +114,64 @@ class SessionRepository {
     return _acceptCloudSession(body);
   }
 
-  /// Upgrades a local-only device to cloud sync. Local rows keep their ids, so
-  /// the first sync pushes the whole history up rather than starting over.
-  Future<AuthSession> linkExistingDataToCloud({
+  /// Moves a store that has only ever lived on this device into the cloud,
+  /// either as a new account or into an existing one.
+  ///
+  /// Local rows keep their ids and are re-scoped to the cloud store's id.
+  /// Every local write was already queued in the outbox, so the first sync
+  /// uploads the complete history - including the stock ledger - through the
+  /// same tested path as any other push.
+  Future<AuthSession> upgradeToCloud({
     required String email,
     required String password,
+    required bool createAccount,
     required String fullName,
     required String storeName,
   }) async {
-    final session = await register(
-      email: email,
-      password: password,
-      fullName: fullName,
-      storeName: storeName,
+    final localStoreId = _preferences.readActiveStoreId();
+
+    final body = createAccount
+        ? await _authApi.register(
+            email: email.trim(),
+            password: password,
+            fullName: fullName.trim(),
+            storeName: storeName.trim(),
+            deviceTag: await _deviceTag(),
+          )
+        : await _authApi.signIn(
+            email: email.trim(),
+            password: password,
+            deviceTag: await _deviceTag(),
+          );
+
+    final session = AuthSession.fromJson(body, mode: StorageMode.cloud);
+
+    await _tokens.saveTokens(
+      accessToken: session.accessToken ?? '',
+      refreshToken: session.refreshToken ?? '',
     );
 
-    await _preferences.writeStorageMode(StorageMode.cloud.name);
+    await _database.db.transaction((txn) async {
+      await SessionDao(txn).adoptCloudStore(
+        fromStoreId: localStoreId ?? '',
+        store: session.store,
+        owner: session.owner,
+      );
+    });
+
+    await _preferences.clearSyncCursor();
+    await _persist(session.owner, session.store, StorageMode.cloud);
     return session;
   }
 
-  Future<void> signOut({bool eraseLocalData = false}) async {
+  /// Signing out always clears this device.
+  ///
+  /// In cloud mode the records are safe on the server and come back with a
+  /// full download on the next sign-in. Leaving them - and the outbox - behind
+  /// would mean the next person to sign in on this phone uploads the previous
+  /// owner's unsent entries into their own store. Callers warn about unsent
+  /// changes before getting here.
+  Future<void> signOut() async {
     final refreshToken = await _tokens.readRefreshToken();
     if (refreshToken != null) {
       try {
@@ -145,10 +183,7 @@ class SessionRepository {
 
     await _tokens.clear();
     await _preferences.clearSession();
-
-    if (eraseLocalData) {
-      await _sessionDao.wipe(_database.db);
-    }
+    await _sessionDao.wipe(_database.db);
   }
 
   Future<AuthSession> _acceptCloudSession(Map<String, dynamic> body) async {

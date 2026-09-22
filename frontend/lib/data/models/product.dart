@@ -74,6 +74,10 @@ class Product {
   );
 
   /// Shape the API expects when this product is pushed to the cloud.
+  ///
+  /// Stock is deliberately absent: it reaches the server only through the
+  /// stock ledger. Sending the current count here would be applied on top of
+  /// the sales that produced it, deducting them twice.
   Map<String, Object?> toPushJson() => {
     'id': id,
     'name': name,
@@ -81,7 +85,7 @@ class Product {
     'unit_label': unitLabel,
     'cost_price': costPrice,
     'selling_price': sellingPrice,
-    'opening_stock': stockQuantity,
+    'opening_stock': 0,
     'reorder_level': reorderLevel,
   };
 

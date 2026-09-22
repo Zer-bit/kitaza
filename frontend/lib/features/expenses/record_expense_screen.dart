@@ -48,7 +48,7 @@ class _RecordExpenseScreenState extends ConsumerState<RecordExpenseScreen> {
             description: _description.text,
           );
 
-      ref.read(dataRevisionProvider.notifier).bump();
+      ref.read(dataRevisionProvider.notifier).localWrite();
 
       if (!mounted) return;
       FeedbackMessenger.success(context, 'Expense recorded.');

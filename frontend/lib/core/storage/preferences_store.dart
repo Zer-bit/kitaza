@@ -34,6 +34,8 @@ class PreferencesStore {
   Future<void> writeSyncCursor(String value) =>
       _preferences.setString(_syncCursorKey, value);
 
+  Future<void> clearSyncCursor() => _preferences.remove(_syncCursorKey);
+
   Future<void> clearSession() async {
     await _preferences.remove(_activeStoreKey);
     await _preferences.remove(_syncCursorKey);

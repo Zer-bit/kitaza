@@ -15,7 +15,9 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs \
 
 COPY src ./src
 COPY migrations ./migrations
-RUN touch src/main.rs && cargo build --release
+# The crate is a library plus a thin binary; touch both so neither is
+# mistaken for the cached placeholder.
+RUN touch src/main.rs src/lib.rs && cargo build --release
 
 
 FROM debian:bookworm-slim AS runtime

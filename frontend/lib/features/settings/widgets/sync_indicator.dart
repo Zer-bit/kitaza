@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/route_paths.dart';
 import '../../../core/config/storage_mode.dart';
 import '../../../data/repositories/sync_coordinator.dart';
 import '../../authentication/auth_controller.dart';
@@ -21,6 +23,19 @@ class SyncIndicator extends ConsumerWidget {
     }
 
     final status = ref.watch(syncCoordinatorProvider);
+
+    // Refused entries outrank every other state: they will not fix themselves.
+    if (status.needsAttention) {
+      return IconButton(
+        onPressed: () => context.push(RoutePaths.syncProblems),
+        tooltip: '${status.parkedCount} could not be saved',
+        icon: Icon(
+          Icons.sync_problem_rounded,
+          size: 20,
+          color: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
 
     return switch (status.phase) {
       SyncPhase.syncing => const _Chip(

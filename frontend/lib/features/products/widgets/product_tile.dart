@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/formatting/peso_formatter.dart';
+import '../../../core/formatting/quantity_formatter.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../data/models/product.dart';
 
@@ -53,10 +54,7 @@ class ProductTile extends StatelessWidget {
     );
   }
 
-  String _stockLabel() =>
-      product.stockQuantity == product.stockQuantity.roundToDouble()
-      ? product.stockQuantity.toInt().toString()
-      : product.stockQuantity.toStringAsFixed(2);
+  String _stockLabel() => QuantityFormatter.exact(product.stockQuantity);
 }
 
 class _LowStockBadge extends StatelessWidget {

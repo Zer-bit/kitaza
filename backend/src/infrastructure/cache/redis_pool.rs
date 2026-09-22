@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use redis::aio::ConnectionManager;
 
 use crate::config::RedisSettings;
@@ -24,16 +26,25 @@ impl CacheHandle {
     }
 }
 
+/// The connection manager retries internally, which left boot stalled for
+/// about ten seconds when Redis was down. A cache is never worth delaying
+/// startup for, so the attempt is capped.
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(2);
+
 pub async fn connect_cache(settings: &RedisSettings) -> CacheHandle {
-    match try_connect(&settings.url).await {
-        Ok(connection) => {
+    match tokio::time::timeout(CONNECT_TIMEOUT, try_connect(&settings.url)).await {
+        Ok(Ok(connection)) => {
             tracing::info!("redis cache connected");
             CacheHandle {
                 connection: Some(connection),
             }
         }
-        Err(error) => {
+        Ok(Err(error)) => {
             tracing::warn!(%error, "redis unavailable, continuing without cache");
+            CacheHandle::disabled()
+        }
+        Err(_) => {
+            tracing::warn!("redis did not answer in time, continuing without cache");
             CacheHandle::disabled()
         }
     }

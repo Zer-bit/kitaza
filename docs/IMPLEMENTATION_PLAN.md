@@ -1,8 +1,8 @@
 # Kitaza — Implementation Plan
 
 This is the build order for Kitaza, from the scaffold that exists today through
-to a product small businesses pay for monthly. Phases 0–3 are **done and
-verified**; 4 onward are planned.
+to a product small businesses pay for monthly. Phases 0–4 are **done and
+verified**; 5 onward are planned.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -109,27 +109,81 @@ must change the other.
 
 ---
 
-## Phase 4 — Sync hardening
+## Phase 4 — Sync hardening ✅ Done
 
-The sync path exists and is idempotent, but it has not been tested against a
-real network doing real network things.
+Phases 0–3 had only ever been compiled and unit-tested. Phase 4 ran the whole
+system for the first time — the API against a real Postgres, and the Flutter
+data layer against that API — and fixed what that exposed.
 
-- [ ] Integration tests against a live Postgres: push the same batch twice and
-      assert stock moves once. *(The re-push guard is written but only covered
-      by reasoning, not by a test — this is the biggest hole in the codebase.)*
-- [ ] Exponential backoff and a cap on retries for permanently rejected rows.
-- [ ] A "sync problems" screen showing what was rejected and why, with a fix
-      action — rejected rows currently sit in the outbox with their reason
-      recorded but no way for the owner to see it.
-- [ ] Multi-device conflict soak test: two devices editing the same product
-      offline, then both reconnecting.
-- [ ] Upgrade path from local to cloud mode, keeping existing local ids so the
-      first sync uploads the full history rather than starting empty.
-- [ ] WebSocket end-to-end test: sale on the counter tablet appears on the
-      owner's phone.
+- [x] **Integration tests against a live Postgres.** 15 tests drive the real
+      router over HTTP, one freshly migrated database per test
+      (`make test-integration`).
+- [x] **Idempotent replay.** Pushing the same batch twice changes nothing the
+      second time — for sales *and* for stock movements.
+- [x] **Stock as a ledger.** Stock only changes through movements and sales,
+      replayed on the server in the order they happened. A counted-stock
+      correction records the counted total, so it stays right however many
+      sales arrive around it.
+- [x] **Deletions sync.** Voids and removals made offline reach the server,
+      and repeating one is harmless.
+- [x] **Keyset pull pagination.** A new device receives every row however many
+      pages it takes, including rows that share a timestamp.
+- [x] **Retry cap and backoff.** A row the server refuses five times is parked
+      rather than resent forever; transport failures back off from 30 seconds
+      to 15 minutes, and reconnecting or tapping *Sync now* skips the wait.
+- [x] **Sync problems screen** listing refused entries with the server's
+      reason, and *Try again* / *Keep on phone only*.
+- [x] **Local → cloud upgrade.** A store that lived on one phone moves into a
+      new or existing account with its full history, stock ledger included.
+- [x] **Live updates wired in.** The WebSocket connects while signed in to the
+      cloud; an event triggers a normal sync, so there is one path for data
+      to arrive by.
+- [x] **Two-device contract test.** Two simulated phones, each with its own
+      SQLite, trade through the real API and end with identical books
+      (`make test-contract`).
+- [x] **Placeholder logo and splash screen**, generated from one source SVG
+      (`make brand`). The in-app splash matches the native one exactly, so the
+      hand-off is invisible.
 
-**Exit criteria:** a week of simulated flaky-network trading ends with both
-devices and the server holding identical totals.
+### Defects found and fixed
+
+Recorded because each one would have reached a real store.
+
+| Defect | Effect | Caught by |
+|---|---|---|
+| JWT crypto backend never enabled | **Every sign-up and sign-in crashed the request** | First real run of the API |
+| Product stock sent on the product and ignored on update | Correcting a count was silently reverted by the next sync | Reading the sync path |
+| Stock movements not idempotent | A retried push counted a delivery twice | Integration test |
+| Pull cursor jumped to "now" on a full page | A second device only received the oldest 2,000 sales | Integration test |
+| Voids and removals never pushed | Other devices kept counting voided sales | Reading the sync path |
+| Server minted new sale-line ids | A device pulling its own sale back held every line twice | Reading the sync path |
+| Outbox cleared by entity id | An edit made during an upload was deleted unsent | Coordinator test |
+| Pulled data never refreshed the screens | Updates from other devices stayed invisible | Coordinator test |
+| Active store cached for the app's lifetime | After switching accounts, writes went to the previous owner's store | Reading the code |
+| Sign-out left the outbox behind | The next person to sign in uploaded the previous owner's entries | Reading the code |
+| Offline treated as a hard failure | Sync status showed an error instead of "offline" | Coordinator test |
+| Stock pre-filled rounded to whole units | Saving a 2.5 kg product untouched recorded a count of 3 | Reading the editor |
+| Router rebuilt on every auth change | Navigation reset; would have made the splash flicker | Reading the code |
+| Redis connect retried for ~10 s | Boot stalled whenever Redis was down | First real run of the API |
+
+Every fix is covered by a test, and the key server tests were checked by
+re-introducing the bug and confirming the test fails.
+
+### Still open
+
+- The WebSocket **transport** (handshake, reconnect) has no automated test.
+  The broadcaster is verified — a synced sale reaches its store's listeners
+  and no other store's — but not the socket carrying it.
+- Cross-instance event fan-out through Redis is untested; no Redis was
+  available to test against.
+- The Docker image has not been rebuilt since the crate became a library plus
+  a binary. The Dockerfile was updated for it but not exercised.
+- A local-only device keeps its outbox forever, since that outbox is what the
+  cloud upgrade uploads. Fine at small-store volumes; compact it if storage
+  ever becomes a complaint.
+
+**Exit criteria:** two devices trading offline end with identical stock and
+totals. ✅ Proven by the contract test against the live API.
 
 ---
 
@@ -137,6 +191,8 @@ devices and the server holding identical totals.
 
 Everything needed before a stranger uses it unsupervised.
 
+- [ ] A real logo to replace the placeholder — edit
+      `frontend/assets/brand/source/kitaza_glyph.svg` and run `make brand`.
 - [ ] Onboarding that seeds ~20 common sari-sari products so the catalogue is
       not empty on day one.
 - [ ] Barcode scanning for products.

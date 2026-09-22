@@ -48,7 +48,9 @@ way to introduce a bug here.
 
 ## Backend
 
-**axum + sqlx + Postgres + Redis.**
+**axum + sqlx + Postgres + Redis.** The crate is a library with a thin binary,
+so the integration tests in `backend/tests/` can drive the real router against
+a real database.
 
 ### Feature slices
 
@@ -85,10 +87,43 @@ Rows carry client-generated UUIDs, and every write is an upsert on that id.
 Replaying a sync batch is therefore harmless — which matters, because a phone
 losing signal mid-push is the normal case, not the edge case.
 
-Sales need extra care: a plain upsert would re-run the stock deduction. So
-`SaleRepository::record` checks whether the sale id already exists and, if so,
-restores the stock its previous lines took out before applying the new ones.
-Re-pushing an unchanged sale nets to zero; a genuine edit is applied correctly.
+Anything that *moves stock* needs more than an upsert, because re-running it
+would move stock again:
+
+- `SaleRepository::record` checks whether the sale already exists and, if so,
+  restores the stock its previous lines took before applying the new ones. An
+  unchanged re-push nets to zero; a genuine edit lands correctly.
+- `StockRepository::record_movement` locks the product row, inserts the
+  ledger row with `ON CONFLICT DO NOTHING`, and only moves stock if that
+  insert actually happened.
+
+### Stock is a ledger
+
+Stock is never a number that devices overwrite. It is the sum of the stock
+movements and the sales, and it only changes through them:
+
+- A new product with opening stock is a `stock_in` movement.
+- Correcting the count is an `adjustment` carrying the **counted total**, not
+  a difference, so it stays right however many sales arrive around it.
+- Products are pushed with `opening_stock: 0`; stock never travels on the
+  product itself.
+
+On a push, sales and movements are replayed in the order they *happened*
+(`occurred_at`), not the order they were listed. This is what lets two phones
+sell the same product offline and still agree on the count when they
+reconnect — proven by the two-device contract test.
+
+### Pull pagination
+
+A pull pages each table on `(updated_at, id)` rather than "everything since a
+timestamp". A timestamp-only cursor has two failure modes, both reproduced in
+the integration tests before being fixed: a full page moves the cursor past
+rows that were never sent, and rows written in one transaction share a
+timestamp and get split across a gap. The id breaks the tie.
+
+A short settle window holds back rows younger than two seconds. `updated_at`
+is set when a transaction starts, not when it commits, and without the margin
+a slow transaction could commit behind a cursor that has already moved on.
 
 ### Redis is optional by design
 
@@ -98,6 +133,10 @@ unreachable, and the API logs a warning and carries on. Availability beats
 throttling for a store that needs to ring up a sale.
 
 ### Realtime
+
+The WebSocket carries nudges, not data. An event makes the device run an
+ordinary sync, and the pull brings the rows. There is one path for data to
+arrive by, and a missed event costs nothing but a slightly later refresh.
 
 Each store gets its own in-process broadcast channel, so a busy store never
 wakes another store's listeners. When Redis is present, events are also
@@ -127,12 +166,60 @@ data/models/         plain immutable classes
 
 Screens never touch a DAO. Repositories never build widgets.
 
+### The outbox
+
+Every local write also lands in `sync_queue`, in the same transaction. The
+sync coordinator:
+
+- **pushes in batches until the outbox is empty**, then **pulls pages until
+  the server reports `has_more: false`**;
+- **clears exactly the rows it sent**, by row id. Re-queuing an entity
+  replaces its row with a new id, so an edit made while an upload is in flight
+  survives that upload;
+- **parks a row after five refusals** instead of resending it forever, and
+  shows it on the *Sync problems* screen with the server's reason;
+- **backs off** from 30 seconds to 15 minutes after transport failures, but
+  goes immediately when connectivity returns or the owner taps *Sync now*.
+
+A local-only device queues too. That outbox is what makes the cloud upgrade
+work: the store's rows are re-scoped to the cloud store's id, and the first
+sync uploads the complete history through the ordinary push path.
+
+### Sessions and store scope
+
+The active store and storage mode are Riverpod state, set by the auth
+controller on every session change, and every store-scoped provider rebuilds
+when they change. An earlier version read them once and cached them for the
+app's lifetime, so switching accounts kept writing to the previous store.
+
+**Signing out always clears the device.** In cloud mode the records come back
+with a full download on the next sign-in. Leaving them — and the outbox —
+behind would let the next person to sign in upload the previous owner's unsent
+entries into their own store. The sign-out dialog tries a final sync and says
+how many unsent changes would be lost.
+
 ### Refresh
 
-One `dataRevisionProvider` counter is bumped by any write — local, pulled from
-the cloud, or announced over the WebSocket. Read-side providers watch it and
-recompute. This is considerably easier to follow than a stream subscription per
-table, and on a dataset this size the recompute is cheap.
+One `dataRevisionProvider` counter is watched by every read-side provider.
+`localWrite()` bumps it and schedules a push a moment later, coalescing a
+burst of entries into one upload; a pull that wrote anything bumps it too.
+This is considerably easier to follow than a stream subscription per table,
+and on a dataset this size the recompute is cheap.
+
+### Startup and the splash
+
+The router is created once and re-runs its redirect when auth changes. The
+decision itself is a pure function, `resolveRoute`, tested directly.
+
+The native splash (generated by `flutter_native_splash`) shows until Flutter's
+first frame. That frame is `SplashScreen`, drawn to match it exactly — same
+background per *system* brightness, same logo, same 120dp size — so the
+hand-off cannot be seen. It stays until the stored session is read, then
+routes to the dashboard or the welcome screen. A spinner appears only if that
+takes longer than 700ms.
+
+All brand imagery — launcher icons, splash, in-app logo — is generated from
+one SVG, `frontend/assets/brand/source/kitaza_glyph.svg`, by `make brand`.
 
 ### Money, again
 

@@ -6,7 +6,7 @@ use validator::Validate;
 
 use crate::shared::{Money, Quantity};
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 pub struct RecordMovementRequest {
     #[serde(default)]
     pub id: Option<Uuid>,
@@ -18,7 +18,9 @@ pub struct RecordMovementRequest {
     #[validate(length(min = 1, message = "is required"))]
     pub movement: String,
 
-    #[validate(range(exclusive_min = 0.0, message = "must be greater than zero"))]
+    /// An amount for in/out movements, or the counted total for an
+    /// adjustment, which may be zero.
+    #[validate(range(min = 0.0, message = "cannot be negative"))]
     pub quantity: f64,
 
     #[serde(default)]

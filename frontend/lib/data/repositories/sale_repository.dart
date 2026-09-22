@@ -135,7 +135,8 @@ class SaleRepository {
 
     await _db.transaction((txn) async {
       await SaleDao(txn).insert(_storeId, sale);
-      await SyncQueueDao(txn).enqueue('sales', sale.id, sale.toPushJson());
+      await SyncQueueDao(txn)
+          .enqueue(QueuedEntity.sales, sale.id, sale.toPushJson());
     });
 
     return sale;
@@ -144,7 +145,8 @@ class SaleRepository {
   Future<void> voidSale(String saleId) async {
     await _db.transaction((txn) async {
       await SaleDao(txn).voidSale(saleId);
-      await SyncQueueDao(txn).clearAccepted([saleId]);
+      await SyncQueueDao(txn)
+          .enqueueDeletion(DeletedEntity.sale, QueuedEntity.sales, saleId);
     });
   }
 }
