@@ -1,0 +1,94 @@
+name: check
+
+# Everything `make check` runs, plus the backend tests that need a real
+# Postgres. A red build here is the same failure a developer would see.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: kitaza
+          POSTGRES_PASSWORD: kitaza
+          POSTGRES_DB: kitaza
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U kitaza"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.98'
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - name: Formatting
+        run: cargo fmt --check
+        working-directory: backend
+      - name: Lints
+        run: cargo clippy --all-targets --features integration -- -D warnings
+        working-directory: backend
+      # Integration tests create a database per test, so the role needs
+      # CREATEDB - the compose superuser has it.
+      - name: Tests
+        run: cargo test --features integration
+        working-directory: backend
+        env:
+          DATABASE_URL: postgres://kitaza:kitaza@localhost:5432/kitaza
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: frontend
+      - name: Formatting
+        run: dart format --set-exit-if-changed lib test
+        working-directory: frontend
+      - name: Analysis
+        run: flutter analyze
+        working-directory: frontend
+      # The contract tests need a running API and skip themselves without
+      # one; everything else runs here.
+      - name: Tests
+        run: flutter test
+        working-directory: frontend
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          channel: stable
+          cache: true
+      # Proves the Android build still assembles. It is signed with the debug
+      # key on purpose: CI holds no release keystore, and an APK from here
+      # must never be installable as the real app.
+      - name: Release build
+        run: flutter build apk --release --split-per-abi -PallowDebugSigning
+        working-directory: frontend

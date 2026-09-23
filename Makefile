@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup check test test-integration test-contract brand backup restore fmt lint run-api run-app stack stack-down clean
+.PHONY: help setup check test test-integration test-contract brand backup restore fmt lint run-api run-app release-apk release-bundle stack stack-down clean
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -46,6 +46,27 @@ lint: ## Analyse and check formatting
 fmt: ## Format both codebases
 	cd backend && cargo fmt
 	cd frontend && dart format lib test
+
+# A release build has to be told where the API lives. Without it the app
+# carries the developer default, which points at a machine the owner's phone
+# cannot reach, and cloud mode simply never connects.
+RELEASE_DEFINES = \
+	--dart-define=KITAZA_API_URL=$(KITAZA_API_URL) \
+	--dart-define=KITAZA_WS_URL=$(KITAZA_WS_URL)
+
+check-release-config:
+	@test -n "$(KITAZA_API_URL)" -a -n "$(KITAZA_WS_URL)" || { printf '%s\n' \
+		"Tell the build where the API lives, for example:" \
+		"  make $(MAKECMDGOALS) KITAZA_API_URL=https://api.kitaza.ph/api/v1 KITAZA_WS_URL=wss://api.kitaza.ph"; exit 2; }
+	@test -f frontend/android/key.properties || { printf '%s\n' \
+		"No frontend/android/key.properties, so the release could not be signed." \
+		"Copy frontend/android/key.properties.example and fill it in."; exit 2; }
+
+release-apk: check-release-config ## Signed APKs to hand out directly, one per processor
+	cd frontend && flutter build apk --release --split-per-abi $(RELEASE_DEFINES)
+
+release-bundle: check-release-config ## Signed app bundle to upload to Play
+	cd frontend && flutter build appbundle --release $(RELEASE_DEFINES)
 
 stack: ## Start Postgres, Redis and the API
 	docker compose up --build -d

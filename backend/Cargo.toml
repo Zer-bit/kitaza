@@ -39,3 +39,4 @@ validator = { version = "0.21.0", features = ["derive"] }
 
 [dev-dependencies]
 http-body-util = "0.1.5"
+tokio-tungstenite = { version = "0.30.0", default-features = false, features = ["connect", "handshake"] }

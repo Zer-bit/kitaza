@@ -1227,5 +1227,14 @@
   "benchmarkNotSharing": "Comparisons are off while you keep your own figures back.",
   "benchmarkSharingTitle": "Share anonymous comparisons",
   "benchmarkSharingHint": "Your monthly totals join the middle figures other owners see. Never your name, your store or any single sale, and only across at least 20 stores.",
-  "benchmarkSharingOff": "Not sharing. You will not see comparisons either."
+  "benchmarkSharingOff": "Not sharing. You will not see comparisons either.",
+  "settingsAbout": "About",
+  "aboutVersion": "Kitaza {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "aboutCopied": "Version copied",
+  "aboutUnreleasedBuild": "Test build. Cloud storage will not connect."
 }

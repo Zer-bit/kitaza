@@ -45,17 +45,30 @@ class RealtimeEvent {
 /// Reconnects with backoff and simply stays quiet when there is no network -
 /// the app is fully usable without it.
 class RealtimeChannel {
-  RealtimeChannel({required this.storeId, required this.readAccessToken});
+  RealtimeChannel({
+    required this.storeId,
+    required this.readAccessToken,
+    String? baseUrl,
+    Duration minBackoff = _defaultMinBackoff,
+  }) : baseUrl = baseUrl ?? AppConfig.realtimeBaseUrl,
+       _backoff = minBackoff,
+       _minBackoff = minBackoff;
 
   final String storeId;
+
+  /// Where the sockets live. Passed in so a test can point the real client at
+  /// a real server of its own.
+  final String baseUrl;
 
   /// Read afresh on every connection attempt. Access tokens are short-lived
   /// and renewed by the HTTP layer, so one captured at construction would
   /// leave a reconnecting socket knocking with an expired token forever.
   final Future<String?> Function() readAccessToken;
 
-  static const Duration _minBackoff = Duration(seconds: 2);
+  static const Duration _defaultMinBackoff = Duration(seconds: 2);
   static const Duration _maxBackoff = Duration(seconds: 60);
+
+  final Duration _minBackoff;
 
   final StreamController<RealtimeEvent> _events =
       StreamController<RealtimeEvent>.broadcast();
@@ -63,7 +76,7 @@ class RealtimeChannel {
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _subscription;
   Timer? _reconnectTimer;
-  Duration _backoff = _minBackoff;
+  Duration _backoff;
   bool _disposed = false;
 
   Stream<RealtimeEvent> get events => _events.stream;
@@ -81,9 +94,7 @@ class RealtimeChannel {
     }
 
     try {
-      final uri = Uri.parse(
-        ApiEndpoints.realtime(AppConfig.realtimeBaseUrl, storeId, token),
-      );
+      final uri = Uri.parse(ApiEndpoints.realtime(baseUrl, storeId, token));
       final channel = WebSocketChannel.connect(uri);
       _channel = channel;
 
@@ -126,9 +137,9 @@ class RealtimeChannel {
 
     _reconnectTimer = Timer(_backoff, connect);
     _backoff = Duration(
-      seconds: (_backoff.inSeconds * 2).clamp(
-        _minBackoff.inSeconds,
-        _maxBackoff.inSeconds,
+      milliseconds: (_backoff.inMilliseconds * 2).clamp(
+        _minBackoff.inMilliseconds,
+        _maxBackoff.inMilliseconds,
       ),
     );
   }

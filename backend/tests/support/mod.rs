@@ -19,6 +19,8 @@ use kitaza_server::config::{
 use kitaza_server::infrastructure::cache::CacheHandle;
 use serde_json::{Value, json};
 use sqlx::PgPool;
+use tokio::net::TcpListener;
+use tokio::task::JoinHandle;
 use tower::ServiceExt;
 use uuid::Uuid;
 
@@ -71,6 +73,29 @@ impl TestApp {
     /// Plans enforced, with the test gateway taking "payments".
     pub fn with_billing(pool: PgPool) -> Self {
         Self::build(pool, settings(500, BillingMode::Test))
+    }
+
+    /// Pings realtime sockets many times a second, so a test can watch what
+    /// the keepalive does without waiting the production twenty-five.
+    pub fn with_brisk_keepalive(pool: PgPool) -> Self {
+        let mut settings = settings(500, BillingMode::Off);
+        settings.server.realtime_keepalive = Duration::from_millis(100);
+        Self::build(pool, settings)
+    }
+
+    /// The router on a real TCP port. A websocket cannot be driven through
+    /// `oneshot` - only a real connection carries an upgrade - so the socket
+    /// tests talk to this instead.
+    pub async fn serve(&self) -> ServedApp {
+        let listener = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .expect("no free port");
+        let address = listener.local_addr().unwrap();
+        let router = self.router.clone();
+        let server = tokio::spawn(async move {
+            let _ = axum::serve(listener, router.into_make_service()).await;
+        });
+        ServedApp { address, server }
     }
 
     fn build(pool: PgPool, settings: AppSettings) -> Self {
@@ -294,6 +319,25 @@ impl TestApp {
     }
 }
 
+/// The test router listening on a loopback port for as long as it is held.
+pub struct ServedApp {
+    pub address: SocketAddr,
+    server: JoinHandle<()>,
+}
+
+impl ServedApp {
+    /// The websocket URL a phone would open for a store.
+    pub fn socket_url(&self, store_id: Uuid, token: &str) -> String {
+        format!("ws://{}/ws/store/{store_id}?token={token}", self.address)
+    }
+}
+
+impl Drop for ServedApp {
+    fn drop(&mut self) {
+        self.server.abort();
+    }
+}
+
 /// A product as a device sends it: stock always starts at zero and arrives
 /// through the ledger.
 pub fn product(id: Uuid, name: &str) -> Value {
@@ -332,6 +376,7 @@ fn settings(page_size: i64, billing: BillingMode) -> AppSettings {
             allowed_origins: vec!["*".into()],
             request_timeout_seconds: 30,
             max_body_bytes: 4 * 1024 * 1024,
+            realtime_keepalive: Duration::from_secs(25),
         },
         database: DatabaseSettings {
             url: String::new(),

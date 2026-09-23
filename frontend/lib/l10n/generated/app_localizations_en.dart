@@ -2054,4 +2054,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get benchmarkSharingOff =>
       'Not sharing. You will not see comparisons either.';
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String aboutVersion(Object version) {
+    return 'Kitaza $version';
+  }
+
+  @override
+  String get aboutCopied => 'Version copied';
+
+  @override
+  String get aboutUnreleasedBuild =>
+      'Test build. Cloud storage will not connect.';
 }

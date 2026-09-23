@@ -3,7 +3,7 @@
 This is the build order for Kitaza, from the scaffold that exists today through
 to a product small businesses pay for monthly. Every phase is **done and
 verified** as far as it can be without real phones, real stores and a live
-payment account; Phases 5–8 list exactly what that leaves.
+payment account; Phases 5–9 list exactly what that leaves.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -172,9 +172,9 @@ re-introducing the bug and confirming the test fails.
 
 ### Still open
 
-- The WebSocket **transport** (handshake, reconnect) has no automated test.
-  The broadcaster is verified — a synced sale reaches its store's listeners
-  and no other store's — but not the socket carrying it.
+- ~~The WebSocket **transport** has no automated test.~~ Closed in Phase 9:
+  the handshake, who is let through, delivery, reconnection and the
+  signed-out cut-off are all driven over a real socket.
 - Cross-instance event fan-out through Redis is untested; no Redis was
   available to test against.
 - The Docker image has not been rebuilt since the crate became a library plus
@@ -442,6 +442,87 @@ follow and a number they will ignore.
 not already know, and can see why it is true. The arithmetic is there on
 every card; whether it tells them something new is the field trial's
 question.
+
+---
+
+## Phase 9 — Ready to release ✅ Done
+
+Everything between "it works on my machine" and an APK a stranger can
+install. Nothing new for an owner to learn; the phase exists so the build
+that reaches them is the build that was tested.
+
+- [x] **A release that can only be signed properly.** Signing material comes
+      from `android/key.properties`, which is never committed. A release
+      build with no key **fails** instead of falling back to the debug key —
+      that fallback is the Flutter template default, and an app signed with
+      it installs fine and can then never be updated, because the real key
+      does not match. A developer who only wants to run a release build
+      locally passes `-PallowDebugSigning`, which is also how CI builds it.
+- [x] **A build that cannot point at nowhere.** `make release-apk` and
+      `make release-bundle` refuse without `KITAZA_API_URL` and
+      `KITAZA_WS_URL`. The default is the Android emulator's route to the
+      developer's own machine, and on a real phone it looks exactly like bad
+      signal. If one ever slips out anyway, Settings → About says **Test
+      build** on the phone.
+- [x] **A build that says what it is.** Settings → About shows the version
+      and the phone's operating system, and copies both to the clipboard,
+      so an owner ringing about a problem can say which build they have. The
+      same string was already attached to error reports.
+- [x] **The websocket transport, tested from both ends.** Five server tests
+      over a real socket on a real port: a sale reaches a listening phone, a
+      made-up token gets no socket, one owner cannot listen to another's
+      store, a phone revoked after it connected is hung up on, and a phone
+      that drops can reconnect. The keepalive interval became a setting so
+      the cut-off can be watched without waiting twenty-five seconds. Six
+      more drive the app's own client against a real server: events arrive,
+      an unknown topic from a newer server still triggers a sync, a frame
+      that is not JSON is ignored rather than fatal, a dropped connection
+      comes back, and each reconnection asks for a fresh access token
+      instead of knocking forever with an expired one.
+- [x] **Continuous integration.** Formatting, lints, every unit test, the
+      backend integration tests against a real Postgres, and an Android
+      release build, on every push and pull request.
+- [x] **A release runbook**, in `docs/OPERATIONS.md`: making the keystore,
+      what each release bumps, and what to check on a built APK.
+
+### Defects found and fixed
+
+| Defect | Effect | Caught by |
+|---|---|---|
+| `android:label="kitaza_app"` | The app's name on the home screen was the project folder | Reading a built APK |
+| Release builds signed with the debug key | Would have installed, then been impossible to update | Reading the template gradle |
+| No API URL required for a release | A handed-out APK would silently fail to reach the cloud | Reading the release path |
+| One 88 MB APK carrying three processors | A third of it downloaded over mobile data for nothing | Building it |
+| `CupertinoIcons` font referenced but not bundled | A missing glyph, and a warning on every build | Build output |
+| `description: "A new Flutter project."` | The template default, headed for a store listing | Packaging test |
+
+The app's realtime client had no tests at all before this phase — it took its
+server address from a compile-time constant, so nothing could point it
+anywhere. It now takes the address as an argument, which is what let the six
+client tests exist.
+
+### What is not verified, and why
+
+- **Installing and running the APK on a phone.** It is built, signed and its
+  certificate, label and minimum version read back — but nothing has run it.
+  The field trial is still the first time this app meets Android.
+- **The signing key itself.** The build was proven with a throwaway keystore
+  that was then deleted. The real one does not exist yet, and making it is
+  a decision with no undo.
+- **CI has never run.** The workflow matches what `make check` does locally
+  and the versions this machine uses, but no push has exercised it.
+- **R8 is off.** Shrinking the Java side would save a few megabytes, but it
+  can break the camera and printer plugins in ways only a real phone shows.
+  Worth turning on during the field trial, not before it.
+- **Android 7.0 is the floor**, inherited from Flutter and the scanner.
+  Whether any owner in the trial has something older is a question for the
+  trial.
+- **The server image still has not been rebuilt**, as in Phase 4: no Docker
+  daemon is available on this machine. This phase covers releasing the app,
+  not deploying the API.
+
+**Exit criteria:** `make release-bundle` produces a signed artefact that
+identifies itself correctly. ✅ Proven, with a throwaway key.
 
 ---
 

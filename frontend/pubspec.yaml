@@ -1,5 +1,5 @@
 name: kitaza_app
-description: "A new Flutter project."
+description: "Budget point of sale and business health for Philippine sari-sari stores and carinderias."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -9,6 +9,7 @@ environment:
 dependencies:
   collection: ^1.19.1
   connectivity_plus: ^7.3.1
+  cupertino_icons: ^1.0.9
   device_info_plus: ^13.2.0
   dio: ^5.11.1
   file_picker: ^13.1.0

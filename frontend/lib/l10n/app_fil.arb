@@ -525,5 +525,9 @@
   "benchmarkNotSharing": "Naka-off ang paghahambing habang hindi ka nagbabahagi ng sarili mong numero.",
   "benchmarkSharingTitle": "Magbahagi ng anonymous na paghahambing",
   "benchmarkSharingHint": "Sasama ang buwanang kabuuan mo sa gitnang numerong nakikita ng ibang may-ari. Hindi kasama ang pangalan mo, ang tindahan mo, o kahit isang benta, at hindi bababa sa 20 tindahan ang pinagsasamahan.",
-  "benchmarkSharingOff": "Hindi nagbabahagi. Hindi mo rin makikita ang paghahambing."
+  "benchmarkSharingOff": "Hindi nagbabahagi. Hindi mo rin makikita ang paghahambing.",
+  "settingsAbout": "Tungkol dito",
+  "aboutVersion": "Kitaza {version}",
+  "aboutCopied": "Nakopya ang bersyon",
+  "aboutUnreleasedBuild": "Pansubok na build. Hindi kokonekta ang cloud."
 }

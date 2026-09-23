@@ -2045,4 +2045,19 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get benchmarkSharingOff =>
       'Hindi nagbabahagi. Hindi mo rin makikita ang paghahambing.';
+
+  @override
+  String get settingsAbout => 'Tungkol dito';
+
+  @override
+  String aboutVersion(Object version) {
+    return 'Kitaza $version';
+  }
+
+  @override
+  String get aboutCopied => 'Nakopya ang bersyon';
+
+  @override
+  String get aboutUnreleasedBuild =>
+      'Pansubok na build. Hindi kokonekta ang cloud.';
 }

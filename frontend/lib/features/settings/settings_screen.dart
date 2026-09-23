@@ -7,6 +7,7 @@ import '../../l10n/l10n.dart';
 import '../../shared/widgets/page_body.dart';
 import '../../shared/widgets/section_header.dart';
 import '../authentication/auth_controller.dart';
+import 'widgets/about_card.dart';
 import 'widgets/account_card.dart';
 import 'widgets/backup_card.dart';
 import 'widgets/comparisons_card.dart';
@@ -97,6 +98,9 @@ class SettingsScreen extends ConsumerWidget {
                 AppSpacing.gapXl,
                 SectionHeader(title: l10n.settingsAccount),
                 if (session != null) AccountCard(session: session),
+                AppSpacing.gapXl,
+                SectionHeader(title: l10n.settingsAbout),
+                const AboutCard(),
                 AppSpacing.gapXl,
               ],
             ),

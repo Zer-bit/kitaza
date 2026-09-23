@@ -3259,6 +3259,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not sharing. You will not see comparisons either.'**
   String get benchmarkSharingOff;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitaza {version}'**
+  String aboutVersion(Object version);
+
+  /// No description provided for @aboutCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Version copied'**
+  String get aboutCopied;
+
+  /// No description provided for @aboutUnreleasedBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Test build. Cloud storage will not connect.'**
+  String get aboutUnreleasedBuild;
 }
 
 class _AppLocalizationsDelegate

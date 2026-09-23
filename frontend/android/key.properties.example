@@ -1,0 +1,11 @@
+# Copy to `key.properties` and fill in. Never committed: the real file and any
+# .jks are in .gitignore, and losing the keystore means no further release can
+# ever update the app on a phone. Keep a backup somewhere safe.
+#
+# Create the keystore once:
+#   keytool -genkey -v -keystore kitaza-release.jks -storetype JKS \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias kitaza
+storeFile=kitaza-release.jks
+storePassword=
+keyAlias=kitaza
+keyPassword=

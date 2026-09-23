@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use axum::Router;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::{Query, State};
+use axum::extract::{Extension, Query, State};
 use axum::response::Response;
 use axum::routing::get;
 use serde::Deserialize;
@@ -14,7 +14,9 @@ use crate::features::access::actor_for_token;
 use crate::features::stores::authorise;
 use crate::shared::{ApiError, ApiResult};
 
-const KEEPALIVE_INTERVAL: Duration = Duration::from_secs(25);
+/// How often an open socket is pinged and its device re-checked.
+#[derive(Clone, Copy)]
+pub struct KeepaliveInterval(pub Duration);
 
 #[derive(Deserialize)]
 struct RealtimeQuery {
@@ -23,8 +25,10 @@ struct RealtimeQuery {
     token: String,
 }
 
-pub fn realtime_routes() -> Router<AppState> {
-    Router::new().route("/ws/store/{store_id}", get(upgrade_connection))
+pub fn realtime_routes(keepalive: Duration) -> Router<AppState> {
+    Router::new()
+        .route("/ws/store/{store_id}", get(upgrade_connection))
+        .layer(Extension(KeepaliveInterval(keepalive)))
 }
 
 async fn upgrade_connection(
@@ -32,6 +36,7 @@ async fn upgrade_connection(
     State(state): State<AppState>,
     axum::extract::Path(store_id): axum::extract::Path<Uuid>,
     Query(query): Query<RealtimeQuery>,
+    Extension(keepalive): Extension<KeepaliveInterval>,
 ) -> ApiResult<Response> {
     let actor = actor_for_token(&state, &query.token).await?;
 
@@ -44,12 +49,19 @@ async fn upgrade_connection(
         .await?;
 
     let session_id = actor.session_id;
-    Ok(upgrade.on_upgrade(move |socket| pump_events(socket, state, store_id, session_id)))
+    Ok(upgrade
+        .on_upgrade(move |socket| pump_events(socket, state, store_id, session_id, keepalive.0)))
 }
 
-async fn pump_events(mut socket: WebSocket, state: AppState, store_id: Uuid, session_id: Uuid) {
+async fn pump_events(
+    mut socket: WebSocket,
+    state: AppState,
+    store_id: Uuid,
+    session_id: Uuid,
+    keepalive_interval: Duration,
+) {
     let mut events = state.broadcaster.subscribe(store_id);
-    let mut keepalive = tokio::time::interval(KEEPALIVE_INTERVAL);
+    let mut keepalive = tokio::time::interval(keepalive_interval);
 
     loop {
         tokio::select! {

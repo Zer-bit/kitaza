@@ -218,3 +218,61 @@ make test-contract CONTRACT_API=http://localhost:8080/api/v1
 
 Neither needs Redis: the API degrades gracefully without it, and so do the
 tests.
+
+---
+
+## Cutting a release
+
+### The signing key, once
+
+An Android app is tied to the key that signed it for life. If the key is
+lost, no later release can replace the app on anyone's phone; they would have
+to uninstall it, and uninstalling takes the store's records with it.
+
+```bash
+keytool -genkeypair -v -keystore kitaza-release.jks -storetype PKCS12 \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias kitaza
+```
+
+Keep the file **outside the repository** and keep a backup somewhere that is
+not the release machine. Then copy `frontend/android/key.properties.example`
+to `key.properties` and fill in the path and passwords. Both the keystore and
+that file are git-ignored, and the build refuses to produce an unsigned
+release rather than quietly signing with the debug key.
+
+### Each release
+
+1. Bump `version:` in `frontend/pubspec.yaml` — `1.2.0+14`, where the number
+   after `+` must go up every time or phones will not treat the build as
+   newer. Both the Android version name and version code come from that one
+   line.
+2. `make check` — formatting, lints and every test in both codebases.
+3. Build, telling it where the API lives:
+
+```bash
+make release-bundle \
+  KITAZA_API_URL=https://api.kitaza.ph/api/v1 \
+  KITAZA_WS_URL=wss://api.kitaza.ph
+```
+
+`release-bundle` produces the `.aab` to upload to Play; `release-apk`
+produces one APK per processor, for handing to an owner directly. The APKs
+are about 32 MB each, against 88 MB for a single file carrying every
+processor, which matters to someone downloading on mobile data.
+
+Without those two variables the app carries the developer default, which
+points at a machine no owner's phone can reach. The build refuses, and if one
+ever slips through, Settings → About says **Test build** on the phone itself.
+
+### Checking a build before it goes out
+
+```bash
+apksigner verify --print-certs app-arm64-v8a-release.apk
+aapt2 dump badging app-arm64-v8a-release.apk | head -2
+```
+
+The certificate fingerprint must match the one used for every previous
+release, and the label must read `Kitaza`.
+
+The app needs Android 7.0 (API 24) or newer — Flutter's own floor, and the
+camera scanner's. Anything older cannot run it.

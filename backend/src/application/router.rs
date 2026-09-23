@@ -54,7 +54,7 @@ pub fn build_router(state: AppState, settings: &ServerSettings) -> Router {
     Router::new()
         .merge(health_routes())
         .merge(billing_pages())
-        .merge(realtime_routes())
+        .merge(realtime_routes(settings.realtime_keepalive))
         .nest(API_PREFIX, api)
         .layer(CompressionLayer::new())
         .layer(TimeoutLayer::with_status_code(

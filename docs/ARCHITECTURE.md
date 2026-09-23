@@ -245,6 +245,11 @@ bridge, two replicas behind a load balancer would each only see their own
 writes. Slow clients that fall behind are sent a `dashboard_stale` nudge rather
 than being silently starved.
 
+Who may listen is decided once, when the socket opens. A socket outlives that
+check, so every `KITAZA_REALTIME_KEEPALIVE_SECONDS` the connection is pinged
+and its device looked up again: a phone the owner has signed out since it
+connected is hung up on rather than left listening to the store.
+
 ---
 
 ## Frontend

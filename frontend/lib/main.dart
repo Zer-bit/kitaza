@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app/app_bootstrap.dart';
 import 'app/app_restarter.dart';
 import 'app/kitaza_app.dart';
+import 'core/config/build_info.dart';
 import 'core/diagnostics/error_reporter.dart';
 import 'core/storage/preferences_store.dart';
 import 'data/local/database/local_database.dart';
@@ -25,8 +26,8 @@ Future<void> main() async {
   await initializeDateFormatting();
 
   final reporter = ErrorReporter(
-    appVersion: dependencies.appVersion,
-    platform: dependencies.platform,
+    appVersion: dependencies.build.version,
+    platform: dependencies.build.platform,
   )..install();
 
   runApp(
@@ -40,6 +41,7 @@ Future<void> main() async {
           overrides: [
             localDatabaseProvider.overrideWithValue(current.database),
             preferencesStoreProvider.overrideWithValue(current.preferences),
+            buildInfoProvider.overrideWithValue(current.build),
           ],
           child: const KitazaApp(),
         );

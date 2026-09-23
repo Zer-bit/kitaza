@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::time::Duration;
 
 use super::{optional, parsed};
 
@@ -8,6 +9,11 @@ pub struct ServerSettings {
     pub allowed_origins: Vec<String>,
     pub request_timeout_seconds: u64,
     pub max_body_bytes: usize,
+
+    /// How often an open realtime socket is pinged, and its device re-checked.
+    /// Shorten it when a proxy in front of the API closes idle connections
+    /// sooner than this.
+    pub realtime_keepalive: Duration,
 }
 
 impl ServerSettings {
@@ -20,6 +26,10 @@ impl ServerSettings {
             allowed_origins: split_origins(&optional("KITAZA_ALLOWED_ORIGINS", "*")),
             request_timeout_seconds: parsed("KITAZA_REQUEST_TIMEOUT_SECONDS", 20)?,
             max_body_bytes: parsed("KITAZA_MAX_BODY_BYTES", 2 * 1024 * 1024)?,
+            realtime_keepalive: Duration::from_secs(parsed(
+                "KITAZA_REALTIME_KEEPALIVE_SECONDS",
+                25,
+            )?),
         })
     }
 
