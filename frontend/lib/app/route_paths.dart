@@ -1,3 +1,5 @@
+import '../data/models/legal_document.dart';
+
 /// Every route name in one place. Screens navigate by these constants so a
 /// path change never means hunting through the widget tree.
 abstract final class RoutePaths {
@@ -25,6 +27,14 @@ abstract final class RoutePaths {
   static const String devices = '/settings/devices';
   static const String activity = '/settings/activity';
   static const String plan = '/settings/plan';
+  static const String guide = '/guide';
+  static const String privacy = '/settings/privacy';
+  static const String closeAccount = '/settings/privacy/close';
+  static const String legal = '/legal';
+
+  /// One legal document. Named in the path so a link keeps working.
+  static String legalFor(LegalDocument document) =>
+      '$legal/${document.wireName}';
 
   static const Set<String> publicRoutes = {
     welcome,

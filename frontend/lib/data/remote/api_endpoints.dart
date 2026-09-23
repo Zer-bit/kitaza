@@ -11,6 +11,10 @@ abstract final class ApiEndpoints {
   static const String devices = '/devices';
   static const String billing = '/billing';
   static const String billingCheckout = '/billing/checkout';
+  static const String accountPrivacy = '/account/privacy';
+  static const String accountConsent = '/account/consent';
+  static const String accountExport = '/account/export';
+  static const String accountDeletion = '/account/deletion';
 
   static String store(String storeId) => '/stores/$storeId';
   static String device(String sessionId) => '/devices/$sessionId';

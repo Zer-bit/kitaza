@@ -20,6 +20,8 @@ class PreferencesStore {
   static const String _printerAddressKey = 'kitaza.printer_address';
   static const String _printerNameKey = 'kitaza.printer_name';
   static const String _printerPaperKey = 'kitaza.printer_paper';
+  static const String _guideReadKey = 'kitaza.guide_read';
+  static const String _guideOfferedKey = 'kitaza.guide_offered';
 
   String? readThemeMode() => _preferences.getString(_themeModeKey);
   Future<void> writeThemeMode(String value) =>
@@ -53,6 +55,19 @@ class PreferencesStore {
   String? readActiveStoreId() => _preferences.getString(_activeStoreKey);
   Future<void> writeActiveStoreId(String value) =>
       _preferences.setString(_activeStoreKey, value);
+
+  /// Which guide lessons this phone has opened. Per device on purpose: it is
+  /// about the person holding it, not about the store.
+  List<String> readGuideRead() =>
+      _preferences.getStringList(_guideReadKey) ?? const [];
+  Future<void> writeGuideRead(List<String> value) =>
+      _preferences.setStringList(_guideReadKey, value);
+
+  /// Whether the guide has been offered on the dashboard already, so the
+  /// offer appears once rather than every launch.
+  bool readGuideOffered() => _preferences.getBool(_guideOfferedKey) ?? false;
+  Future<void> writeGuideOffered(bool value) =>
+      _preferences.setBool(_guideOfferedKey, value);
 
   bool readOnboarded() => _preferences.getBool(_onboardedKey) ?? false;
   Future<void> writeOnboarded(bool value) =>

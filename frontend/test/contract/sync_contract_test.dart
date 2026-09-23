@@ -13,6 +13,7 @@ import 'package:kitaza_app/data/local/dao/sync_queue_dao.dart';
 import 'package:kitaza_app/data/models/activity_event.dart';
 import 'package:kitaza_app/data/models/auth_session.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
+import 'package:kitaza_app/data/models/legal_document.dart';
 import 'package:kitaza_app/data/models/subscription.dart';
 import 'package:kitaza_app/data/remote/api_client.dart';
 import 'package:kitaza_app/data/remote/auth_api.dart';
@@ -125,6 +126,8 @@ Future<(String token, String storeId)> _register() async {
       'password': 'contract-test-password',
       'full_name': 'Contract Test',
       'store_name': 'Contract Store',
+      'accepted_privacy_version': LegalDocument.privacyNotice.currentVersion,
+      'accepted_terms_version': LegalDocument.terms.currentVersion,
     },
   );
   final body = response.data!;
@@ -141,6 +144,50 @@ Future<void> _outlastSettleWindow() =>
 
 void main() {
   billingContract();
+
+  test('a real server refuses an account that agreed to nothing', () async {
+    final dio = Dio(
+      BaseOptions(baseUrl: _api!, contentType: 'application/json'),
+    );
+
+    // The one guarantee the law rests on, checked against the server
+    // rather than against a stand-in: without consent there is no lawful
+    // basis to hold the account, so it is never created.
+    await expectLater(
+      dio.post<Map<String, dynamic>>(
+        '/auth/register',
+        data: {
+          'email': 'no-consent-${const Uuid().v4().substring(0, 8)}@x.com',
+          'password': 'contract-test-password',
+          'full_name': 'No Consent',
+          'store_name': 'No Consent Store',
+        },
+      ),
+      throwsA(
+        isA<DioException>().having(
+          (error) => error.response?.statusCode,
+          'status',
+          400,
+        ),
+      ),
+    );
+
+    // And an out-of-date notice is not the notice in force.
+    await expectLater(
+      dio.post<Map<String, dynamic>>(
+        '/auth/register',
+        data: {
+          'email': 'stale-${const Uuid().v4().substring(0, 8)}@x.com',
+          'password': 'contract-test-password',
+          'full_name': 'Stale Consent',
+          'store_name': 'Stale Store',
+          'accepted_privacy_version': '1999-01-01',
+          'accepted_terms_version': LegalDocument.terms.currentVersion,
+        },
+      ),
+      throwsA(isA<DioException>()),
+    );
+  }, skip: _skip);
 
   test(
     'two phones sharing a store end up with identical books',
@@ -368,6 +415,9 @@ void billingContract() {
           'password': 'contract-test-password',
           'full_name': 'Billing Test',
           'store_name': 'Billing Store',
+          'accepted_privacy_version':
+              LegalDocument.privacyNotice.currentVersion,
+          'accepted_terms_version': LegalDocument.terms.currentVersion,
         },
       );
       final session = AuthSession.fromJson(registered, mode: StorageMode.cloud);

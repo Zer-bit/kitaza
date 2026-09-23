@@ -30,6 +30,10 @@ String? resolveRoute(AsyncValue<AuthSession?> auth, String location) {
     return signedIn ? RoutePaths.dashboard : RoutePaths.welcome;
   }
 
+  // The privacy notice and the terms are readable by anyone, signed in or
+  // not: agreeing to something you cannot read is not agreeing.
+  if (location.startsWith('${RoutePaths.legal}/')) return null;
+
   final atPublicRoute = RoutePaths.publicRoutes.contains(location);
   if (!signedIn && !atPublicRoute) return RoutePaths.welcome;
   if (signedIn && atPublicRoute) return RoutePaths.dashboard;

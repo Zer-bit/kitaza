@@ -392,6 +392,69 @@ renders every count message for 1–30 in both languages.
 
 ---
 
+## Privacy, in the shape of the code
+
+The law is [COMPLIANCE.md](COMPLIANCE.md); this is how it lands in the
+software.
+
+The strongest thing here is what is **not** collected. A sale is an amount and
+its items, and `utang` is a payment method - there is no customer name, number
+or address anywhere in the schema. That is what keeps a store owner from
+becoming a personal information controller for their customers merely by
+using Kitaza, and it is a property of the data model rather than a policy that
+could drift.
+
+An **offline store sends nothing**, so for most owners the server holds no
+business records at all. That is not a setting that could be flipped from our
+side; there is no account.
+
+Three mechanisms carry the rest:
+
+- **Consent is a row, not a flag.** `consent_records` holds the document, the
+  version and the moment. Registration without both current versions is
+  refused at the service, before an account exists. Raising a version puts
+  every account into `outstanding` and the app asks again.
+- **Erasure is scheduled, then total.** A deletion sets `delete_after` on the
+  owner row; the retention sweep deletes that row and everything cascades from
+  it. Before deleting, the sweep copies payment amounts into
+  `accounting_records`, a table with no owner column - the money is kept
+  because a business must account for it, and nothing about the person is.
+- **Retention is a sweep, not a promise.** Error reports, the activity log and
+  signed-out devices all have a maximum age enforced every six hours by
+  `features/privacy/retention.rs`. Data nobody deletes is data that
+  accumulates, and "we only keep what we need" has to be code to be true.
+
+---
+
+## The guide
+
+Eight lessons under `frontend/lib/features/guide/`, in the order someone new
+should read them: the first day, recording a sale, products and prices, money
+going out, reading the dashboard, the suggestions, backups, and staff.
+
+Three things shape it:
+
+- **A lesson knows its structure, not its words.** `GuideLesson` carries an
+  icon, how many steps it has, the screen it teaches, and what the reader must
+  be allowed to do. The text is in the ARB files like every other string, so
+  the guide is translated by the same test that covers the rest of the app.
+- **Nobody is taught what they cannot do.** A lesson is shown only to someone
+  who could use the screen it describes: a cashier is never told to export the
+  books, because their phone has no export button. The *Open it now* button
+  goes further and asks `mayOpen`, the same function the router uses, so an
+  offline owner reads about staff accounts without being offered a screen
+  that would bounce them back.
+- **Reading is not a task to complete.** Opening a lesson marks it read; there
+  is no confirmation to tap, nothing is locked, and the order is a suggestion.
+  Progress is kept per device, because it describes the person holding the
+  phone rather than the store.
+
+It is offered once on the dashboard, to someone who has never opened it, and
+lives permanently at the top of Settings. Like everything else on the phone,
+it works with no signal.
+
+---
+
 ## Schema migrations (phone)
 
 `SchemaMigrations` holds every change since version 1 as a numbered step. A

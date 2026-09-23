@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
+import '../legal/widgets/consent_checkbox.dart';
 import 'auth_controller.dart';
 import 'widgets/auth_scaffold.dart';
 
@@ -23,6 +24,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _password = TextEditingController();
   bool _obscure = true;
   bool _submitting = false;
+  bool _agreed = false;
+  bool _showConsentError = false;
 
   @override
   void dispose() {
@@ -34,7 +37,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formOk = _formKey.currentState!.validate();
+    // Checked even when the rest of the form is wrong, so someone who fixes
+    // their password is not surprised by a second objection.
+    setState(() => _showConsentError = !_agreed);
+    if (!formOk || !_agreed) return;
 
     setState(() => _submitting = true);
     await ref
@@ -127,7 +134,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             ],
           ),
         ),
-        AppSpacing.gapXl,
+        AppSpacing.gapLg,
+        ConsentCheckbox(
+          agreed: _agreed,
+          showError: _showConsentError,
+          onChanged: (value) => setState(() {
+            _agreed = value;
+            _showConsentError = false;
+          }),
+        ),
+        AppSpacing.gapLg,
         FilledButton(
           onPressed: _submitting ? null : _submit,
           child: _submitting

@@ -135,6 +135,35 @@ member the plan does not cover.
 An owner's stores are listed by `/auth/me`, each with its
 `share_benchmarks` setting.
 
+## Your data and privacy
+
+Registration is **refused** without both consent versions. There is no way to
+create an account that has not agreed to anything.
+
+```
+POST /auth/register
+{ ..., "accepted_privacy_version": "2026-09-01",
+       "accepted_terms_version": "2026-09-01" }
+```
+
+A version that is not the one in force is rejected with 400, so an app showing
+an out-of-date notice cannot collect consent for it.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/account/privacy` | Owner only. What was agreed and when, what is still `outstanding`, and any pending deletion. |
+| POST | `/account/consent` | `{ "document": "privacy_notice", "version": "2026-09-01" }`. Agreeing again is not an error. |
+| GET | `/account/export` | Everything held about this account, as JSON: stores, products, sales with their lines, expenses, withdrawals, stock, staff, devices, activity, consents, payments, error reports. |
+| POST | `/account/deletion` | Schedules erasure. Answers `{ "requested_at", "deletes_at" }`. |
+| DELETE | `/account/deletion` | Calls it off, any time before `deletes_at`. |
+
+All five need the owner, not a staff member: a cashier cannot export or delete
+their employer's account.
+
+Deletion is scheduled rather than immediate - `KITAZA_DELETION_GRACE_DAYS`,
+30 by default - and carried out by the retention sweep. See
+[COMPLIANCE.md](COMPLIANCE.md) for what is deleted, what survives, and why.
+
 ## Comparisons with other stores
 
 ```

@@ -3283,6 +3283,1122 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Test build. Cloud storage will not connect.'**
   String get aboutUnreleasedBuild;
+
+  /// No description provided for @settingsGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Kitaza'**
+  String get settingsGuide;
+
+  /// No description provided for @guideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use Kitaza'**
+  String get guideTitle;
+
+  /// No description provided for @guideIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Eight short lessons. Read them in order the first time, then come back to any one of them whenever you need it.'**
+  String get guideIntro;
+
+  /// No description provided for @guideProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{read, plural, =0{Not started} other{{read} of {total} read}}'**
+  String guideProgress(int read, int total);
+
+  /// No description provided for @guideLessonProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} steps}}'**
+  String guideLessonProgress(int count);
+
+  /// No description provided for @guideStepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {number}'**
+  String guideStepLabel(int number);
+
+  /// No description provided for @guideOpenScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open it now'**
+  String get guideOpenScreen;
+
+  /// No description provided for @guideNextLesson.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String guideNextLesson(Object title);
+
+  /// No description provided for @guideAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'That is the whole guide.'**
+  String get guideAllDone;
+
+  /// No description provided for @guideAllDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here is a test. Come back to any lesson whenever you need it.'**
+  String get guideAllDoneBody;
+
+  /// No description provided for @guideBackToLessons.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the lessons'**
+  String get guideBackToLessons;
+
+  /// No description provided for @guideRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get guideRead;
+
+  /// No description provided for @guidePromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New to Kitaza?'**
+  String get guidePromptTitle;
+
+  /// No description provided for @guidePromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A short guide walks you through recording a sale, your prices, and reading your numbers.'**
+  String get guidePromptBody;
+
+  /// No description provided for @guidePromptOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show me'**
+  String get guidePromptOpen;
+
+  /// No description provided for @guidePromptDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get guidePromptDismiss;
+
+  /// No description provided for @guideFirstDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first day'**
+  String get guideFirstDayTitle;
+
+  /// No description provided for @guideFirstDaySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do in the first hour, and why the app keeps working when the signal does not.'**
+  String get guideFirstDaySummary;
+
+  /// No description provided for @guideFirstDayStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'It works without load'**
+  String get guideFirstDayStep1Title;
+
+  /// No description provided for @guideFirstDayStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything you record is saved on this phone first. No signal, no data, no problem. If you use cloud storage, the phone sends it on by itself once there is signal again.'**
+  String get guideFirstDayStep1Body;
+
+  /// No description provided for @guideFirstDayStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Put in what you sell'**
+  String get guideFirstDayStep2Title;
+
+  /// No description provided for @guideFirstDayStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not need everything on day one. Start with the ten things that move the most. Add the rest as you go along.'**
+  String get guideFirstDayStep2Body;
+
+  /// No description provided for @guideFirstDayStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Record every sale, even a five-peso one'**
+  String get guideFirstDayStep3Title;
+
+  /// No description provided for @guideFirstDayStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'A sachet counts the same as a case. The numbers Kitaza gives back are only as true as what you put in, so the small ones matter most.'**
+  String get guideFirstDayStep3Body;
+
+  /// No description provided for @guideFirstDayStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Look at the day before you close'**
+  String get guideFirstDayStep4Title;
+
+  /// No description provided for @guideFirstDayStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the first screen at the end of the day. It shows what came in, what went out, and what you actually kept.'**
+  String get guideFirstDayStep4Body;
+
+  /// No description provided for @guideRecordingSalesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording a sale'**
+  String get guideRecordingSalesTitle;
+
+  /// No description provided for @guideRecordingSalesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'The one thing you will do a hundred times a day. It takes three taps.'**
+  String get guideRecordingSalesSummary;
+
+  /// No description provided for @guideRecordingSalesStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Add sale'**
+  String get guideRecordingSalesStep1Title;
+
+  /// No description provided for @guideRecordingSalesStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'It is the big button at the top of the first screen. You can reach it from anywhere using the buttons along the bottom.'**
+  String get guideRecordingSalesStep1Body;
+
+  /// No description provided for @guideRecordingSalesStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap what they bought'**
+  String get guideRecordingSalesStep2Title;
+
+  /// No description provided for @guideRecordingSalesStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an item to add one. Tap it again for two. If the item has a barcode, use the scanner button instead of searching for it.'**
+  String get guideRecordingSalesStep2Body;
+
+  /// No description provided for @guideRecordingSalesStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Say how they paid'**
+  String get guideRecordingSalesStep3Title;
+
+  /// No description provided for @guideRecordingSalesStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash, GCash, or utang. Utang is still a sale, and Kitaza remembers it as money you have not been handed yet.'**
+  String get guideRecordingSalesStep3Body;
+
+  /// No description provided for @guideRecordingSalesStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get guideRecordingSalesStep4Title;
+
+  /// No description provided for @guideRecordingSalesStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'That is it. The sale is on the phone straight away, and the stock count goes down by itself.'**
+  String get guideRecordingSalesStep4Body;
+
+  /// No description provided for @guideRecordingSalesStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'If you get one wrong'**
+  String get guideRecordingSalesStep5Title;
+
+  /// No description provided for @guideRecordingSalesStep5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sales, find it, and void it. Nothing is erased quietly: the sale is marked void and the stock goes back on the shelf.'**
+  String get guideRecordingSalesStep5Body;
+
+  /// No description provided for @guideWhatYouSellTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What you sell'**
+  String get guideWhatYouSellTitle;
+
+  /// No description provided for @guideWhatYouSellSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Your prices, your stock, and the one field that decides whether Kitaza can tell you your profit.'**
+  String get guideWhatYouSellSummary;
+
+  /// No description provided for @guideWhatYouSellStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item'**
+  String get guideWhatYouSellStep1Title;
+
+  /// No description provided for @guideWhatYouSellStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Products and tap Add. A name and a selling price are enough to start selling it.'**
+  String get guideWhatYouSellStep1Body;
+
+  /// No description provided for @guideWhatYouSellStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Put in both prices'**
+  String get guideWhatYouSellStep2Title;
+
+  /// No description provided for @guideWhatYouSellStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'What you paid for it, and what you charge. Without the cost, Kitaza can only count your sales - it cannot tell you what you kept.'**
+  String get guideWhatYouSellStep2Body;
+
+  /// No description provided for @guideWhatYouSellStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Count what is on the shelf'**
+  String get guideWhatYouSellStep3Title;
+
+  /// No description provided for @guideWhatYouSellStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Put in how many you have now. From then on Kitaza counts down as you sell and up when you record a delivery.'**
+  String get guideWhatYouSellStep3Body;
+
+  /// No description provided for @guideWhatYouSellStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Say when to reorder'**
+  String get guideWhatYouSellStep4Title;
+
+  /// No description provided for @guideWhatYouSellStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the number that means running low - two, five, a dozen. Kitaza tells you before the shelf is empty, not after.'**
+  String get guideWhatYouSellStep4Body;
+
+  /// No description provided for @guideWhatYouSellStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan instead of typing'**
+  String get guideWhatYouSellStep5Title;
+
+  /// No description provided for @guideWhatYouSellStep5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a barcode once while adding the item, and from then on scanning it at the counter finds it instantly.'**
+  String get guideWhatYouSellStep5Body;
+
+  /// No description provided for @guideMoneyGoingOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Money going out'**
+  String get guideMoneyGoingOutTitle;
+
+  /// No description provided for @guideMoneyGoingOutSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Buying stock, paying the bills, and the difference between the two kinds of money leaving.'**
+  String get guideMoneyGoingOutSummary;
+
+  /// No description provided for @guideMoneyGoingOutStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Record what you spend'**
+  String get guideMoneyGoingOutStep1Title;
+
+  /// No description provided for @guideMoneyGoingOutStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Expense and put in the amount. The reason is optional - do not let it slow you down at the counter.'**
+  String get guideMoneyGoingOutStep1Body;
+
+  /// No description provided for @guideMoneyGoingOutStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Buying stock counts too'**
+  String get guideMoneyGoingOutStep2Title;
+
+  /// No description provided for @guideMoneyGoingOutStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip to the palengke, the delivery, the load you bought to resell. If money left the till, it belongs here.'**
+  String get guideMoneyGoingOutStep2Body;
+
+  /// No description provided for @guideMoneyGoingOutStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Money you take for yourself is different'**
+  String get guideMoneyGoingOutStep3Title;
+
+  /// No description provided for @guideMoneyGoingOutStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Withdrawals for that, not Expenses. Mixing them makes a shop that is doing fine look like it is losing money every week.'**
+  String get guideMoneyGoingOutStep3Body;
+
+  /// No description provided for @guideMoneyGoingOutStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Do it the same day'**
+  String get guideMoneyGoingOutStep4Title;
+
+  /// No description provided for @guideMoneyGoingOutStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'An expense remembered three days later is usually remembered wrong. A quick note at the time beats an exact one that never happens.'**
+  String get guideMoneyGoingOutStep4Body;
+
+  /// No description provided for @guideReadingYourNumbersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your numbers'**
+  String get guideReadingYourNumbersTitle;
+
+  /// No description provided for @guideReadingYourNumbersSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'What the first screen is telling you, and the difference between selling a lot and earning.'**
+  String get guideReadingYourNumbersSummary;
+
+  /// No description provided for @guideReadingYourNumbersStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the period first'**
+  String get guideReadingYourNumbersStep1Title;
+
+  /// No description provided for @guideReadingYourNumbersStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, this week, this month. Every number on the screen is for the period you picked, so check it before you worry.'**
+  String get guideReadingYourNumbersStep1Body;
+
+  /// No description provided for @guideReadingYourNumbersStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales is not profit'**
+  String get guideReadingYourNumbersStep2Title;
+
+  /// No description provided for @guideReadingYourNumbersStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales is what came through the till. Profit is what is left after what the goods cost you. A busy day with thin prices can earn less than a quiet one.'**
+  String get guideReadingYourNumbersStep2Body;
+
+  /// No description provided for @guideReadingYourNumbersStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'The coloured band'**
+  String get guideReadingYourNumbersStep3Title;
+
+  /// No description provided for @guideReadingYourNumbersStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Green means the week is going well, yellow means watch something, red means something needs your attention today. It always says why underneath.'**
+  String get guideReadingYourNumbersStep3Body;
+
+  /// No description provided for @guideReadingYourNumbersStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a number to see where it came from'**
+  String get guideReadingYourNumbersStep4Title;
+
+  /// No description provided for @guideReadingYourNumbersStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in Kitaza is a number you have to take on faith. Every total opens into the sales and expenses that made it.'**
+  String get guideReadingYourNumbersStep4Body;
+
+  /// No description provided for @guideWhatKitazaSuggestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kitaza suggests'**
+  String get guideWhatKitazaSuggestsTitle;
+
+  /// No description provided for @guideWhatKitazaSuggestsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder advice, prices worth a look, and your own busy days - all worked out from your own records.'**
+  String get guideWhatKitazaSuggestsSummary;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'What to reorder'**
+  String get guideWhatKitazaSuggestsStep1Title;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'How fast each item actually sells, how many days the shelf will last, and how much to buy. Days it was out of stock are left out, so a fast seller is not mistaken for a slow one.'**
+  String get guideWhatKitazaSuggestsStep1Body;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices worth a look'**
+  String get guideWhatKitazaSuggestsStep2Title;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything you are selling for less than it cost you, thin margins on good sellers, and stock that is not moving. Each one suggests a price and what it would add in a month.'**
+  String get guideWhatKitazaSuggestsStep2Body;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own busy days'**
+  String get guideWhatKitazaSuggestsStep3Title;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Payday weeks and your best day of the week, measured from your takings - not guessed. A store beside a school and one beside a factory do not share a rhythm.'**
+  String get guideWhatKitazaSuggestsStep3Body;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the arithmetic'**
+  String get guideWhatKitazaSuggestsStep4Title;
+
+  /// No description provided for @guideWhatKitazaSuggestsStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Every card has How these are worked out underneath it. If a suggestion looks wrong to you, open it - you know your store better than the app does.'**
+  String get guideWhatKitazaSuggestsStep4Body;
+
+  /// No description provided for @guideKeepingRecordsSafeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping your records safe'**
+  String get guideKeepingRecordsSafeTitle;
+
+  /// No description provided for @guideKeepingRecordsSafeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens if the phone is lost, and how to make sure a year of records is not lost with it.'**
+  String get guideKeepingRecordsSafeSummary;
+
+  /// No description provided for @guideKeepingRecordsSafeStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitaza backs itself up'**
+  String get guideKeepingRecordsSafeStep1Title;
+
+  /// No description provided for @guideKeepingRecordsSafeStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'A copy of your records is saved on the phone on its own, without you asking. That covers a mistake. It does not cover a lost phone.'**
+  String get guideKeepingRecordsSafeStep1Body;
+
+  /// No description provided for @guideKeepingRecordsSafeStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a copy off the phone'**
+  String get guideKeepingRecordsSafeStep2Title;
+
+  /// No description provided for @guideKeepingRecordsSafeStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'In Settings, tap Export and send the file to yourself - Messenger, email, a memory card. Once a month is enough. This is the step people skip and regret.'**
+  String get guideKeepingRecordsSafeStep2Body;
+
+  /// No description provided for @guideKeepingRecordsSafeStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your records back'**
+  String get guideKeepingRecordsSafeStep3Title;
+
+  /// No description provided for @guideKeepingRecordsSafeStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'On a new phone, install Kitaza and choose Restore instead of setting up a new store. Your products, sales and expenses come back as they were.'**
+  String get guideKeepingRecordsSafeStep3Body;
+
+  /// No description provided for @guideKeepingRecordsSafeStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Or let the cloud hold it'**
+  String get guideKeepingRecordsSafeStep4Title;
+
+  /// No description provided for @guideKeepingRecordsSafeStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud storage keeps your records on our server as well as your phone, so a lost phone costs you nothing. It needs signal sometimes, and a monthly plan.'**
+  String get guideKeepingRecordsSafeStep4Body;
+
+  /// No description provided for @guideYourHelpersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your helpers'**
+  String get guideYourHelpersTitle;
+
+  /// No description provided for @guideYourHelpersSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Letting someone else mind the counter without handing over everything.'**
+  String get guideYourHelpersSummary;
+
+  /// No description provided for @guideYourHelpersStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the person first'**
+  String get guideYourHelpersStep1Title;
+
+  /// No description provided for @guideYourHelpersStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'In Settings, open Team and add them by name. Kitaza gives you a short code for them to type into their own phone.'**
+  String get guideYourHelpersStep1Body;
+
+  /// No description provided for @guideYourHelpersStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what they can see'**
+  String get guideYourHelpersStep2Title;
+
+  /// No description provided for @guideYourHelpersStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone can sell. You decide separately whether they can change prices, record expenses, see your profit, or void a sale.'**
+  String get guideYourHelpersStep2Body;
+
+  /// No description provided for @guideYourHelpersStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Their phone and yours agree'**
+  String get guideYourHelpersStep3Title;
+
+  /// No description provided for @guideYourHelpersStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'A sale rung up at the counter shows on your phone within seconds. Both phones keep working when the signal drops, and catch up afterwards.'**
+  String get guideYourHelpersStep3Body;
+
+  /// No description provided for @guideYourHelpersStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'If a phone goes missing'**
+  String get guideYourHelpersStep4Title;
+
+  /// No description provided for @guideYourHelpersStep4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Signed-in devices and remove it. That phone stops being able to see or change anything, straight away.'**
+  String get guideYourHelpersStep4Body;
+
+  /// No description provided for @legalOperator.
+  ///
+  /// In en, this message translates to:
+  /// **'[Registered business name], [address], Philippines'**
+  String get legalOperator;
+
+  /// No description provided for @legalContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions about this document, or about your records: [privacy@kitaza.ph]. We answer within 15 working days, as the National Privacy Commission expects.'**
+  String get legalContact;
+
+  /// No description provided for @legalVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String legalVersion(Object version);
+
+  /// No description provided for @legalPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy notice'**
+  String get legalPrivacyTitle;
+
+  /// No description provided for @legalTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get legalTermsTitle;
+
+  /// No description provided for @legalReadPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy notice'**
+  String get legalReadPrivacy;
+
+  /// No description provided for @legalReadTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get legalReadTerms;
+
+  /// No description provided for @legalAgreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you start'**
+  String get legalAgreeTitle;
+
+  /// No description provided for @legalAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and agree to the {privacy} and the {terms}.'**
+  String legalAgree(Object privacy, Object terms);
+
+  /// No description provided for @legalAgreeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please read and agree to both before continuing.'**
+  String get legalAgreeRequired;
+
+  /// No description provided for @legalAgreedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Agreed {date}'**
+  String legalAgreedOn(Object date);
+
+  /// No description provided for @legalNeedsAgreement.
+  ///
+  /// In en, this message translates to:
+  /// **'Please review and agree'**
+  String get legalNeedsAgreement;
+
+  /// No description provided for @legalUpdatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We have updated these'**
+  String get legalUpdatedTitle;
+
+  /// No description provided for @legalUpdatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please read what changed and agree again. Nothing on your phone is affected while you decide.'**
+  String get legalUpdatedBody;
+
+  /// No description provided for @legalAgreeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree'**
+  String get legalAgreeButton;
+
+  /// No description provided for @privacyWhoHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Who holds your records'**
+  String get privacyWhoHeading;
+
+  /// No description provided for @privacyWhoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitaza is run by {operator}. Under the Data Privacy Act of 2012 (Republic Act 10173) we are the personal information controller for the details you give us about yourself.\n\nOur Data Protection Officer can be reached at the address at the end of this notice.'**
+  String privacyWhoBody(Object operator);
+
+  /// No description provided for @privacyOfflineHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'If you use Kitaza offline, we hold nothing'**
+  String get privacyOfflineHeading;
+
+  /// No description provided for @privacyOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An offline store keeps everything on the phone. Your products, sales, expenses and takings never reach us, because there is nothing to send them to. We could not show them to anyone if we were asked.\n\nThis is not a setting we can change from our side. It is simply where the records are.'**
+  String get privacyOfflineBody;
+
+  /// No description provided for @privacyWhatHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What we hold when you use the cloud'**
+  String get privacyWhatHeading;
+
+  /// No description provided for @privacyWhatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name, your email address, and a scrambled form of your password that cannot be turned back into it.\n\nYour store\'s name, its type, and the names of any staff you add.\n\nYour business records: products and prices, sales, expenses, withdrawals and stock counts.\n\nThe name of each phone signed in, when it was last used, and a record of who did what in your store.\n\nIf the app breaks, what broke and which version it was: the error, where in the code it happened, and the phone\'s operating system.'**
+  String get privacyWhatBody;
+
+  /// No description provided for @privacyNeverHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What we never hold'**
+  String get privacyNeverHeading;
+
+  /// No description provided for @privacyNeverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We do not record your customers. A sale is an amount and the items in it; an utang is a payment method. No customer name, number or address is ever asked for or stored.\n\nWe never see card numbers, GCash PINs or bank details. Payments go through PayMongo, who handle them; we are told only that a payment succeeded and for how much.\n\nWe do not track your location, read your contacts, or look at anything else on your phone. The camera is used for scanning barcodes, and only while you have the scanner open.'**
+  String get privacyNeverBody;
+
+  /// No description provided for @privacyWhyHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Why we hold it'**
+  String get privacyWhyHeading;
+
+  /// No description provided for @privacyWhyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To run the service you asked for: to keep your records for you, to show them on your other phones, and to let your staff use the store.\n\nTo take payment for the plan you chose, and to keep the accounting records a business is required to keep.\n\nTo fix what breaks. Error reports tell us a build is failing; they carry no business figures.\n\nWith your permission, to work out the middle figures that let you compare your store with others. You can switch this off in Settings, and switching it off also switches off seeing anyone else\'s.'**
+  String get privacyWhyBody;
+
+  /// No description provided for @privacySharedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Who else sees it'**
+  String get privacySharedHeading;
+
+  /// No description provided for @privacySharedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PayMongo Philippines, to take payment. They see what a payment is for and who is paying, under their own privacy policy.\n\nThe company that hosts our servers, which stores the data on our behalf and may not use it for anything else.\n\nNobody else. We do not sell your records, and we do not hand them to advertisers. We would give them to a government body only where a law or a court order requires it, and we would tell you unless we were forbidden to.\n\nComparisons between stores are published as middle figures only, across at least twenty stores of a similar type and size. They name no store and contain no single sale.'**
+  String get privacySharedBody;
+
+  /// No description provided for @privacyKeepHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'How long we keep it'**
+  String get privacyKeepHeading;
+
+  /// No description provided for @privacyKeepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your business records, for as long as your account is open.\n\nWho did what in your store: two years.\n\nError reports: ninety days.\n\nPhones you have signed out: one year.\n\nWhen you close your account we delete everything after thirty days, and the thirty days exist only so a mis-tap can be undone. What survives is the amount and date of payments we received, with nothing about you attached to it, because a business must be able to account for money it was paid.'**
+  String get privacyKeepBody;
+
+  /// No description provided for @privacyRightsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rights'**
+  String get privacyRightsHeading;
+
+  /// No description provided for @privacyRightsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Data Privacy Act gives you rights over what we hold, and the app carries out most of them without you having to ask anyone.\n\nTo be told what we hold and why: this notice, and Settings shows it too.\n\nTo get a copy: Settings, Download my records. It is an ordinary file you can open and keep.\n\nTo correct what is wrong: change it in the app, or write to us.\n\nTo have it deleted: Settings, Close my account. After thirty days it is gone and cannot be brought back.\n\nTo object, and to withdraw a permission you gave. Turning off comparisons is one of these.\n\nTo be paid for damage caused if we mishandle your records, and to complain to the National Privacy Commission at privacy.gov.ph. You do not have to come to us first, although we would rather you did.'**
+  String get privacyRightsBody;
+
+  /// No description provided for @privacySafetyHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping it safe, and telling you when we fail'**
+  String get privacySafetyHeading;
+
+  /// No description provided for @privacySafetyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords are stored scrambled and cannot be read back, by us or anyone else. Traffic between your phone and our servers is encrypted. A phone you sign out stops working straight away.\n\nIf your records are exposed and it puts you at real risk, we will tell the National Privacy Commission within seventy-two hours of finding out, and we will tell you: what happened, what was involved, and what to do about it.'**
+  String get privacySafetyBody;
+
+  /// No description provided for @privacyChangesHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes to this notice'**
+  String get privacyChangesHeading;
+
+  /// No description provided for @privacyChangesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When this notice changes in a way that matters, the app asks you to read it and agree again, and records the version you agreed to.\n\nUsing the app does not count as agreeing. We ask you plainly.'**
+  String get privacyChangesBody;
+
+  /// No description provided for @termsWhatHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kitaza is'**
+  String get termsWhatHeading;
+
+  /// No description provided for @termsWhatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitaza is a record book for a small shop. It records what you sell and spend, counts your stock, and works out figures from what you put in.\n\nThe agreement is between you and {operator}.'**
+  String termsWhatBody(Object operator);
+
+  /// No description provided for @termsNotHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What Kitaza is not'**
+  String get termsNotHeading;
+
+  /// No description provided for @termsNotBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It is not an accountant, and it is not a BIR filing tool. Its figures are not a tax return and not a set of audited books.\n\nIts suggestions - what to reorder, what to charge - are arithmetic on your own records, shown with their working. They are something to weigh, not instructions. You know your shop; the app does not.\n\nIf you need advice about tax, permits or the law, ask someone qualified to give it.'**
+  String get termsNotBody;
+
+  /// No description provided for @termsAccountHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get termsAccountHeading;
+
+  /// No description provided for @termsAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be old enough to enter a contract, and the details you give must be true.\n\nKeep your password to yourself. Anything done by a phone signed in to your account is treated as done by you, so sign out a phone you no longer have.\n\nStaff you add act for you. You decide what each of them may see and do, and you are responsible for what they do in your store.'**
+  String get termsAccountBody;
+
+  /// No description provided for @termsPayHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What you pay'**
+  String get termsPayHeading;
+
+  /// No description provided for @termsPayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The first thirty days are free and need no payment details.\n\nAfter that a plan is paid for in advance - one month or one year at a time - at the price shown in the app when you pay. Nothing renews by itself and nothing is charged automatically. When a period runs out you get seven more days, and then the app stops syncing until you pay again.\n\nYour records are not held hostage. An unpaid account can still be read on the phone, and its records can still be exported.\n\nPrices can change, but never for a period you have already paid for.'**
+  String get termsPayBody;
+
+  /// No description provided for @termsRefundHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds'**
+  String get termsRefundHeading;
+
+  /// No description provided for @termsRefundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If the service does not do what this page says it does, tell us within thirty days of paying and we will refund that payment in full.\n\nWe do not refund a period you simply did not use. Nothing renews by itself, so an unused period is a choice rather than an accident.\n\nThis sits alongside your rights under the Consumer Act of the Philippines (Republic Act 7394); nothing here takes those away.'**
+  String get termsRefundBody;
+
+  /// No description provided for @termsYoursHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Your records are yours'**
+  String get termsYoursHeading;
+
+  /// No description provided for @termsYoursBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What you put in stays yours. We claim nothing over it, and we hold it to run the service for you and nothing else.\n\nYou can take a copy at any time, and you can close the account and have it deleted. The Privacy notice says exactly what happens then.'**
+  String get termsYoursBody;
+
+  /// No description provided for @termsFairHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Using it fairly'**
+  String get termsFairHeading;
+
+  /// No description provided for @termsFairBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not use Kitaza to break the law, to record someone else\'s business without their say-so, or to attack the service or get into an account that is not yours.\n\nWe may suspend an account that is doing one of these, and we will say why.'**
+  String get termsFairBody;
+
+  /// No description provided for @termsLimitsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What we do and do not promise'**
+  String get termsLimitsHeading;
+
+  /// No description provided for @termsLimitsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We will take reasonable care to keep the service running and your records safe. We cannot promise it will never be down, and we cannot promise a phone will never be lost or broken - which is why the app keeps its own backups and asks you to keep a copy off the phone.\n\nWhere the law allows a limit, ours is the amount you have paid us in the twelve months before the problem. Nothing here limits liability for fraud, for death or injury caused by negligence, or for anything a law says may not be limited.'**
+  String get termsLimitsBody;
+
+  /// No description provided for @termsEndingHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Ending it'**
+  String get termsEndingHeading;
+
+  /// No description provided for @termsEndingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can close your account at any time, from Settings.\n\nWe would end an agreement only for a serious or repeated breach of these terms, and we would give you notice and time to take a copy of your records first.'**
+  String get termsEndingBody;
+
+  /// No description provided for @termsLawHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Which law applies'**
+  String get termsLawHeading;
+
+  /// No description provided for @termsLawBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The law of the Republic of the Philippines. A dispute that cannot be settled between us goes to the courts of the place where our business is registered.\n\nIf part of this page turns out to be unenforceable, the rest still stands.'**
+  String get termsLawBody;
+
+  /// No description provided for @settingsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data and privacy'**
+  String get settingsPrivacy;
+
+  /// No description provided for @privacyCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data and privacy'**
+  String get privacyCardTitle;
+
+  /// No description provided for @privacyCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is held, how to get a copy, and how to close your account'**
+  String get privacyCardSubtitle;
+
+  /// No description provided for @privacyScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data and privacy'**
+  String get privacyScreenTitle;
+
+  /// No description provided for @privacyWhereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where your records are'**
+  String get privacyWhereTitle;
+
+  /// No description provided for @privacyWhereLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'On this phone only. Nothing about your store has ever been sent to us, and nothing can be.'**
+  String get privacyWhereLocal;
+
+  /// No description provided for @privacyWhereCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'On this phone and on our servers, so your other phones and your staff can see them.'**
+  String get privacyWhereCloud;
+
+  /// No description provided for @privacyDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What you agreed to'**
+  String get privacyDocumentsTitle;
+
+  /// No description provided for @privacyDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download my records'**
+  String get privacyDownloadTitle;
+
+  /// No description provided for @privacyDownloadLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything on this phone, as a file you can keep or open elsewhere.'**
+  String get privacyDownloadLocal;
+
+  /// No description provided for @privacyDownloadCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything we hold about you, as a file you can keep or open elsewhere.'**
+  String get privacyDownloadCloud;
+
+  /// No description provided for @privacyDownloadWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Gathering your records…'**
+  String get privacyDownloadWorking;
+
+  /// No description provided for @privacyDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not gather your records. Try again.'**
+  String get privacyDownloadFailed;
+
+  /// No description provided for @privacyCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close my account'**
+  String get privacyCloseTitle;
+
+  /// No description provided for @privacyCloseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete everything we hold about you'**
+  String get privacyCloseSubtitle;
+
+  /// No description provided for @privacyCloseScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close my account'**
+  String get privacyCloseScreenTitle;
+
+  /// No description provided for @privacyCloseExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account, your stores and every sale, expense and product in them will be deleted from our servers.'**
+  String get privacyCloseExplain;
+
+  /// No description provided for @privacyCloseGrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is deleted for {days} days. Until then you can change your mind, and everything carries on as normal.'**
+  String privacyCloseGrace(int days);
+
+  /// No description provided for @privacyCloseKeeps.
+  ///
+  /// In en, this message translates to:
+  /// **'What we keep: the amount and date of payments you made, with nothing about you attached. A business has to be able to account for money it was paid.'**
+  String get privacyCloseKeeps;
+
+  /// No description provided for @privacyClosePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'The records on this phone are not touched. Take a copy first if you want to keep them.'**
+  String get privacyClosePhone;
+
+  /// No description provided for @privacyCloseConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the name of your store to confirm'**
+  String get privacyCloseConfirmLabel;
+
+  /// No description provided for @privacyCloseConfirmWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That does not match the name of your store.'**
+  String get privacyCloseConfirmWrong;
+
+  /// No description provided for @privacyCloseSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Close my account'**
+  String get privacyCloseSubmit;
+
+  /// No description provided for @privacyCloseScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account will be deleted on {date}.'**
+  String privacyCloseScheduled(Object date);
+
+  /// No description provided for @privacyCloseCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my account'**
+  String get privacyCloseCancel;
+
+  /// No description provided for @privacyCloseCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is staying open.'**
+  String get privacyCloseCancelled;
+
+  /// No description provided for @privacyCloseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not do that. Try again when you have signal.'**
+  String get privacyCloseFailed;
+
+  /// No description provided for @privacyLocalOnlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to close'**
+  String get privacyLocalOnlyTitle;
+
+  /// No description provided for @privacyLocalOnlyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This store is on your phone only. To remove it, delete the app - but take a copy of your records first.'**
+  String get privacyLocalOnlyBody;
+
+  /// No description provided for @privacyNpcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If we get it wrong'**
+  String get privacyNpcTitle;
+
+  /// No description provided for @privacyNpcBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can complain to the National Privacy Commission at privacy.gov.ph. You do not have to come to us first.'**
+  String get privacyNpcBody;
 }
 
 class _AppLocalizationsDelegate

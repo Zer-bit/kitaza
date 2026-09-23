@@ -3,7 +3,7 @@
 This is the build order for Kitaza, from the scaffold that exists today through
 to a product small businesses pay for monthly. Every phase is **done and
 verified** as far as it can be without real phones, real stores and a live
-payment account; Phases 5–9 list exactly what that leaves.
+payment account; Phases 5–10 list exactly what that leaves.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -523,6 +523,76 @@ client tests exist.
 
 **Exit criteria:** `make release-bundle` produces a signed artefact that
 identifies itself correctly. ✅ Proven, with a throwaway key.
+
+---
+
+## Phase 10 — Privacy and the law ✅ Done (pending legal review)
+
+Everything the Data Privacy Act of 2012 asks of a personal information
+controller, built as code rather than promised in a page nobody reads. The
+documents themselves are drafts: [COMPLIANCE.md](COMPLIANCE.md) lists what
+only a lawyer and the business owner can do.
+
+- [x] **The strongest privacy feature is the one already there.** Kitaza
+      records no customers at all — a sale is an amount and its items, and
+      `utang` is a payment method, not a person. No customer name, number or
+      address exists anywhere in the schema. That is what keeps a store owner
+      from becoming a controller for their own customers merely by using the
+      app. An offline store sends nothing, ever.
+- [x] **Consent is a row, not a shrug.** Registration is **refused** without
+      the version of the privacy notice and the terms the person was shown.
+      An out-of-date version is refused too, so an app showing an old notice
+      cannot collect consent for it. Raising a version asks every account
+      again.
+- [x] **A privacy notice and terms in the app**, in English and Filipino,
+      readable without signing in and without signal, in the same plain voice
+      as everything else. The terms say out loud that Kitaza is not an
+      accountant and not a BIR filing tool.
+- [x] **The right to a copy.** Settings → Download my records. An offline
+      store shares its own backup; a cloud store gets every table keyed to it
+      as indented JSON — plain JSON on purpose, since a copy you can only open
+      in Kitaza is not really a copy.
+- [x] **The right to erasure.** Close my account, confirmed by typing the
+      store's name, then thirty days in which a mis-tap can be undone. After
+      that everything cascades off the owner row. What survives is payment
+      amounts in a table with **no owner column at all**, because a business
+      must account for money it received and nothing about the person needs
+      to be kept to do that.
+- [x] **Retention is a sweep, not a promise.** Every six hours: error reports
+      past ninety days, activity past two years, signed-out devices past a
+      year, and accounts past their grace period. Data nobody deletes is data
+      that accumulates.
+
+### Defects found and fixed
+
+| Defect | Effect | Caught by |
+|---|---|---|
+| Consent could not be given at all | No lawful basis to hold any account | Reading RA 10173 against the schema |
+| No way to delete an account | The right to erasure was unavailable | The same |
+| Nothing was ever deleted | Error reports and activity accumulated forever | The same |
+| The export named a table that does not exist | The right to a copy answered 500 | Integration test |
+| The consent links were word-sized | Below the app's own 52px tap target, unusable for the owners it is for | Writing the test that had to tap one |
+| "Close my account" headed an offline store's screen | Offered something that does not exist | Widget test |
+
+### What is not verified, and why
+
+- **No lawyer has read any of it.** The documents are drafts written to be
+  honest about what the software does. That is a different thing from being
+  enforceable, and the refund and liability sections are where that gap
+  matters most.
+- **The operator is a placeholder.** `make release-apk` refuses to build while
+  the business name and DPO address are unfilled, so it cannot be shipped by
+  accident — but it also means no release can be cut until they exist.
+- **No NPC registration, no DPO, no published policy URL.** All three are
+  needed before a stranger uses this, and none can be done from here.
+- **No Data Protection Impact Assessment.** The benchmark pooling is the part
+  that warrants one.
+- **The Filipino text has not been read by a lawyer or a native speaker**, and
+  it is the version most owners will read.
+
+**Exit criteria:** an owner can see what is held, take a copy of it, and have
+it deleted, without asking anyone. ✅ Proven end to end, including against a
+live server.
 
 ---
 

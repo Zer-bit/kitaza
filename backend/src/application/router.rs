@@ -19,6 +19,7 @@ use crate::features::diagnostics::diagnostics_routes;
 use crate::features::expenses::expense_routes;
 use crate::features::health::health_routes;
 use crate::features::inventory::inventory_routes;
+use crate::features::privacy::privacy_routes;
 use crate::features::products::product_routes;
 use crate::features::reports::report_routes;
 use crate::features::sales::sale_routes;
@@ -37,6 +38,7 @@ pub fn build_router(state: AppState, settings: &ServerSettings) -> Router {
         .merge(auth_routes())
         .merge(billing_routes())
         .merge(benchmark_routes())
+        .merge(privacy_routes())
         .merge(store_routes())
         .merge(staff_routes())
         .merge(device_routes())

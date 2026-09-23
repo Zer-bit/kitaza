@@ -8,6 +8,7 @@ import '../../l10n/l10n.dart';
 import '../../shared/widgets/feedback_messenger.dart';
 import '../../shared/widgets/page_body.dart';
 import '../authentication/auth_controller.dart';
+import '../legal/widgets/consent_checkbox.dart';
 
 /// Moves a store that has only lived on this phone into the cloud, keeping
 /// every sale, expense and stock count recorded so far.
@@ -25,6 +26,8 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
   bool _createAccount = true;
   bool _obscure = true;
   bool _working = false;
+  bool _agreed = false;
+  bool _showConsentError = false;
 
   @override
   void dispose() {
@@ -34,7 +37,13 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formOk = _formKey.currentState!.validate();
+    // Only a new account needs agreement; signing in to one that exists
+    // means it was agreed to already.
+    final needsConsent = _createAccount && !_agreed;
+    setState(() => _showConsentError = needsConsent);
+    if (!formOk || needsConsent) return;
+
     setState(() => _working = true);
 
     try {
@@ -151,6 +160,17 @@ class _CloudUpgradeScreenState extends ConsumerState<CloudUpgradeScreen> {
                       return null;
                     },
                   ),
+                  if (_createAccount) ...[
+                    AppSpacing.gapLg,
+                    ConsentCheckbox(
+                      agreed: _agreed,
+                      showError: _showConsentError,
+                      onChanged: (value) => setState(() {
+                        _agreed = value;
+                        _showConsentError = false;
+                      }),
+                    ),
+                  ],
                   AppSpacing.gapXl,
                   FilledButton(
                     onPressed: _working ? null : _submit,

@@ -9,6 +9,7 @@ use crate::features::devices::DeviceRepository;
 use crate::features::diagnostics::{DiagnosticsRepository, DiagnosticsService};
 use crate::features::expenses::{ExpenseRepository, ExpenseService};
 use crate::features::inventory::{InventoryService, StockRepository};
+use crate::features::privacy::{ConsentRepository, PrivacyService};
 use crate::features::products::{ProductRepository, ProductService};
 use crate::features::reports::{ReportRepository, ReportService};
 use crate::features::sales::{SaleRepository, SaleService};
@@ -35,6 +36,7 @@ pub struct AppState {
     pub staff_service: StaffService,
     pub billing_service: BillingService,
     pub benchmark_service: BenchmarkService,
+    pub privacy_service: PrivacyService,
     pub device_repository: DeviceRepository,
     pub product_service: ProductService,
     pub inventory_service: InventoryService,
@@ -68,6 +70,11 @@ impl AppState {
             audit: audit_trail.clone(),
             broadcaster: broadcaster.clone(),
         });
+
+        let privacy_service = PrivacyService::new(
+            ConsentRepository::new(pool.clone()),
+            settings.privacy.deletion_grace,
+        );
 
         let product_repository = ProductRepository::new(pool.clone());
         let sale_repository = SaleRepository::new(pool.clone());
@@ -143,10 +150,12 @@ impl AppState {
                 sessions: session_directory.clone(),
                 audit: audit_trail.clone(),
                 billing: billing_service.clone(),
+                privacy: privacy_service.clone(),
                 refresh_lifetime: settings.security.refresh_token_lifetime,
             }),
             billing_service,
             benchmark_service: BenchmarkService::new(BenchmarkRepository::new(pool.clone())),
+            privacy_service,
             staff_service,
             device_repository: DeviceRepository::new(pool.clone()),
             session_directory,

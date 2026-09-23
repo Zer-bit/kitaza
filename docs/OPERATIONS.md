@@ -242,6 +242,10 @@ release rather than quietly signing with the debug key.
 
 ### Each release
 
+0. Check [COMPLIANCE.md](COMPLIANCE.md). The build refuses while the privacy
+   notice still carries placeholder business details, and there are other
+   things on that page — NPC registration, a published policy URL — that no
+   check here can enforce.
 1. Bump `version:` in `frontend/pubspec.yaml` — `1.2.0+14`, where the number
    after `+` must go up every time or phones will not treat the build as
    newer. Both the Android version name and version code come from that one

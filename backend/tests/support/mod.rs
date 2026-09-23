@@ -13,9 +13,10 @@ use chrono::{DateTime, Utc};
 use http_body_util::BodyExt;
 use kitaza_server::application::{AppState, build_router};
 use kitaza_server::config::{
-    AppSettings, BillingMode, BillingSettings, DatabaseSettings, RedisSettings, SecuritySettings,
-    ServerSettings, SyncSettings,
+    AppSettings, BillingMode, BillingSettings, DatabaseSettings, PrivacySettings, RedisSettings,
+    SecuritySettings, ServerSettings, SyncSettings,
 };
+use kitaza_server::features::privacy::{LegalDocument, RetentionPolicy};
 use kitaza_server::infrastructure::cache::CacheHandle;
 use serde_json::{Value, json};
 use sqlx::PgPool;
@@ -167,6 +168,9 @@ impl TestApp {
                     "password": "a-good-password",
                     "full_name": "Test Owner",
                     "store_name": "Test Store",
+                    "accepted_privacy_version":
+                        LegalDocument::PrivacyNotice.current_version(),
+                    "accepted_terms_version": LegalDocument::Terms.current_version(),
                 })),
             )
             .await;
@@ -401,6 +405,10 @@ fn settings(page_size: i64, billing: BillingMode) -> AppSettings {
         sync: SyncSettings {
             settle_window: Duration::ZERO,
             page_size,
+        },
+        privacy: PrivacySettings {
+            deletion_grace: chrono::Duration::days(30),
+            retention: RetentionPolicy::default(),
         },
         billing: BillingSettings {
             mode: billing,

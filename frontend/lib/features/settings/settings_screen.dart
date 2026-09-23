@@ -11,8 +11,10 @@ import 'widgets/about_card.dart';
 import 'widgets/account_card.dart';
 import 'widgets/backup_card.dart';
 import 'widgets/comparisons_card.dart';
+import 'widgets/guide_card.dart';
 import 'widgets/language_selector.dart';
 import 'widgets/printer_card.dart';
+import 'widgets/privacy_card.dart';
 import 'widgets/problem_reports_tile.dart';
 import 'widgets/storage_status_card.dart';
 import 'widgets/stores_card.dart';
@@ -36,6 +38,9 @@ class SettingsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                SectionHeader(title: l10n.settingsGuide),
+                const GuideCard(),
+                AppSpacing.gapXl,
                 SectionHeader(title: l10n.settingsAppearance),
                 Card(
                   child: Padding(
@@ -92,6 +97,8 @@ class SettingsScreen extends ConsumerWidget {
                 // store: exporting or replacing it is the owner's call.
                 if (isOwner) ...[const BackupCard(), AppSpacing.gapMd],
                 const ProblemReportsTile(),
+                AppSpacing.gapMd,
+                const PrivacyCard(),
                 AppSpacing.gapXl,
                 SectionHeader(title: l10n.printerSection),
                 const PrinterCard(),

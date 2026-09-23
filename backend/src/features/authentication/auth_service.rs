@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::features::access::{Actor, SessionDirectory};
 use crate::features::audit::{AuditAction, AuditEntry, AuditTrail};
 use crate::features::billing::BillingService;
+use crate::features::privacy::PrivacyService;
 use crate::features::staff::{StaffRepository, join_code};
 use crate::infrastructure::cache::{RateLimitVerdict, RateLimiter};
 use crate::shared::{ApiError, ApiResult};
@@ -39,6 +40,7 @@ pub struct AuthDependencies {
     pub sessions: SessionDirectory,
     pub audit: AuditTrail,
     pub billing: BillingService,
+    pub privacy: PrivacyService,
     pub refresh_lifetime: Duration,
 }
 
@@ -51,6 +53,7 @@ pub struct AuthService {
     sessions: SessionDirectory,
     audit: AuditTrail,
     billing: BillingService,
+    privacy: PrivacyService,
     refresh_lifetime: Duration,
 }
 
@@ -64,11 +67,17 @@ impl AuthService {
             sessions: dependencies.sessions,
             audit: dependencies.audit,
             billing: dependencies.billing,
+            privacy: dependencies.privacy,
             refresh_lifetime: dependencies.refresh_lifetime,
         }
     }
 
     pub async fn register(&self, request: RegisterRequest) -> ApiResult<AuthenticatedSession> {
+        self.privacy.check_registration_consent(
+            request.accepted_privacy_version.as_deref(),
+            request.accepted_terms_version.as_deref(),
+        )?;
+
         let email = request.email.trim().to_lowercase();
 
         if self.repository.find_owner_by_email(&email).await?.is_some() {
@@ -93,6 +102,8 @@ impl AuthService {
                 Utc::now() + self.billing.trial_length(),
             )
             .await?;
+
+        self.privacy.record_registration_consent(owner.id).await?;
 
         let device = device_name(request.device_name, request.device_tag);
         self.open_owner_session(owner, device).await

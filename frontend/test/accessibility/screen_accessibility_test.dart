@@ -6,6 +6,8 @@ import 'package:kitaza_app/data/models/activity_event.dart';
 import 'package:kitaza_app/data/models/auth_session.dart';
 import 'package:kitaza_app/data/models/billing_overview.dart';
 import 'package:kitaza_app/data/models/expense_category.dart';
+import 'package:kitaza_app/data/models/guide_lesson.dart';
+import 'package:kitaza_app/data/models/legal_document.dart';
 import 'package:kitaza_app/data/models/payment_method.dart';
 import 'package:kitaza_app/data/models/staff_member.dart';
 import 'package:kitaza_app/data/models/subscription.dart';
@@ -23,6 +25,11 @@ import 'package:kitaza_app/features/billing/plan_screen.dart';
 import 'package:kitaza_app/features/dashboard/dashboard_screen.dart';
 import 'package:kitaza_app/features/expenses/expense_history_screen.dart';
 import 'package:kitaza_app/features/expenses/record_expense_screen.dart';
+import 'package:kitaza_app/features/guide/guide_lesson_screen.dart';
+import 'package:kitaza_app/features/guide/guide_screen.dart';
+import 'package:kitaza_app/features/legal/legal_screen.dart';
+import 'package:kitaza_app/features/privacy/close_account_screen.dart';
+import 'package:kitaza_app/features/privacy/privacy_screen.dart';
 import 'package:kitaza_app/features/products/product_editor_screen.dart';
 import 'package:kitaza_app/features/products/product_list_screen.dart';
 import 'package:kitaza_app/features/reports/reports_screen.dart';
@@ -51,6 +58,14 @@ final Map<String, WidgetBuilder> _screens = {
   RoutePaths.withdrawals: (_) => const WithdrawalScreen(),
   RoutePaths.reports: (_) => const ReportsScreen(),
   RoutePaths.settings: (_) => const SettingsScreen(),
+  RoutePaths.guide: (_) => const GuideScreen(),
+  // The longest lesson, which is where the step cards run out of room first.
+  GuideLesson.recordingSales.path: (_) =>
+      const GuideLessonScreen(lesson: GuideLesson.recordingSales),
+  RoutePaths.privacy: (_) => const PrivacyScreen(),
+  // The longest document, which is where paragraphs run out of room first.
+  RoutePaths.legalFor(LegalDocument.privacyNotice): (_) =>
+      const LegalScreen(document: LegalDocument.privacyNotice),
 };
 
 /// A believable day at the counter, with the long names and large amounts
@@ -156,6 +171,21 @@ final Map<String, (String, WidgetBuilder, AuthSession)> _signedInScreens = {
     RoutePaths.dashboard,
     (_) => const DashboardScreen(),
     cloudOwner(subscription: pausedPlan),
+  ),
+  'closing an account': (
+    RoutePaths.closeAccount,
+    (_) => const CloseAccountScreen(),
+    cloudOwner(),
+  ),
+  'privacy, cloud owner': (
+    RoutePaths.privacy,
+    (_) => const PrivacyScreen(),
+    cloudOwner(),
+  ),
+  'guide, cashier': (
+    RoutePaths.guide,
+    (_) => const GuideScreen(),
+    staffMember({}),
   ),
   'home, trial ending, cashier': (
     RoutePaths.dashboard,

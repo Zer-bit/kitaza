@@ -20,6 +20,7 @@ import '../authentication/auth_controller.dart';
 import '../billing/widgets/plan_banner.dart';
 import '../settings/widgets/sync_indicator.dart';
 import 'dashboard_controller.dart';
+import 'widgets/guide_prompt_card.dart';
 import 'widgets/health_banner.dart';
 import 'widgets/highlight_tiles.dart';
 import 'widgets/period_selector.dart';
@@ -146,6 +147,7 @@ class _DashboardBody extends ConsumerWidget {
               const PlanBanner(),
               if (access.can(Permission.manageProducts))
                 const StarterPromptCard(),
+              const GuidePromptCard(),
               AppSpacing.gapXl,
               PeriodSelector(
                 selected: summary.period,

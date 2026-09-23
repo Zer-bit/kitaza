@@ -2069,4 +2069,681 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutUnreleasedBuild =>
       'Test build. Cloud storage will not connect.';
+
+  @override
+  String get settingsGuide => 'Learn Kitaza';
+
+  @override
+  String get guideTitle => 'How to use Kitaza';
+
+  @override
+  String get guideIntro =>
+      'Eight short lessons. Read them in order the first time, then come back to any one of them whenever you need it.';
+
+  @override
+  String guideProgress(int read, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      read,
+      locale: localeName,
+      other: '$read of $total read',
+      zero: 'Not started',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String guideLessonProgress(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String guideStepLabel(int number) {
+    return 'Step $number';
+  }
+
+  @override
+  String get guideOpenScreen => 'Open it now';
+
+  @override
+  String guideNextLesson(Object title) {
+    return 'Next: $title';
+  }
+
+  @override
+  String get guideAllDone => 'That is the whole guide.';
+
+  @override
+  String get guideAllDoneBody =>
+      'Nothing here is a test. Come back to any lesson whenever you need it.';
+
+  @override
+  String get guideBackToLessons => 'Back to the lessons';
+
+  @override
+  String get guideRead => 'Read';
+
+  @override
+  String get guidePromptTitle => 'New to Kitaza?';
+
+  @override
+  String get guidePromptBody =>
+      'A short guide walks you through recording a sale, your prices, and reading your numbers.';
+
+  @override
+  String get guidePromptOpen => 'Show me';
+
+  @override
+  String get guidePromptDismiss => 'Not now';
+
+  @override
+  String get guideFirstDayTitle => 'Your first day';
+
+  @override
+  String get guideFirstDaySummary =>
+      'What to do in the first hour, and why the app keeps working when the signal does not.';
+
+  @override
+  String get guideFirstDayStep1Title => 'It works without load';
+
+  @override
+  String get guideFirstDayStep1Body =>
+      'Everything you record is saved on this phone first. No signal, no data, no problem. If you use cloud storage, the phone sends it on by itself once there is signal again.';
+
+  @override
+  String get guideFirstDayStep2Title => 'Put in what you sell';
+
+  @override
+  String get guideFirstDayStep2Body =>
+      'You do not need everything on day one. Start with the ten things that move the most. Add the rest as you go along.';
+
+  @override
+  String get guideFirstDayStep3Title =>
+      'Record every sale, even a five-peso one';
+
+  @override
+  String get guideFirstDayStep3Body =>
+      'A sachet counts the same as a case. The numbers Kitaza gives back are only as true as what you put in, so the small ones matter most.';
+
+  @override
+  String get guideFirstDayStep4Title => 'Look at the day before you close';
+
+  @override
+  String get guideFirstDayStep4Body =>
+      'Open the first screen at the end of the day. It shows what came in, what went out, and what you actually kept.';
+
+  @override
+  String get guideRecordingSalesTitle => 'Recording a sale';
+
+  @override
+  String get guideRecordingSalesSummary =>
+      'The one thing you will do a hundred times a day. It takes three taps.';
+
+  @override
+  String get guideRecordingSalesStep1Title => 'Tap Add sale';
+
+  @override
+  String get guideRecordingSalesStep1Body =>
+      'It is the big button at the top of the first screen. You can reach it from anywhere using the buttons along the bottom.';
+
+  @override
+  String get guideRecordingSalesStep2Title => 'Tap what they bought';
+
+  @override
+  String get guideRecordingSalesStep2Body =>
+      'Tap an item to add one. Tap it again for two. If the item has a barcode, use the scanner button instead of searching for it.';
+
+  @override
+  String get guideRecordingSalesStep3Title => 'Say how they paid';
+
+  @override
+  String get guideRecordingSalesStep3Body =>
+      'Cash, GCash, or utang. Utang is still a sale, and Kitaza remembers it as money you have not been handed yet.';
+
+  @override
+  String get guideRecordingSalesStep4Title => 'Save';
+
+  @override
+  String get guideRecordingSalesStep4Body =>
+      'That is it. The sale is on the phone straight away, and the stock count goes down by itself.';
+
+  @override
+  String get guideRecordingSalesStep5Title => 'If you get one wrong';
+
+  @override
+  String get guideRecordingSalesStep5Body =>
+      'Open Sales, find it, and void it. Nothing is erased quietly: the sale is marked void and the stock goes back on the shelf.';
+
+  @override
+  String get guideWhatYouSellTitle => 'What you sell';
+
+  @override
+  String get guideWhatYouSellSummary =>
+      'Your prices, your stock, and the one field that decides whether Kitaza can tell you your profit.';
+
+  @override
+  String get guideWhatYouSellStep1Title => 'Add an item';
+
+  @override
+  String get guideWhatYouSellStep1Body =>
+      'Go to Products and tap Add. A name and a selling price are enough to start selling it.';
+
+  @override
+  String get guideWhatYouSellStep2Title => 'Put in both prices';
+
+  @override
+  String get guideWhatYouSellStep2Body =>
+      'What you paid for it, and what you charge. Without the cost, Kitaza can only count your sales - it cannot tell you what you kept.';
+
+  @override
+  String get guideWhatYouSellStep3Title => 'Count what is on the shelf';
+
+  @override
+  String get guideWhatYouSellStep3Body =>
+      'Put in how many you have now. From then on Kitaza counts down as you sell and up when you record a delivery.';
+
+  @override
+  String get guideWhatYouSellStep4Title => 'Say when to reorder';
+
+  @override
+  String get guideWhatYouSellStep4Body =>
+      'Set the number that means running low - two, five, a dozen. Kitaza tells you before the shelf is empty, not after.';
+
+  @override
+  String get guideWhatYouSellStep5Title => 'Scan instead of typing';
+
+  @override
+  String get guideWhatYouSellStep5Body =>
+      'Scan a barcode once while adding the item, and from then on scanning it at the counter finds it instantly.';
+
+  @override
+  String get guideMoneyGoingOutTitle => 'Money going out';
+
+  @override
+  String get guideMoneyGoingOutSummary =>
+      'Buying stock, paying the bills, and the difference between the two kinds of money leaving.';
+
+  @override
+  String get guideMoneyGoingOutStep1Title => 'Record what you spend';
+
+  @override
+  String get guideMoneyGoingOutStep1Body =>
+      'Tap Expense and put in the amount. The reason is optional - do not let it slow you down at the counter.';
+
+  @override
+  String get guideMoneyGoingOutStep2Title => 'Buying stock counts too';
+
+  @override
+  String get guideMoneyGoingOutStep2Body =>
+      'The trip to the palengke, the delivery, the load you bought to resell. If money left the till, it belongs here.';
+
+  @override
+  String get guideMoneyGoingOutStep3Title =>
+      'Money you take for yourself is different';
+
+  @override
+  String get guideMoneyGoingOutStep3Body =>
+      'Use Withdrawals for that, not Expenses. Mixing them makes a shop that is doing fine look like it is losing money every week.';
+
+  @override
+  String get guideMoneyGoingOutStep4Title => 'Do it the same day';
+
+  @override
+  String get guideMoneyGoingOutStep4Body =>
+      'An expense remembered three days later is usually remembered wrong. A quick note at the time beats an exact one that never happens.';
+
+  @override
+  String get guideReadingYourNumbersTitle => 'Reading your numbers';
+
+  @override
+  String get guideReadingYourNumbersSummary =>
+      'What the first screen is telling you, and the difference between selling a lot and earning.';
+
+  @override
+  String get guideReadingYourNumbersStep1Title => 'Pick the period first';
+
+  @override
+  String get guideReadingYourNumbersStep1Body =>
+      'Today, this week, this month. Every number on the screen is for the period you picked, so check it before you worry.';
+
+  @override
+  String get guideReadingYourNumbersStep2Title => 'Sales is not profit';
+
+  @override
+  String get guideReadingYourNumbersStep2Body =>
+      'Sales is what came through the till. Profit is what is left after what the goods cost you. A busy day with thin prices can earn less than a quiet one.';
+
+  @override
+  String get guideReadingYourNumbersStep3Title => 'The coloured band';
+
+  @override
+  String get guideReadingYourNumbersStep3Body =>
+      'Green means the week is going well, yellow means watch something, red means something needs your attention today. It always says why underneath.';
+
+  @override
+  String get guideReadingYourNumbersStep4Title =>
+      'Tap a number to see where it came from';
+
+  @override
+  String get guideReadingYourNumbersStep4Body =>
+      'Nothing in Kitaza is a number you have to take on faith. Every total opens into the sales and expenses that made it.';
+
+  @override
+  String get guideWhatKitazaSuggestsTitle => 'What Kitaza suggests';
+
+  @override
+  String get guideWhatKitazaSuggestsSummary =>
+      'Reorder advice, prices worth a look, and your own busy days - all worked out from your own records.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep1Title => 'What to reorder';
+
+  @override
+  String get guideWhatKitazaSuggestsStep1Body =>
+      'How fast each item actually sells, how many days the shelf will last, and how much to buy. Days it was out of stock are left out, so a fast seller is not mistaken for a slow one.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep2Title => 'Prices worth a look';
+
+  @override
+  String get guideWhatKitazaSuggestsStep2Body =>
+      'Anything you are selling for less than it cost you, thin margins on good sellers, and stock that is not moving. Each one suggests a price and what it would add in a month.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep3Title => 'Your own busy days';
+
+  @override
+  String get guideWhatKitazaSuggestsStep3Body =>
+      'Payday weeks and your best day of the week, measured from your takings - not guessed. A store beside a school and one beside a factory do not share a rhythm.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep4Title => 'Check the arithmetic';
+
+  @override
+  String get guideWhatKitazaSuggestsStep4Body =>
+      'Every card has How these are worked out underneath it. If a suggestion looks wrong to you, open it - you know your store better than the app does.';
+
+  @override
+  String get guideKeepingRecordsSafeTitle => 'Keeping your records safe';
+
+  @override
+  String get guideKeepingRecordsSafeSummary =>
+      'What happens if the phone is lost, and how to make sure a year of records is not lost with it.';
+
+  @override
+  String get guideKeepingRecordsSafeStep1Title => 'Kitaza backs itself up';
+
+  @override
+  String get guideKeepingRecordsSafeStep1Body =>
+      'A copy of your records is saved on the phone on its own, without you asking. That covers a mistake. It does not cover a lost phone.';
+
+  @override
+  String get guideKeepingRecordsSafeStep2Title => 'Keep a copy off the phone';
+
+  @override
+  String get guideKeepingRecordsSafeStep2Body =>
+      'In Settings, tap Export and send the file to yourself - Messenger, email, a memory card. Once a month is enough. This is the step people skip and regret.';
+
+  @override
+  String get guideKeepingRecordsSafeStep3Title => 'Getting your records back';
+
+  @override
+  String get guideKeepingRecordsSafeStep3Body =>
+      'On a new phone, install Kitaza and choose Restore instead of setting up a new store. Your products, sales and expenses come back as they were.';
+
+  @override
+  String get guideKeepingRecordsSafeStep4Title => 'Or let the cloud hold it';
+
+  @override
+  String get guideKeepingRecordsSafeStep4Body =>
+      'Cloud storage keeps your records on our server as well as your phone, so a lost phone costs you nothing. It needs signal sometimes, and a monthly plan.';
+
+  @override
+  String get guideYourHelpersTitle => 'Your helpers';
+
+  @override
+  String get guideYourHelpersSummary =>
+      'Letting someone else mind the counter without handing over everything.';
+
+  @override
+  String get guideYourHelpersStep1Title => 'Add the person first';
+
+  @override
+  String get guideYourHelpersStep1Body =>
+      'In Settings, open Team and add them by name. Kitaza gives you a short code for them to type into their own phone.';
+
+  @override
+  String get guideYourHelpersStep2Title => 'Choose what they can see';
+
+  @override
+  String get guideYourHelpersStep2Body =>
+      'Everyone can sell. You decide separately whether they can change prices, record expenses, see your profit, or void a sale.';
+
+  @override
+  String get guideYourHelpersStep3Title => 'Their phone and yours agree';
+
+  @override
+  String get guideYourHelpersStep3Body =>
+      'A sale rung up at the counter shows on your phone within seconds. Both phones keep working when the signal drops, and catch up afterwards.';
+
+  @override
+  String get guideYourHelpersStep4Title => 'If a phone goes missing';
+
+  @override
+  String get guideYourHelpersStep4Body =>
+      'Open Signed-in devices and remove it. That phone stops being able to see or change anything, straight away.';
+
+  @override
+  String get legalOperator =>
+      '[Registered business name], [address], Philippines';
+
+  @override
+  String get legalContact =>
+      'Questions about this document, or about your records: [privacy@kitaza.ph]. We answer within 15 working days, as the National Privacy Commission expects.';
+
+  @override
+  String legalVersion(Object version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get legalPrivacyTitle => 'Privacy notice';
+
+  @override
+  String get legalTermsTitle => 'Terms of use';
+
+  @override
+  String get legalReadPrivacy => 'Privacy notice';
+
+  @override
+  String get legalReadTerms => 'Terms of use';
+
+  @override
+  String get legalAgreeTitle => 'Before you start';
+
+  @override
+  String legalAgree(Object privacy, Object terms) {
+    return 'I have read and agree to the $privacy and the $terms.';
+  }
+
+  @override
+  String get legalAgreeRequired =>
+      'Please read and agree to both before continuing.';
+
+  @override
+  String legalAgreedOn(Object date) {
+    return 'Agreed $date';
+  }
+
+  @override
+  String get legalNeedsAgreement => 'Please review and agree';
+
+  @override
+  String get legalUpdatedTitle => 'We have updated these';
+
+  @override
+  String get legalUpdatedBody =>
+      'Please read what changed and agree again. Nothing on your phone is affected while you decide.';
+
+  @override
+  String get legalAgreeButton => 'I agree';
+
+  @override
+  String get privacyWhoHeading => 'Who holds your records';
+
+  @override
+  String privacyWhoBody(Object operator) {
+    return 'Kitaza is run by $operator. Under the Data Privacy Act of 2012 (Republic Act 10173) we are the personal information controller for the details you give us about yourself.\n\nOur Data Protection Officer can be reached at the address at the end of this notice.';
+  }
+
+  @override
+  String get privacyOfflineHeading =>
+      'If you use Kitaza offline, we hold nothing';
+
+  @override
+  String get privacyOfflineBody =>
+      'An offline store keeps everything on the phone. Your products, sales, expenses and takings never reach us, because there is nothing to send them to. We could not show them to anyone if we were asked.\n\nThis is not a setting we can change from our side. It is simply where the records are.';
+
+  @override
+  String get privacyWhatHeading => 'What we hold when you use the cloud';
+
+  @override
+  String get privacyWhatBody =>
+      'Your name, your email address, and a scrambled form of your password that cannot be turned back into it.\n\nYour store\'s name, its type, and the names of any staff you add.\n\nYour business records: products and prices, sales, expenses, withdrawals and stock counts.\n\nThe name of each phone signed in, when it was last used, and a record of who did what in your store.\n\nIf the app breaks, what broke and which version it was: the error, where in the code it happened, and the phone\'s operating system.';
+
+  @override
+  String get privacyNeverHeading => 'What we never hold';
+
+  @override
+  String get privacyNeverBody =>
+      'We do not record your customers. A sale is an amount and the items in it; an utang is a payment method. No customer name, number or address is ever asked for or stored.\n\nWe never see card numbers, GCash PINs or bank details. Payments go through PayMongo, who handle them; we are told only that a payment succeeded and for how much.\n\nWe do not track your location, read your contacts, or look at anything else on your phone. The camera is used for scanning barcodes, and only while you have the scanner open.';
+
+  @override
+  String get privacyWhyHeading => 'Why we hold it';
+
+  @override
+  String get privacyWhyBody =>
+      'To run the service you asked for: to keep your records for you, to show them on your other phones, and to let your staff use the store.\n\nTo take payment for the plan you chose, and to keep the accounting records a business is required to keep.\n\nTo fix what breaks. Error reports tell us a build is failing; they carry no business figures.\n\nWith your permission, to work out the middle figures that let you compare your store with others. You can switch this off in Settings, and switching it off also switches off seeing anyone else\'s.';
+
+  @override
+  String get privacySharedHeading => 'Who else sees it';
+
+  @override
+  String get privacySharedBody =>
+      'PayMongo Philippines, to take payment. They see what a payment is for and who is paying, under their own privacy policy.\n\nThe company that hosts our servers, which stores the data on our behalf and may not use it for anything else.\n\nNobody else. We do not sell your records, and we do not hand them to advertisers. We would give them to a government body only where a law or a court order requires it, and we would tell you unless we were forbidden to.\n\nComparisons between stores are published as middle figures only, across at least twenty stores of a similar type and size. They name no store and contain no single sale.';
+
+  @override
+  String get privacyKeepHeading => 'How long we keep it';
+
+  @override
+  String get privacyKeepBody =>
+      'Your business records, for as long as your account is open.\n\nWho did what in your store: two years.\n\nError reports: ninety days.\n\nPhones you have signed out: one year.\n\nWhen you close your account we delete everything after thirty days, and the thirty days exist only so a mis-tap can be undone. What survives is the amount and date of payments we received, with nothing about you attached to it, because a business must be able to account for money it was paid.';
+
+  @override
+  String get privacyRightsHeading => 'Your rights';
+
+  @override
+  String get privacyRightsBody =>
+      'The Data Privacy Act gives you rights over what we hold, and the app carries out most of them without you having to ask anyone.\n\nTo be told what we hold and why: this notice, and Settings shows it too.\n\nTo get a copy: Settings, Download my records. It is an ordinary file you can open and keep.\n\nTo correct what is wrong: change it in the app, or write to us.\n\nTo have it deleted: Settings, Close my account. After thirty days it is gone and cannot be brought back.\n\nTo object, and to withdraw a permission you gave. Turning off comparisons is one of these.\n\nTo be paid for damage caused if we mishandle your records, and to complain to the National Privacy Commission at privacy.gov.ph. You do not have to come to us first, although we would rather you did.';
+
+  @override
+  String get privacySafetyHeading =>
+      'Keeping it safe, and telling you when we fail';
+
+  @override
+  String get privacySafetyBody =>
+      'Passwords are stored scrambled and cannot be read back, by us or anyone else. Traffic between your phone and our servers is encrypted. A phone you sign out stops working straight away.\n\nIf your records are exposed and it puts you at real risk, we will tell the National Privacy Commission within seventy-two hours of finding out, and we will tell you: what happened, what was involved, and what to do about it.';
+
+  @override
+  String get privacyChangesHeading => 'Changes to this notice';
+
+  @override
+  String get privacyChangesBody =>
+      'When this notice changes in a way that matters, the app asks you to read it and agree again, and records the version you agreed to.\n\nUsing the app does not count as agreeing. We ask you plainly.';
+
+  @override
+  String get termsWhatHeading => 'What Kitaza is';
+
+  @override
+  String termsWhatBody(Object operator) {
+    return 'Kitaza is a record book for a small shop. It records what you sell and spend, counts your stock, and works out figures from what you put in.\n\nThe agreement is between you and $operator.';
+  }
+
+  @override
+  String get termsNotHeading => 'What Kitaza is not';
+
+  @override
+  String get termsNotBody =>
+      'It is not an accountant, and it is not a BIR filing tool. Its figures are not a tax return and not a set of audited books.\n\nIts suggestions - what to reorder, what to charge - are arithmetic on your own records, shown with their working. They are something to weigh, not instructions. You know your shop; the app does not.\n\nIf you need advice about tax, permits or the law, ask someone qualified to give it.';
+
+  @override
+  String get termsAccountHeading => 'Your account';
+
+  @override
+  String get termsAccountBody =>
+      'You must be old enough to enter a contract, and the details you give must be true.\n\nKeep your password to yourself. Anything done by a phone signed in to your account is treated as done by you, so sign out a phone you no longer have.\n\nStaff you add act for you. You decide what each of them may see and do, and you are responsible for what they do in your store.';
+
+  @override
+  String get termsPayHeading => 'What you pay';
+
+  @override
+  String get termsPayBody =>
+      'The first thirty days are free and need no payment details.\n\nAfter that a plan is paid for in advance - one month or one year at a time - at the price shown in the app when you pay. Nothing renews by itself and nothing is charged automatically. When a period runs out you get seven more days, and then the app stops syncing until you pay again.\n\nYour records are not held hostage. An unpaid account can still be read on the phone, and its records can still be exported.\n\nPrices can change, but never for a period you have already paid for.';
+
+  @override
+  String get termsRefundHeading => 'Refunds';
+
+  @override
+  String get termsRefundBody =>
+      'If the service does not do what this page says it does, tell us within thirty days of paying and we will refund that payment in full.\n\nWe do not refund a period you simply did not use. Nothing renews by itself, so an unused period is a choice rather than an accident.\n\nThis sits alongside your rights under the Consumer Act of the Philippines (Republic Act 7394); nothing here takes those away.';
+
+  @override
+  String get termsYoursHeading => 'Your records are yours';
+
+  @override
+  String get termsYoursBody =>
+      'What you put in stays yours. We claim nothing over it, and we hold it to run the service for you and nothing else.\n\nYou can take a copy at any time, and you can close the account and have it deleted. The Privacy notice says exactly what happens then.';
+
+  @override
+  String get termsFairHeading => 'Using it fairly';
+
+  @override
+  String get termsFairBody =>
+      'Do not use Kitaza to break the law, to record someone else\'s business without their say-so, or to attack the service or get into an account that is not yours.\n\nWe may suspend an account that is doing one of these, and we will say why.';
+
+  @override
+  String get termsLimitsHeading => 'What we do and do not promise';
+
+  @override
+  String get termsLimitsBody =>
+      'We will take reasonable care to keep the service running and your records safe. We cannot promise it will never be down, and we cannot promise a phone will never be lost or broken - which is why the app keeps its own backups and asks you to keep a copy off the phone.\n\nWhere the law allows a limit, ours is the amount you have paid us in the twelve months before the problem. Nothing here limits liability for fraud, for death or injury caused by negligence, or for anything a law says may not be limited.';
+
+  @override
+  String get termsEndingHeading => 'Ending it';
+
+  @override
+  String get termsEndingBody =>
+      'You can close your account at any time, from Settings.\n\nWe would end an agreement only for a serious or repeated breach of these terms, and we would give you notice and time to take a copy of your records first.';
+
+  @override
+  String get termsLawHeading => 'Which law applies';
+
+  @override
+  String get termsLawBody =>
+      'The law of the Republic of the Philippines. A dispute that cannot be settled between us goes to the courts of the place where our business is registered.\n\nIf part of this page turns out to be unenforceable, the rest still stands.';
+
+  @override
+  String get settingsPrivacy => 'Your data and privacy';
+
+  @override
+  String get privacyCardTitle => 'Your data and privacy';
+
+  @override
+  String get privacyCardSubtitle =>
+      'What is held, how to get a copy, and how to close your account';
+
+  @override
+  String get privacyScreenTitle => 'Your data and privacy';
+
+  @override
+  String get privacyWhereTitle => 'Where your records are';
+
+  @override
+  String get privacyWhereLocal =>
+      'On this phone only. Nothing about your store has ever been sent to us, and nothing can be.';
+
+  @override
+  String get privacyWhereCloud =>
+      'On this phone and on our servers, so your other phones and your staff can see them.';
+
+  @override
+  String get privacyDocumentsTitle => 'What you agreed to';
+
+  @override
+  String get privacyDownloadTitle => 'Download my records';
+
+  @override
+  String get privacyDownloadLocal =>
+      'Everything on this phone, as a file you can keep or open elsewhere.';
+
+  @override
+  String get privacyDownloadCloud =>
+      'Everything we hold about you, as a file you can keep or open elsewhere.';
+
+  @override
+  String get privacyDownloadWorking => 'Gathering your records…';
+
+  @override
+  String get privacyDownloadFailed =>
+      'Could not gather your records. Try again.';
+
+  @override
+  String get privacyCloseTitle => 'Close my account';
+
+  @override
+  String get privacyCloseSubtitle => 'Delete everything we hold about you';
+
+  @override
+  String get privacyCloseScreenTitle => 'Close my account';
+
+  @override
+  String get privacyCloseExplain =>
+      'Your account, your stores and every sale, expense and product in them will be deleted from our servers.';
+
+  @override
+  String privacyCloseGrace(int days) {
+    return 'Nothing is deleted for $days days. Until then you can change your mind, and everything carries on as normal.';
+  }
+
+  @override
+  String get privacyCloseKeeps =>
+      'What we keep: the amount and date of payments you made, with nothing about you attached. A business has to be able to account for money it was paid.';
+
+  @override
+  String get privacyClosePhone =>
+      'The records on this phone are not touched. Take a copy first if you want to keep them.';
+
+  @override
+  String get privacyCloseConfirmLabel =>
+      'Type the name of your store to confirm';
+
+  @override
+  String get privacyCloseConfirmWrong =>
+      'That does not match the name of your store.';
+
+  @override
+  String get privacyCloseSubmit => 'Close my account';
+
+  @override
+  String privacyCloseScheduled(Object date) {
+    return 'Your account will be deleted on $date.';
+  }
+
+  @override
+  String get privacyCloseCancel => 'Keep my account';
+
+  @override
+  String get privacyCloseCancelled => 'Your account is staying open.';
+
+  @override
+  String get privacyCloseFailed =>
+      'Could not do that. Try again when you have signal.';
+
+  @override
+  String get privacyLocalOnlyTitle => 'Nothing to close';
+
+  @override
+  String get privacyLocalOnlyBody =>
+      'This store is on your phone only. To remove it, delete the app - but take a copy of your records first.';
+
+  @override
+  String get privacyNpcTitle => 'If we get it wrong';
+
+  @override
+  String get privacyNpcBody =>
+      'You can complain to the National Privacy Commission at privacy.gov.ph. You do not have to come to us first.';
 }

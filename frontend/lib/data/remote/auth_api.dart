@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/legal_document.dart';
 import 'api_client.dart';
 import 'api_endpoints.dart';
 
@@ -28,6 +29,10 @@ class AuthApi {
         'store_name': storeName,
         'device_tag': device.tag,
         'device_name': device.name,
+        // The server refuses to make an account without these, so a screen
+        // that forgot to ask gets an error rather than silent consent.
+        'accepted_privacy_version': LegalDocument.privacyNotice.currentVersion,
+        'accepted_terms_version': LegalDocument.terms.currentVersion,
       },
     );
   }

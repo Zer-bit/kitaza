@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/models/guide_lesson.dart';
+import '../data/models/legal_document.dart';
 import '../features/authentication/auth_controller.dart';
 import '../features/authentication/join_store_screen.dart';
 import '../features/authentication/local_setup_screen.dart';
@@ -13,6 +15,11 @@ import '../features/billing/plan_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/expenses/expense_history_screen.dart';
 import '../features/expenses/record_expense_screen.dart';
+import '../features/guide/guide_lesson_screen.dart';
+import '../features/guide/guide_screen.dart';
+import '../features/legal/legal_screen.dart';
+import '../features/privacy/close_account_screen.dart';
+import '../features/privacy/privacy_screen.dart';
 import '../features/products/product_editor_screen.dart';
 import '../features/products/product_list_screen.dart';
 import '../features/reports/reports_screen.dart';
@@ -140,6 +147,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.withdrawals,
         builder: (context, state) => const WithdrawalScreen(),
       ),
+      // Readable without signing in: someone deciding whether to make an
+      // account has to be able to read what they would be agreeing to.
+      GoRoute(
+        path: '${RoutePaths.legal}/:document',
+        builder: (context, state) {
+          final document = LegalDocument.parse(
+            state.pathParameters['document'] ?? '',
+          );
+          return LegalScreen(document: document ?? LegalDocument.privacyNotice);
+        },
+      ),
+      GoRoute(
+        path: RoutePaths.guide,
+        builder: (context, state) => const GuideScreen(),
+        routes: [
+          GoRoute(
+            path: ':lesson',
+            builder: (context, state) {
+              final lesson = GuideLesson.named(state.pathParameters['lesson']);
+              return lesson == null
+                  ? const GuideScreen()
+                  : GuideLessonScreen(lesson: lesson);
+            },
+          ),
+        ],
+      ),
       GoRoute(
         path: RoutePaths.settings,
         builder: (context, state) => const SettingsScreen(),
@@ -167,6 +200,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'plan',
             builder: (context, state) => const PlanScreen(),
+          ),
+          GoRoute(
+            path: 'privacy',
+            builder: (context, state) => const PrivacyScreen(),
+            routes: [
+              GoRoute(
+                path: 'close',
+                builder: (context, state) => const CloseAccountScreen(),
+              ),
+            ],
           ),
         ],
       ),

@@ -30,6 +30,15 @@ pub struct RegisterRequest {
     #[serde(default)]
     #[validate(length(max = 80, message = "must be at most 80 characters"))]
     pub device_name: Option<String>,
+
+    /// The versions of the privacy notice and the terms the person was shown
+    /// and agreed to. Without both, there is no lawful basis to hold the
+    /// account, so registration is refused rather than recorded.
+    #[serde(default)]
+    pub accepted_privacy_version: Option<String>,
+
+    #[serde(default)]
+    pub accepted_terms_version: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Validate)]

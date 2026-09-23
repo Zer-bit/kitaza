@@ -2060,4 +2060,687 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get aboutUnreleasedBuild =>
       'Pansubok na build. Hindi kokonekta ang cloud.';
+
+  @override
+  String get settingsGuide => 'Matutong gamitin';
+
+  @override
+  String get guideTitle => 'Paano gamitin ang Kitaza';
+
+  @override
+  String get guideIntro =>
+      'Walong maikling aralin. Sundan ang pagkakasunod-sunod sa unang basa, tapos balikan ang kahit alin kapag kailangan.';
+
+  @override
+  String guideProgress(int read, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      read,
+      locale: localeName,
+      other: '$read sa $total ang nabasa',
+      zero: 'Hindi pa nasisimulan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String guideLessonProgress(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hakbang',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String guideStepLabel(int number) {
+    return 'Hakbang $number';
+  }
+
+  @override
+  String get guideOpenScreen => 'Buksan ito ngayon';
+
+  @override
+  String guideNextLesson(Object title) {
+    return 'Susunod: $title';
+  }
+
+  @override
+  String get guideAllDone => 'Iyan na ang buong gabay.';
+
+  @override
+  String get guideAllDoneBody =>
+      'Walang pagsusulit dito. Balikan ang kahit anong aralin kapag kailangan mo.';
+
+  @override
+  String get guideBackToLessons => 'Balik sa mga aralin';
+
+  @override
+  String get guideRead => 'Nabasa na';
+
+  @override
+  String get guidePromptTitle => 'Bago sa Kitaza?';
+
+  @override
+  String get guidePromptBody =>
+      'May maikling gabay na magtuturo kung paano mag-record ng benta, ang presyo mo, at paano basahin ang numero mo.';
+
+  @override
+  String get guidePromptOpen => 'Ituro mo';
+
+  @override
+  String get guidePromptDismiss => 'Mamaya na';
+
+  @override
+  String get guideFirstDayTitle => 'Ang unang araw mo';
+
+  @override
+  String get guideFirstDaySummary =>
+      'Ang gagawin sa unang oras, at kung bakit gumagana ang app kahit walang signal.';
+
+  @override
+  String get guideFirstDayStep1Title => 'Gumagana kahit walang load';
+
+  @override
+  String get guideFirstDayStep1Body =>
+      'Lahat ng ire-record mo ay naka-save muna sa telepono. Walang signal, walang data, walang problema. Kung cloud ang gamit mo, kusang ipapadala ito ng telepono pagbalik ng signal.';
+
+  @override
+  String get guideFirstDayStep2Title => 'Ilagay ang mga binebenta mo';
+
+  @override
+  String get guideFirstDayStep2Body =>
+      'Hindi kailangang kumpleto agad sa unang araw. Simulan sa sampung pinakamabiling paninda. Dagdagan mo na lang habang tumatakbo ang araw.';
+
+  @override
+  String get guideFirstDayStep3Title => 'I-record lahat, kahit limang piso';
+
+  @override
+  String get guideFirstDayStep3Body =>
+      'Pareho ang bigat ng isang sachet at ng isang kaha. Ang numerong ibabalik sa iyo ng Kitaza ay kasingtotoo lang ng inilagay mo, kaya ang maliliit ang pinakamahalaga.';
+
+  @override
+  String get guideFirstDayStep4Title => 'Tingnan ang araw bago magsara';
+
+  @override
+  String get guideFirstDayStep4Body =>
+      'Buksan ang unang screen bago ka magsara. Nandoon kung magkano ang pumasok, magkano ang lumabas, at magkano ang talagang natira sa iyo.';
+
+  @override
+  String get guideRecordingSalesTitle => 'Pag-record ng benta';
+
+  @override
+  String get guideRecordingSalesSummary =>
+      'Ito ang gagawin mo nang daan-daang beses sa isang araw. Tatlong pindot lang.';
+
+  @override
+  String get guideRecordingSalesStep1Title => 'Pindutin ang Magdagdag ng benta';
+
+  @override
+  String get guideRecordingSalesStep1Body =>
+      'Ito ang malaking button sa itaas ng unang screen. Maaabot mo ito kahit saan ka gamit ang mga button sa ibaba.';
+
+  @override
+  String get guideRecordingSalesStep2Title => 'Pindutin ang binili nila';
+
+  @override
+  String get guideRecordingSalesStep2Body =>
+      'Isang pindot, isang piraso. Pindutin ulit kung dalawa. Kung may barcode ang paninda, i-scan na lang sa halip na hanapin.';
+
+  @override
+  String get guideRecordingSalesStep3Title => 'Sabihin kung paano nagbayad';
+
+  @override
+  String get guideRecordingSalesStep3Body =>
+      'Cash, GCash, o utang. Benta pa rin ang utang, at tinatandaan ito ng Kitaza bilang perang hindi pa naaabot sa iyo.';
+
+  @override
+  String get guideRecordingSalesStep4Title => 'I-save';
+
+  @override
+  String get guideRecordingSalesStep4Body =>
+      'Ayun, tapos na. Nasa telepono na agad ang benta, at kusang bumababa ang bilang ng stock.';
+
+  @override
+  String get guideRecordingSalesStep5Title => 'Kung may namali ka';
+
+  @override
+  String get guideRecordingSalesStep5Body =>
+      'Buksan ang Benta, hanapin ito, at i-void. Walang tahimik na binubura: mamarkahan itong void at babalik ang stock sa istante.';
+
+  @override
+  String get guideWhatYouSellTitle => 'Ang mga paninda mo';
+
+  @override
+  String get guideWhatYouSellSummary =>
+      'Ang presyo, ang stock, at ang isang bagay na magdedesisyon kung masasabi sa iyo ng Kitaza ang tubo mo.';
+
+  @override
+  String get guideWhatYouSellStep1Title => 'Magdagdag ng paninda';
+
+  @override
+  String get guideWhatYouSellStep1Body =>
+      'Pumunta sa Paninda at pindutin ang Magdagdag. Sapat na ang pangalan at presyo para makapagbenta ka na.';
+
+  @override
+  String get guideWhatYouSellStep2Title => 'Ilagay ang dalawang presyo';
+
+  @override
+  String get guideWhatYouSellStep2Body =>
+      'Ang puhunan mo, at ang sinisingil mo. Kapag walang puhunan, mabibilang lang ng Kitaza ang benta mo - hindi nito masasabi kung magkano ang natira sa iyo.';
+
+  @override
+  String get guideWhatYouSellStep3Title => 'Bilangin ang nasa istante';
+
+  @override
+  String get guideWhatYouSellStep3Body =>
+      'Ilagay kung ilan ang meron ka ngayon. Mula roon, kusang binabawasan ito ng Kitaza habang nagbebenta ka at dinadagdagan kapag may na-record kang delivery.';
+
+  @override
+  String get guideWhatYouSellStep4Title => 'Sabihin kung kailan mag-order ulit';
+
+  @override
+  String get guideWhatYouSellStep4Body =>
+      'Itakda ang bilang na nangangahulugang paubos na - dalawa, lima, isang dosena. Sasabihin ito ng Kitaza bago maubos, hindi pagkatapos.';
+
+  @override
+  String get guideWhatYouSellStep5Title => 'Mag-scan sa halip na mag-type';
+
+  @override
+  String get guideWhatYouSellStep5Body =>
+      'I-scan ang barcode minsan habang dinadagdag ang paninda, at mula noon ay agad na itong makikita kapag ni-scan mo sa counter.';
+
+  @override
+  String get guideMoneyGoingOutTitle => 'Perang lumalabas';
+
+  @override
+  String get guideMoneyGoingOutSummary =>
+      'Pagpuhunan, pagbayad ng bayarin, at ang pagkakaiba ng dalawang klaseng perang lumalabas.';
+
+  @override
+  String get guideMoneyGoingOutStep1Title => 'I-record ang ginastos mo';
+
+  @override
+  String get guideMoneyGoingOutStep1Body =>
+      'Pindutin ang Gastos at ilagay ang halaga. Hindi kailangan ang dahilan - huwag mo nang hayaang makapagpabagal ito sa counter.';
+
+  @override
+  String get guideMoneyGoingOutStep2Title => 'Gastos din ang pagpuhunan';
+
+  @override
+  String get guideMoneyGoingOutStep2Body =>
+      'Ang punta sa palengke, ang delivery, ang load na binili mong ibebenta ulit. Kung may perang lumabas sa kahon, dito ito kabilang.';
+
+  @override
+  String get guideMoneyGoingOutStep3Title =>
+      'Iba ang perang kinuha mo para sa sarili';
+
+  @override
+  String get guideMoneyGoingOutStep3Body =>
+      'Gamitin ang Paglabas ng pera para doon, hindi ang Gastos. Kapag pinagsama mo, ang tindahang maayos naman ay magmumukhang lugi kada linggo.';
+
+  @override
+  String get guideMoneyGoingOutStep4Title => 'Gawin sa mismong araw';
+
+  @override
+  String get guideMoneyGoingOutStep4Body =>
+      'Ang gastos na naalala makalipas ang tatlong araw ay kadalasang maling naaalala. Mas mabuti ang mabilisang tala ngayon kaysa sa tamang-tamang tala na hindi naman mangyayari.';
+
+  @override
+  String get guideReadingYourNumbersTitle => 'Pagbasa ng numero mo';
+
+  @override
+  String get guideReadingYourNumbersSummary =>
+      'Ang sinasabi sa iyo ng unang screen, at ang pagkakaiba ng malakas na benta at ng kita.';
+
+  @override
+  String get guideReadingYourNumbersStep1Title => 'Piliin muna ang panahon';
+
+  @override
+  String get guideReadingYourNumbersStep1Body =>
+      'Ngayon, ngayong linggo, ngayong buwan. Lahat ng numero sa screen ay para sa napili mong panahon, kaya tingnan ito bago ka mag-alala.';
+
+  @override
+  String get guideReadingYourNumbersStep2Title => 'Hindi tubo ang benta';
+
+  @override
+  String get guideReadingYourNumbersStep2Body =>
+      'Ang benta ay ang dumaan sa kahon. Ang tubo ay ang natira matapos ang puhunan sa paninda. Ang maabalang araw na manipis ang presyo ay puwedeng mas maliit ang kita kaysa sa tahimik na araw.';
+
+  @override
+  String get guideReadingYourNumbersStep3Title => 'Ang may kulay na banda';
+
+  @override
+  String get guideReadingYourNumbersStep3Body =>
+      'Berde: maayos ang linggo. Dilaw: may bantayan ka. Pula: may dapat asikasuhin ngayong araw. Laging may paliwanag sa ilalim kung bakit.';
+
+  @override
+  String get guideReadingYourNumbersStep4Title =>
+      'Pindutin ang numero para makita kung saan galing';
+
+  @override
+  String get guideReadingYourNumbersStep4Body =>
+      'Walang numero sa Kitaza na basta na lang dapat paniwalaan. Bawat kabuuan ay bubukas sa mga bentahan at gastos na bumuo nito.';
+
+  @override
+  String get guideWhatKitazaSuggestsTitle => 'Ang mungkahi ng Kitaza';
+
+  @override
+  String get guideWhatKitazaSuggestsSummary =>
+      'Kailan mag-order ulit, presyong dapat tingnan, at ang sarili mong maabalang araw - galing lahat sa sarili mong tala.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep1Title => 'Ano ang dapat i-order ulit';
+
+  @override
+  String get guideWhatKitazaSuggestsStep1Body =>
+      'Kung gaano kabilis talaga nauubos ang bawat paninda, ilang araw pa ang aabutin ng istante, at ilan ang bibilhin. Hindi binibilang ang mga araw na wala kang stock, kaya hindi napagkakamalang mabagal ang mabilis na paninda.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep2Title => 'Presyong dapat tingnan';
+
+  @override
+  String get guideWhatKitazaSuggestsStep2Body =>
+      'Ang mga ibinebenta mo nang mas mura pa sa puhunan, ang manipis na tubo sa mabiling paninda, at ang stock na hindi gumagalaw. May mungkahing presyo ang bawat isa at kung magkano ang maidaragdag nito sa isang buwan.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep3Title =>
+      'Ang sarili mong maabalang araw';
+
+  @override
+  String get guideWhatKitazaSuggestsStep3Body =>
+      'Ang linggo ng sahod at ang pinakamalakas mong araw sa isang linggo, sinukat mula sa kita mo - hindi hinulaan. Magkaiba ang ritmo ng tindahang katabi ng paaralan at ng katabi ng pabrika.';
+
+  @override
+  String get guideWhatKitazaSuggestsStep4Title => 'Tingnan ang pagkukuwenta';
+
+  @override
+  String get guideWhatKitazaSuggestsStep4Body =>
+      'May Paano ito kinuwenta sa ilalim ng bawat card. Kung mali sa tingin mo ang mungkahi, buksan mo ito - mas kilala mo ang tindahan mo kaysa sa app.';
+
+  @override
+  String get guideKeepingRecordsSafeTitle => 'Pag-iingat ng tala mo';
+
+  @override
+  String get guideKeepingRecordsSafeSummary =>
+      'Ang mangyayari kapag nawala ang telepono, at kung paano hindi masasama roon ang isang taong tala.';
+
+  @override
+  String get guideKeepingRecordsSafeStep1Title =>
+      'Kusang nagbaback-up ang Kitaza';
+
+  @override
+  String get guideKeepingRecordsSafeStep1Body =>
+      'May kopya ng tala mo na kusang nase-save sa telepono, kahit hindi mo hilingin. Sagot nito ang pagkakamali. Hindi nito sagot ang nawawalang telepono.';
+
+  @override
+  String get guideKeepingRecordsSafeStep2Title =>
+      'Magtago ng kopya sa labas ng telepono';
+
+  @override
+  String get guideKeepingRecordsSafeStep2Body =>
+      'Sa Settings, pindutin ang I-export at ipadala sa sarili mo ang file - Messenger, email, memory card. Sapat na ang minsan sa isang buwan. Ito ang hakbang na nilalaktawan at pinagsisisihan.';
+
+  @override
+  String get guideKeepingRecordsSafeStep3Title => 'Pagbawi ng tala mo';
+
+  @override
+  String get guideKeepingRecordsSafeStep3Body =>
+      'Sa bagong telepono, i-install ang Kitaza at piliin ang Ibalik sa halip na gumawa ng bagong tindahan. Babalik ang paninda, benta at gastos mo gaya ng dati.';
+
+  @override
+  String get guideKeepingRecordsSafeStep4Title =>
+      'O hayaang ang cloud ang magtago';
+
+  @override
+  String get guideKeepingRecordsSafeStep4Body =>
+      'Sa cloud, nasa server namin at nasa telepono mo ang tala, kaya walang mawawala kapag nawala ang telepono. Kailangan nito ng signal paminsan-minsan, at buwanang bayad.';
+
+  @override
+  String get guideYourHelpersTitle => 'Ang mga katulong mo';
+
+  @override
+  String get guideYourHelpersSummary =>
+      'Paano magpabantay ng counter nang hindi ibinibigay ang lahat.';
+
+  @override
+  String get guideYourHelpersStep1Title => 'Idagdag muna ang tao';
+
+  @override
+  String get guideYourHelpersStep1Body =>
+      'Sa Settings, buksan ang Tauhan at idagdag siya sa pangalan. Bibigyan ka ng Kitaza ng maikling code na ita-type niya sa sarili niyang telepono.';
+
+  @override
+  String get guideYourHelpersStep2Title => 'Piliin kung ano ang makikita niya';
+
+  @override
+  String get guideYourHelpersStep2Body =>
+      'Lahat ay puwedeng magbenta. Ikaw ang magdedesisyon kung puwede niyang palitan ang presyo, mag-record ng gastos, makita ang tubo mo, o mag-void ng benta.';
+
+  @override
+  String get guideYourHelpersStep3Title =>
+      'Magkasundo ang telepono niya at ang sa iyo';
+
+  @override
+  String get guideYourHelpersStep3Body =>
+      'Ang bentang narehistro sa counter ay lalabas sa telepono mo sa loob ng ilang segundo. Parehong gumagana ang dalawang telepono kapag nawala ang signal, at naghahabol pagkatapos.';
+
+  @override
+  String get guideYourHelpersStep4Title => 'Kapag may nawalang telepono';
+
+  @override
+  String get guideYourHelpersStep4Body =>
+      'Buksan ang Mga naka-sign in na device at alisin ito. Hindi na agad makakakita o makakapagbago ang teleponong iyon.';
+
+  @override
+  String get legalOperator =>
+      '[Rehistradong pangalan ng negosyo], [address], Pilipinas';
+
+  @override
+  String get legalContact =>
+      'Mga tanong tungkol sa dokumentong ito, o sa tala mo: [privacy@kitaza.ph]. Sinasagot namin ito sa loob ng 15 araw ng trabaho, ayon sa inaasahan ng National Privacy Commission.';
+
+  @override
+  String legalVersion(Object version) {
+    return 'Bersyon $version';
+  }
+
+  @override
+  String get legalPrivacyTitle => 'Paunawa sa privacy';
+
+  @override
+  String get legalTermsTitle => 'Mga tuntunin ng paggamit';
+
+  @override
+  String get legalReadPrivacy => 'Paunawa sa privacy';
+
+  @override
+  String get legalReadTerms => 'Mga tuntunin ng paggamit';
+
+  @override
+  String get legalAgreeTitle => 'Bago ka magsimula';
+
+  @override
+  String legalAgree(Object privacy, Object terms) {
+    return 'Nabasa ko at sumasang-ayon ako sa $privacy at sa $terms.';
+  }
+
+  @override
+  String get legalAgreeRequired =>
+      'Pakibasa at sang-ayunan ang dalawa bago magpatuloy.';
+
+  @override
+  String legalAgreedOn(Object date) {
+    return 'Sinang-ayunan noong $date';
+  }
+
+  @override
+  String get legalNeedsAgreement => 'Pakibasa at sang-ayunan';
+
+  @override
+  String get legalUpdatedTitle => 'May binago kami rito';
+
+  @override
+  String get legalUpdatedBody =>
+      'Pakibasa ang nabago at sang-ayunan ulit. Walang maaapektuhan sa telepono mo habang nagdedesisyon ka.';
+
+  @override
+  String get legalAgreeButton => 'Sumasang-ayon ako';
+
+  @override
+  String get privacyWhoHeading => 'Sino ang may hawak ng tala mo';
+
+  @override
+  String privacyWhoBody(Object operator) {
+    return 'Pinapatakbo ang Kitaza ng $operator. Sa ilalim ng Data Privacy Act of 2012 (Republic Act 10173), kami ang personal information controller para sa mga detalyeng ibinibigay mo tungkol sa sarili mo.\n\nMaaabot ang aming Data Protection Officer sa address na nasa dulo ng paunawang ito.';
+  }
+
+  @override
+  String get privacyOfflineHeading =>
+      'Kung offline ang gamit mo, wala kaming hawak';
+
+  @override
+  String get privacyOfflineBody =>
+      'Ang offline na tindahan ay nasa telepono lang lahat. Ang paninda, benta, gastos at kita mo ay hindi umaabot sa amin, dahil walang pinapadalhan. Hindi namin ito maipapakita kahit may humingi.';
+
+  @override
+  String get privacyWhatHeading => 'Ang hawak namin kapag cloud ang gamit mo';
+
+  @override
+  String get privacyWhatBody =>
+      'Ang pangalan mo, ang email mo, at ang ginulong anyo ng password mo na hindi na maibabalik sa dati.\n\nAng pangalan ng tindahan mo, ang uri nito, at ang pangalan ng mga tauhang idinagdag mo.\n\nAng tala ng negosyo mo: paninda at presyo, benta, gastos, paglabas ng pera at bilang ng stock.\n\nAng pangalan ng bawat teleponong naka-sign in, kailan huling ginamit, at tala kung sino ang gumawa ng ano sa tindahan mo.\n\nKung masira ang app, kung ano ang nasira at anong bersyon: ang error, kung saan sa code ito nangyari, at ang operating system ng telepono.';
+
+  @override
+  String get privacyNeverHeading => 'Ang hindi namin hawak kailanman';
+
+  @override
+  String get privacyNeverBody =>
+      'Hindi namin itinatala ang mga suki mo. Ang benta ay halaga at ang mga binili; ang utang ay paraan ng pagbabayad. Walang pangalan, numero o address ng suki na hinihingi o iniimbak.\n\nHindi namin nakikita ang card number, GCash PIN o detalye ng bangko. Dumadaan ang bayad sa PayMongo na siyang humahawak nito; ang sinasabi lang sa amin ay may naipasang bayad at kung magkano.\n\nHindi namin sinusubaybayan ang kinaroroonan mo, hindi binabasa ang contacts mo, at wala kaming tinitingnan sa telepono mo. Ang camera ay ginagamit sa pag-scan ng barcode, at habang bukas lang ang scanner.';
+
+  @override
+  String get privacyWhyHeading => 'Bakit namin ito hawak';
+
+  @override
+  String get privacyWhyBody =>
+      'Para patakbuhin ang serbisyong hiniling mo: itago ang tala mo, ipakita ito sa iba mong telepono, at magamit ng tauhan mo ang tindahan.\n\nPara maningil para sa planong pinili mo, at panatilihin ang talang pinansyal na kailangang itago ng isang negosyo.\n\nPara ayusin ang nasisira. Ang error report ay nagsasabing may bumabagsak na build; walang dalang numero ng negosyo.\n\nKung papayag ka, para kuwentahin ang gitnang numero na ipinapaghambing sa tindahan mo at sa iba. Puwede mo itong patayin sa Settings, at kapag pinatay mo, hindi mo rin makikita ang sa iba.';
+
+  @override
+  String get privacySharedHeading => 'Sino pa ang nakakakita nito';
+
+  @override
+  String get privacySharedBody =>
+      'Ang PayMongo Philippines, para sa bayad. Nakikita nila kung para saan ang bayad at sino ang nagbabayad, sa ilalim ng sarili nilang privacy policy.\n\nAng kompanyang nagho-host ng server namin, na nag-iimbak ng data para sa amin at hindi puwedeng gamitin ito sa iba.\n\nWala nang iba. Hindi namin ibinebenta ang tala mo at hindi namin ibinibigay sa advertiser. Ibibigay lang namin ito sa gobyerno kung may batas o utos ng korte na nag-uutos, at sasabihin namin sa iyo maliban kung ipinagbabawal kaming magsabi.\n\nAng paghahambing ng tindahan ay inilalabas bilang gitnang numero lamang, sa hindi bababa sa dalawampung tindahang magkatulad ang uri at laki. Walang pangalan ng tindahan at walang kahit isang benta.';
+
+  @override
+  String get privacyKeepHeading => 'Gaano katagal namin ito itinatago';
+
+  @override
+  String get privacyKeepBody =>
+      'Ang tala ng negosyo mo, habang bukas ang account mo.\n\nKung sino ang gumawa ng ano sa tindahan: dalawang taon.\n\nError report: siyamnapung araw.\n\nTeleponong na-sign out mo: isang taon.\n\nKapag isinara mo ang account, buburahin namin ang lahat pagkalipas ng tatlumpung araw, at ang tatlumpung araw ay para lang may maibalik kung namali ka ng pindot. Ang matitira ay ang halaga at petsa ng bayad na natanggap namin, na walang kahit anong nakakabit sa iyo, dahil kailangang makapagsulit ang negosyo sa perang natanggap nito.';
+
+  @override
+  String get privacyRightsHeading => 'Ang mga karapatan mo';
+
+  @override
+  String get privacyRightsBody =>
+      'Binibigyan ka ng Data Privacy Act ng karapatan sa hawak namin, at ginagawa ng app ang halos lahat nito nang hindi ka na hihingi ng pabor kanino man.\n\nMalaman kung ano ang hawak namin at bakit: ito ang paunawang ito, at makikita rin sa Settings.\n\nKumuha ng kopya: Settings, I-download ang tala ko. Ordinaryong file ito na puwede mong buksan at itago.\n\nItama ang mali: palitan sa app, o sumulat sa amin.\n\nIpabura ito: Settings, Isara ang account ko. Pagkalipas ng tatlumpung araw, wala na ito at hindi na maibabalik.\n\nTumutol, at bawiin ang pahintulot na ibinigay mo. Isa rito ang pagpatay sa paghahambing.\n\nMabayaran sa pinsalang dulot kung namalpakan namin ang tala mo, at magreklamo sa National Privacy Commission sa privacy.gov.ph. Hindi mo kailangang lumapit muna sa amin, bagaman mas gusto namin kung gagawin mo.';
+
+  @override
+  String get privacySafetyHeading =>
+      'Pag-iingat nito, at pagsasabi kapag nabigo kami';
+
+  @override
+  String get privacySafetyBody =>
+      'Ginugulo ang password bago itago at hindi na ito mababasa pabalik, kahit namin. Naka-encrypt ang daloy sa pagitan ng telepono mo at ng server namin. Ang teleponong ni-sign out mo ay agad na tumitigil.\n\nKung malantad ang tala mo at may tunay itong panganib sa iyo, sasabihin namin sa National Privacy Commission sa loob ng pitumpu\'t dalawang oras mula nang malaman namin, at sasabihin namin sa iyo: kung ano ang nangyari, ano ang kasama, at ano ang dapat gawin.';
+
+  @override
+  String get privacyChangesHeading => 'Pagbabago sa paunawang ito';
+
+  @override
+  String get privacyChangesBody =>
+      'Kapag nagbago ang paunawang ito sa paraang mahalaga, hihilingin ng app na basahin mo ito at sang-ayunan ulit, at itatala ang bersyong sinang-ayunan mo.\n\nHindi katumbas ng pagsang-ayon ang basta paggamit ng app. Tatanungin ka namin nang maliwanag.';
+
+  @override
+  String get termsWhatHeading => 'Ano ang Kitaza';
+
+  @override
+  String termsWhatBody(Object operator) {
+    return 'Ang Kitaza ay talaan para sa maliit na tindahan. Itinatala nito ang binebenta at ginagastos mo, binibilang ang stock, at kinukuwenta ang numero mula sa inilagay mo.\n\nAng kasunduan ay sa pagitan mo at ng $operator.';
+  }
+
+  @override
+  String get termsNotHeading => 'Ano ang hindi Kitaza';
+
+  @override
+  String get termsNotBody =>
+      'Hindi ito accountant, at hindi ito pang-file sa BIR. Ang numero nito ay hindi tax return at hindi na-audit na libro.\n\nAng mungkahi nito - kung ano ang i-order ulit, magkano ang isingil - ay kuwenta sa sarili mong tala, na may kasamang pagkukuwenta. Timbangin mo ito, huwag sundin nang basta. Kilala mo ang tindahan mo; hindi ito kilala ng app.\n\nKung may kailangan kang payo tungkol sa buwis, permit o batas, magtanong sa taong may karapatang magbigay nito.';
+
+  @override
+  String get termsAccountHeading => 'Ang account mo';
+
+  @override
+  String get termsAccountBody =>
+      'Kailangang sapat na ang edad mo para pumasok sa kontrata, at totoo ang mga detalyeng ibibigay mo.\n\nItago mo ang password mo. Anumang gawin ng teleponong naka-sign in sa account mo ay ituturing na ikaw ang gumawa, kaya i-sign out ang teleponong wala na sa iyo.\n\nAng tauhang idinagdag mo ay kumikilos para sa iyo. Ikaw ang nagdedesisyon kung ano ang makikita at magagawa ng bawat isa, at ikaw ang may pananagutan sa ginagawa nila sa tindahan mo.';
+
+  @override
+  String get termsPayHeading => 'Ang babayaran mo';
+
+  @override
+  String get termsPayBody =>
+      'Libre ang unang tatlumpung araw at walang hinihinging detalye ng bayad.\n\nPagkatapos nito, bayad muna ang plano - isang buwan o isang taon sa bawat bayad - sa presyong nakikita sa app habang nagbabayad ka. Walang kusang nagre-renew at walang kusang sinisingil. Kapag naubos ang panahon, may pito pang araw ka, at pagkatapos ay titigil ang pag-sync hanggang magbayad ka ulit.\n\nHindi ipinapangalandakan ang tala mo. Ang hindi bayad na account ay nababasa pa rin sa telepono, at nae-export pa rin ang tala nito.\n\nPuwedeng magbago ang presyo, pero hindi para sa panahong nabayaran mo na.';
+
+  @override
+  String get termsRefundHeading => 'Refund';
+
+  @override
+  String get termsRefundBody =>
+      'Kung hindi ginagawa ng serbisyo ang sinasabi ng pahinang ito, sabihin mo sa amin sa loob ng tatlumpung araw mula nang magbayad ka at ibabalik namin nang buo ang bayad na iyon.\n\nHindi namin ibinabalik ang panahong hindi mo lang ginamit. Walang kusang nagre-renew, kaya ang hindi nagamit na panahon ay pinili, hindi aksidente.\n\nKatabi ito ng karapatan mo sa ilalim ng Consumer Act of the Philippines (Republic Act 7394); walang inaalis dito sa mga iyon.';
+
+  @override
+  String get termsYoursHeading => 'Sa iyo ang tala mo';
+
+  @override
+  String get termsYoursBody =>
+      'Ang inilagay mo ay nananatiling sa iyo. Wala kaming inaangkin dito, at hawak namin ito para patakbuhin ang serbisyo para sa iyo at wala nang iba.\n\nPuwede kang kumuha ng kopya kahit kailan, at puwede mong isara ang account at ipabura ito. Sinasabi ng Paunawa sa privacy kung ano mismo ang mangyayari.';
+
+  @override
+  String get termsFairHeading => 'Makatarungang paggamit';
+
+  @override
+  String get termsFairBody =>
+      'Huwag gamitin ang Kitaza para labagin ang batas, para itala ang negosyo ng iba nang walang pahintulot nila, o para atakihin ang serbisyo o pasukin ang account na hindi sa iyo.\n\nMaaari naming suspindihin ang account na gumagawa nito, at sasabihin namin kung bakit.';
+
+  @override
+  String get termsLimitsHeading =>
+      'Ang ipinapangako at hindi namin ipinapangako';
+
+  @override
+  String get termsLimitsBody =>
+      'Mag-iingat kami nang makatuwiran para tumakbo ang serbisyo at ligtas ang tala mo. Hindi namin maipapangakong hindi ito bababa kailanman, at hindi namin maipapangakong hindi mawawala o masisira ang telepono - kaya nga kusang nagbaback-up ang app at hinihiling nitong magtago ka ng kopya sa labas ng telepono.\n\nKung saan pinapayagan ng batas ang hangganan, ang sa amin ay ang halagang nabayaran mo sa amin sa nakaraang labindalawang buwan bago ang problema. Walang dito ang naglilimita sa pananagutan sa pandaraya, sa kamatayan o pinsalang dulot ng kapabayaan, o sa anumang sinasabi ng batas na hindi puwedeng limitahan.';
+
+  @override
+  String get termsEndingHeading => 'Pagtatapos nito';
+
+  @override
+  String get termsEndingBody =>
+      'Puwede mong isara ang account mo kahit kailan, mula sa Settings.\n\nTatapusin lang namin ang kasunduan kung may malubha o paulit-ulit na paglabag sa mga tuntuning ito, at bibigyan ka namin ng abiso at panahon para kumuha muna ng kopya ng tala mo.';
+
+  @override
+  String get termsLawHeading => 'Aling batas ang sinusunod';
+
+  @override
+  String get termsLawBody =>
+      'Ang batas ng Republika ng Pilipinas. Ang di-pagkakaunawaang hindi maaayos sa pagitan natin ay dadalhin sa hukuman ng lugar kung saan nakarehistro ang negosyo namin.\n\nKung may bahagi ng pahinang ito na lumabas na hindi maipapatupad, mananatili pa rin ang iba.';
+
+  @override
+  String get settingsPrivacy => 'Datos at privacy mo';
+
+  @override
+  String get privacyCardTitle => 'Datos at privacy mo';
+
+  @override
+  String get privacyCardSubtitle =>
+      'Ano ang hawak, paano kumuha ng kopya, at paano isara ang account';
+
+  @override
+  String get privacyScreenTitle => 'Datos at privacy mo';
+
+  @override
+  String get privacyWhereTitle => 'Nasaan ang tala mo';
+
+  @override
+  String get privacyWhereLocal =>
+      'Sa teleponong ito lang. Walang tungkol sa tindahan mo ang naipadala sa amin kailanman, at wala ring maipapadala.';
+
+  @override
+  String get privacyWhereCloud =>
+      'Sa teleponong ito at sa server namin, para makita ito ng iba mong telepono at ng tauhan mo.';
+
+  @override
+  String get privacyDocumentsTitle => 'Ang sinang-ayunan mo';
+
+  @override
+  String get privacyDownloadTitle => 'I-download ang tala ko';
+
+  @override
+  String get privacyDownloadLocal =>
+      'Lahat ng nasa teleponong ito, bilang file na puwede mong itago o buksan sa iba.';
+
+  @override
+  String get privacyDownloadCloud =>
+      'Lahat ng hawak namin tungkol sa iyo, bilang file na puwede mong itago o buksan sa iba.';
+
+  @override
+  String get privacyDownloadWorking => 'Tinitipon ang tala mo…';
+
+  @override
+  String get privacyDownloadFailed =>
+      'Hindi natipon ang tala mo. Subukan ulit.';
+
+  @override
+  String get privacyCloseTitle => 'Isara ang account ko';
+
+  @override
+  String get privacyCloseSubtitle =>
+      'Burahin ang lahat ng hawak namin tungkol sa iyo';
+
+  @override
+  String get privacyCloseScreenTitle => 'Isara ang account ko';
+
+  @override
+  String get privacyCloseExplain =>
+      'Buburahin sa server namin ang account mo, ang mga tindahan mo, at bawat benta, gastos at paninda sa mga ito.';
+
+  @override
+  String privacyCloseGrace(int days) {
+    return 'Walang bubura sa loob ng $days araw. Hanggang doon, puwede kang magbago ng isip, at tuloy ang lahat gaya ng dati.';
+  }
+
+  @override
+  String get privacyCloseKeeps =>
+      'Ang itatago namin: ang halaga at petsa ng mga bayad mo, na walang nakakabit tungkol sa iyo. Kailangang makapagsulit ang negosyo sa perang natanggap nito.';
+
+  @override
+  String get privacyClosePhone =>
+      'Hindi gagalawin ang tala sa teleponong ito. Kumuha muna ng kopya kung gusto mong itago.';
+
+  @override
+  String get privacyCloseConfirmLabel =>
+      'I-type ang pangalan ng tindahan mo para kumpirmahin';
+
+  @override
+  String get privacyCloseConfirmWrong =>
+      'Hindi ito tugma sa pangalan ng tindahan mo.';
+
+  @override
+  String get privacyCloseSubmit => 'Isara ang account ko';
+
+  @override
+  String privacyCloseScheduled(Object date) {
+    return 'Buburahin ang account mo sa $date.';
+  }
+
+  @override
+  String get privacyCloseCancel => 'Panatilihin ang account ko';
+
+  @override
+  String get privacyCloseCancelled => 'Mananatiling bukas ang account mo.';
+
+  @override
+  String get privacyCloseFailed =>
+      'Hindi ito nagawa. Subukan ulit kapag may signal.';
+
+  @override
+  String get privacyLocalOnlyTitle => 'Walang isasara';
+
+  @override
+  String get privacyLocalOnlyBody =>
+      'Nasa telepono mo lang ang tindahang ito. Para alisin ito, i-delete ang app - pero kumuha muna ng kopya ng tala mo.';
+
+  @override
+  String get privacyNpcTitle => 'Kung magkamali kami';
+
+  @override
+  String get privacyNpcBody =>
+      'Puwede kang magreklamo sa National Privacy Commission sa privacy.gov.ph. Hindi mo kailangang lumapit muna sa amin.';
 }

@@ -9,6 +9,7 @@ pub mod diagnostics;
 pub mod expenses;
 pub mod health;
 pub mod inventory;
+pub mod privacy;
 pub mod products;
 pub mod reports;
 pub mod sales;

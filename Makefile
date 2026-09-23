@@ -61,6 +61,10 @@ check-release-config:
 	@test -f frontend/android/key.properties || { printf '%s\n' \
 		"No frontend/android/key.properties, so the release could not be signed." \
 		"Copy frontend/android/key.properties.example and fill it in."; exit 2; }
+	@grep -q '\[Registered business name\]' frontend/lib/l10n/app_en.arb && { printf '%s\n' \
+		"The privacy notice and terms still carry placeholder details." \
+		"Fill in legalOperator and legalContact in both app_en.arb and app_fil.arb," \
+		"and see docs/COMPLIANCE.md for what else must be in place first."; exit 2; } || true
 
 release-apk: check-release-config ## Signed APKs to hand out directly, one per processor
 	cd frontend && flutter build apk --release --split-per-abi $(RELEASE_DEFINES)

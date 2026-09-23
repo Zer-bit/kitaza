@@ -2,6 +2,7 @@ use tokio::net::TcpListener;
 use tokio::signal;
 
 use crate::config::AppSettings;
+use crate::features::privacy::spawn_retention_sweeper;
 use crate::infrastructure::cache::connect_cache;
 use crate::infrastructure::database::{build_pool, run_pending_migrations};
 use crate::infrastructure::realtime::spawn_cross_instance_bridge;
@@ -16,7 +17,11 @@ pub async fn run(settings: AppSettings) -> anyhow::Result<()> {
     }
 
     let cache = connect_cache(&settings.redis).await;
-    let state = AppState::assemble(&settings, pool, cache.clone());
+    let state = AppState::assemble(&settings, pool.clone(), cache.clone());
+
+    // Carries out deletions whose grace period has run out, and drops records
+    // that are past the age they are kept for.
+    spawn_retention_sweeper(pool, settings.privacy.retention);
 
     if cache.is_enabled() {
         spawn_cross_instance_bridge(state.broadcaster.clone(), settings.redis.url.clone());
