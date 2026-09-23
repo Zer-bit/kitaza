@@ -339,6 +339,7 @@ pub fn to_summary(store: &StoreRecord) -> StoreSummary {
         name: store.name.clone(),
         business_type: store.business_type.clone(),
         currency_code: store.currency_code.clone(),
+        share_benchmarks: store.share_benchmarks,
     }
 }
 

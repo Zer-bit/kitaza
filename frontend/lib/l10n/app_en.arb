@@ -1115,5 +1115,117 @@
       "amount": {},
       "plan": {}
     }
-  }
+  },
+  "insightsTitle": "Suggestions",
+  "insightsEarlyDays": "Keep recording sales for about two weeks and Kitaza can suggest what to reorder and which prices to look at.",
+  "insightsHowTitle": "How these are worked out",
+  "insightsHowBody": "From your own records on this phone: the last four weeks of sales for each product, with the days it was out of stock left out. Nothing here changes a price or orders anything.",
+  "restockTitle": "Reorder soon",
+  "restockOrder": "Order {quantity} {unit}",
+  "@restockOrder": {
+    "placeholders": {
+      "quantity": {},
+      "unit": {}
+    }
+  },
+  "restockReasonRate": "About {quantity} {unit} a day. Around {days} left.",
+  "@restockReasonRate": {
+    "placeholders": {
+      "quantity": {},
+      "unit": {},
+      "days": {}
+    }
+  },
+  "restockReasonEmpty": "About {quantity} {unit} a day, and the shelf is empty.",
+  "@restockReasonEmpty": {
+    "placeholders": {
+      "quantity": {},
+      "unit": {}
+    }
+  },
+  "restockReasonLevel": "Below the reorder level you set.",
+  "restockDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@restockDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "priceTitle": "Prices worth a look",
+  "priceReasonBelowCost": "Sold for less than the {cost} it costs you.",
+  "@priceReasonBelowCost": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "priceReasonThin": "Only {percent} is left after the cost.",
+  "@priceReasonThin": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "priceReasonSlow": "Barely sells. Money sitting on the shelf.",
+  "priceTry": "Try {price}",
+  "@priceTry": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "priceExtraPerMonth": "About {amount} more a month",
+  "@priceExtraPerMonth": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "priceSlowAdvice": "Order fewer next time, or lower the price for a while.",
+  "patternTitle": "Your rhythm",
+  "patternPayday": "Payday weeks bring in about {percent} more than the rest of the month.",
+  "@patternPayday": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "patternNextPayday": "Next payday is {date}. Stock up before it.",
+  "@patternNextPayday": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "patternBusiest": "{day} is your best day, about {percent} above your average.",
+  "@patternBusiest": {
+    "placeholders": {
+      "day": {},
+      "percent": {}
+    }
+  },
+  "benchmarkTitle": "Stores like yours",
+  "benchmarkFrom": "{count, plural, other{The middle of {count} similar stores near your size.}}",
+  "@benchmarkFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkMargin": "Kept from each sale",
+  "benchmarkExpenses": "Expenses against sales",
+  "benchmarkDailySales": "Sales a day",
+  "benchmarkYours": "You: {value}",
+  "@benchmarkYours": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "benchmarkTypical": "Usual: {value}",
+  "@benchmarkTypical": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "benchmarkNotEnough": "Comparisons appear once enough stores your size are sharing theirs.",
+  "benchmarkNotSharing": "Comparisons are off while you keep your own figures back.",
+  "benchmarkSharingTitle": "Share anonymous comparisons",
+  "benchmarkSharingHint": "Your monthly totals join the middle figures other owners see. Never your name, your store or any single sale, and only across at least 20 stores.",
+  "benchmarkSharingOff": "Not sharing. You will not see comparisons either."
 }

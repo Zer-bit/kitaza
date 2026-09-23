@@ -130,9 +130,44 @@ member the plan does not cover.
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/stores` | Owner only. `{ "name": "...", "business_type": "carinderia" }` |
-| PATCH | `/stores/{store_id}` | Owner only. Rename: `{ "name": "..." }` |
+| PATCH | `/stores/{store_id}` | Owner only. `{ "name": "..." }` and/or `{ "share_benchmarks": false }`; either may be left out. |
 
-An owner's stores are listed by `/auth/me`.
+An owner's stores are listed by `/auth/me`, each with its
+`share_benchmarks` setting.
+
+## Comparisons with other stores
+
+```
+GET /stores/{store_id}/benchmarks
+```
+
+Needs `view_profit`. How this store sits against others of the same
+business type and size band, over the last 30 days.
+
+```json
+{
+  "available": true,
+  "sample_size": 31,
+  "business_type": "sari_sari",
+  "size_band": "medium",
+  "comparisons": [
+    { "metric": "gross_margin_percent", "yours": 14.0, "typical": 22.0 },
+    { "metric": "expense_percent",      "yours": 11.0, "typical": 6.0 },
+    { "metric": "daily_sales",          "yours": 1800.0, "typical": 2400.0 }
+  ]
+}
+```
+
+When there is nothing to show, `available` is false and
+`unavailable_because` says why: `not_enough_stores` (fewer than 20 peers
+share theirs), `not_enough_history` (this store has fewer than 20 sales in
+the window) or `not_sharing` (the owner turned sharing off, and so sees no
+comparisons either).
+
+Only medians are ever published, only across at least 20 other stores, and
+only from stores that share. Size bands are by monthly sales: under
+₱30,000, under ₱150,000, and above. The asking store is left out of its own
+comparison.
 
 ## Staff
 

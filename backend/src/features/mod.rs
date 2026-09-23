@@ -1,6 +1,7 @@
 pub mod access;
 pub mod audit;
 pub mod authentication;
+pub mod benchmarks;
 pub mod billing;
 pub mod dashboard;
 pub mod devices;

@@ -9,6 +9,7 @@ import '../../shared/widgets/section_header.dart';
 import '../authentication/auth_controller.dart';
 import 'widgets/account_card.dart';
 import 'widgets/backup_card.dart';
+import 'widgets/comparisons_card.dart';
 import 'widgets/language_selector.dart';
 import 'widgets/printer_card.dart';
 import 'widgets/problem_reports_tile.dart';
@@ -77,6 +78,8 @@ class SettingsScreen extends ConsumerWidget {
                     const StoresCard(),
                     AppSpacing.gapMd,
                     const TeamCard(),
+                    AppSpacing.gapMd,
+                    const ComparisonsCard(),
                   ] else
                     const TeamNeedsCloudCard(),
                   AppSpacing.gapXl,

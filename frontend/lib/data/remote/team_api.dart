@@ -27,10 +27,14 @@ class TeamApi {
     return StoreProfile.fromJson(body);
   }
 
-  Future<StoreProfile> renameStore(String storeId, String name) async {
+  Future<StoreProfile> updateStore(
+    String storeId, {
+    String? name,
+    bool? shareBenchmarks,
+  }) async {
     final body = await _client.patch(
       ApiEndpoints.store(storeId),
-      body: {'name': name},
+      body: {'name': ?name, 'share_benchmarks': ?shareBenchmarks},
     );
     return StoreProfile.fromJson(body);
   }

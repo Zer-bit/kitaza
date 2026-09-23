@@ -49,6 +49,18 @@ impl StoreDirectory {
         Ok(())
     }
 
+    /// Whether this store's figures may join the anonymous comparisons.
+    /// Not memoised: an owner turning it off expects it to take effect.
+    pub async fn shares_benchmarks(&self, store_id: Uuid) -> ApiResult<bool> {
+        let (shares,): (bool,) =
+            sqlx::query_as("SELECT share_benchmarks FROM stores WHERE id = $1")
+                .bind(store_id)
+                .fetch_one(&self.pool)
+                .await?;
+
+        Ok(shares)
+    }
+
     fn is_memoised(&self, owner_id: Uuid, store_id: Uuid) -> bool {
         self.confirmed
             .read()

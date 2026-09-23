@@ -1909,4 +1909,149 @@ class AppLocalizationsEn extends AppLocalizations {
   String activitySubscriptionPaid(Object name, Object amount, Object plan) {
     return '$name paid $amount for $plan';
   }
+
+  @override
+  String get insightsTitle => 'Suggestions';
+
+  @override
+  String get insightsEarlyDays =>
+      'Keep recording sales for about two weeks and Kitaza can suggest what to reorder and which prices to look at.';
+
+  @override
+  String get insightsHowTitle => 'How these are worked out';
+
+  @override
+  String get insightsHowBody =>
+      'From your own records on this phone: the last four weeks of sales for each product, with the days it was out of stock left out. Nothing here changes a price or orders anything.';
+
+  @override
+  String get restockTitle => 'Reorder soon';
+
+  @override
+  String restockOrder(Object quantity, Object unit) {
+    return 'Order $quantity $unit';
+  }
+
+  @override
+  String restockReasonRate(Object quantity, Object unit, Object days) {
+    return 'About $quantity $unit a day. Around $days left.';
+  }
+
+  @override
+  String restockReasonEmpty(Object quantity, Object unit) {
+    return 'About $quantity $unit a day, and the shelf is empty.';
+  }
+
+  @override
+  String get restockReasonLevel => 'Below the reorder level you set.';
+
+  @override
+  String restockDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get priceTitle => 'Prices worth a look';
+
+  @override
+  String priceReasonBelowCost(Object cost) {
+    return 'Sold for less than the $cost it costs you.';
+  }
+
+  @override
+  String priceReasonThin(Object percent) {
+    return 'Only $percent is left after the cost.';
+  }
+
+  @override
+  String get priceReasonSlow => 'Barely sells. Money sitting on the shelf.';
+
+  @override
+  String priceTry(Object price) {
+    return 'Try $price';
+  }
+
+  @override
+  String priceExtraPerMonth(Object amount) {
+    return 'About $amount more a month';
+  }
+
+  @override
+  String get priceSlowAdvice =>
+      'Order fewer next time, or lower the price for a while.';
+
+  @override
+  String get patternTitle => 'Your rhythm';
+
+  @override
+  String patternPayday(Object percent) {
+    return 'Payday weeks bring in about $percent more than the rest of the month.';
+  }
+
+  @override
+  String patternNextPayday(Object date) {
+    return 'Next payday is $date. Stock up before it.';
+  }
+
+  @override
+  String patternBusiest(Object day, Object percent) {
+    return '$day is your best day, about $percent above your average.';
+  }
+
+  @override
+  String get benchmarkTitle => 'Stores like yours';
+
+  @override
+  String benchmarkFrom(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The middle of $count similar stores near your size.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get benchmarkMargin => 'Kept from each sale';
+
+  @override
+  String get benchmarkExpenses => 'Expenses against sales';
+
+  @override
+  String get benchmarkDailySales => 'Sales a day';
+
+  @override
+  String benchmarkYours(Object value) {
+    return 'You: $value';
+  }
+
+  @override
+  String benchmarkTypical(Object value) {
+    return 'Usual: $value';
+  }
+
+  @override
+  String get benchmarkNotEnough =>
+      'Comparisons appear once enough stores your size are sharing theirs.';
+
+  @override
+  String get benchmarkNotSharing =>
+      'Comparisons are off while you keep your own figures back.';
+
+  @override
+  String get benchmarkSharingTitle => 'Share anonymous comparisons';
+
+  @override
+  String get benchmarkSharingHint =>
+      'Your monthly totals join the middle figures other owners see. Never your name, your store or any single sale, and only across at least 20 stores.';
+
+  @override
+  String get benchmarkSharingOff =>
+      'Not sharing. You will not see comparisons either.';
 }

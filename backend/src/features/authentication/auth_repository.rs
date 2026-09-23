@@ -19,6 +19,7 @@ pub struct StoreRecord {
     pub name: String,
     pub business_type: String,
     pub currency_code: String,
+    pub share_benchmarks: bool,
 }
 
 #[derive(Debug, FromRow)]
@@ -93,7 +94,7 @@ impl AuthRepository {
         let store = sqlx::query_as::<_, StoreRecord>(
             "INSERT INTO stores (owner_id, name, business_type)
              VALUES ($1, $2, $3)
-             RETURNING id, name, business_type, currency_code",
+             RETURNING id, name, business_type, currency_code, share_benchmarks",
         )
         .bind(owner.id)
         .bind(store_name)
@@ -115,7 +116,7 @@ impl AuthRepository {
 
     pub async fn list_stores(&self, owner_id: Uuid) -> ApiResult<Vec<StoreRecord>> {
         let stores = sqlx::query_as::<_, StoreRecord>(
-            "SELECT id, name, business_type, currency_code
+            "SELECT id, name, business_type, currency_code, share_benchmarks
              FROM stores WHERE owner_id = $1 ORDER BY created_at",
         )
         .bind(owner_id)
@@ -127,7 +128,7 @@ impl AuthRepository {
 
     pub async fn find_store(&self, store_id: Uuid) -> ApiResult<Option<StoreRecord>> {
         let store = sqlx::query_as::<_, StoreRecord>(
-            "SELECT id, name, business_type, currency_code FROM stores WHERE id = $1",
+            "SELECT id, name, business_type, currency_code, share_benchmarks FROM stores WHERE id = $1",
         )
         .bind(store_id)
         .fetch_optional(&self.pool)

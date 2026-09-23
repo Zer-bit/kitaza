@@ -2,6 +2,7 @@ use crate::config::AppSettings;
 use crate::features::access::SessionDirectory;
 use crate::features::audit::AuditTrail;
 use crate::features::authentication::{AuthDependencies, AuthRepository, AuthService, TokenIssuer};
+use crate::features::benchmarks::{BenchmarkRepository, BenchmarkService};
 use crate::features::billing::{BillingDependencies, BillingRepository, BillingService};
 use crate::features::dashboard::{DashboardRepository, DashboardService};
 use crate::features::devices::DeviceRepository;
@@ -33,6 +34,7 @@ pub struct AppState {
     pub auth_service: AuthService,
     pub staff_service: StaffService,
     pub billing_service: BillingService,
+    pub benchmark_service: BenchmarkService,
     pub device_repository: DeviceRepository,
     pub product_service: ProductService,
     pub inventory_service: InventoryService,
@@ -144,6 +146,7 @@ impl AppState {
                 refresh_lifetime: settings.security.refresh_token_lifetime,
             }),
             billing_service,
+            benchmark_service: BenchmarkService::new(BenchmarkRepository::new(pool.clone())),
             staff_service,
             device_repository: DeviceRepository::new(pool.clone()),
             session_directory,

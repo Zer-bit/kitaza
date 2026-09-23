@@ -3061,6 +3061,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} paid {amount} for {plan}'**
   String activitySubscriptionPaid(Object name, Object amount, Object plan);
+
+  /// No description provided for @insightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get insightsTitle;
+
+  /// No description provided for @insightsEarlyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep recording sales for about two weeks and Kitaza can suggest what to reorder and which prices to look at.'**
+  String get insightsEarlyDays;
+
+  /// No description provided for @insightsHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How these are worked out'**
+  String get insightsHowTitle;
+
+  /// No description provided for @insightsHowBody.
+  ///
+  /// In en, this message translates to:
+  /// **'From your own records on this phone: the last four weeks of sales for each product, with the days it was out of stock left out. Nothing here changes a price or orders anything.'**
+  String get insightsHowBody;
+
+  /// No description provided for @restockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder soon'**
+  String get restockTitle;
+
+  /// No description provided for @restockOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order {quantity} {unit}'**
+  String restockOrder(Object quantity, Object unit);
+
+  /// No description provided for @restockReasonRate.
+  ///
+  /// In en, this message translates to:
+  /// **'About {quantity} {unit} a day. Around {days} left.'**
+  String restockReasonRate(Object quantity, Object unit, Object days);
+
+  /// No description provided for @restockReasonEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'About {quantity} {unit} a day, and the shelf is empty.'**
+  String restockReasonEmpty(Object quantity, Object unit);
+
+  /// No description provided for @restockReasonLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the reorder level you set.'**
+  String get restockReasonLevel;
+
+  /// No description provided for @restockDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String restockDays(int count);
+
+  /// No description provided for @priceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices worth a look'**
+  String get priceTitle;
+
+  /// No description provided for @priceReasonBelowCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold for less than the {cost} it costs you.'**
+  String priceReasonBelowCost(Object cost);
+
+  /// No description provided for @priceReasonThin.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {percent} is left after the cost.'**
+  String priceReasonThin(Object percent);
+
+  /// No description provided for @priceReasonSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Barely sells. Money sitting on the shelf.'**
+  String get priceReasonSlow;
+
+  /// No description provided for @priceTry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try {price}'**
+  String priceTry(Object price);
+
+  /// No description provided for @priceExtraPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'About {amount} more a month'**
+  String priceExtraPerMonth(Object amount);
+
+  /// No description provided for @priceSlowAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Order fewer next time, or lower the price for a while.'**
+  String get priceSlowAdvice;
+
+  /// No description provided for @patternTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rhythm'**
+  String get patternTitle;
+
+  /// No description provided for @patternPayday.
+  ///
+  /// In en, this message translates to:
+  /// **'Payday weeks bring in about {percent} more than the rest of the month.'**
+  String patternPayday(Object percent);
+
+  /// No description provided for @patternNextPayday.
+  ///
+  /// In en, this message translates to:
+  /// **'Next payday is {date}. Stock up before it.'**
+  String patternNextPayday(Object date);
+
+  /// No description provided for @patternBusiest.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} is your best day, about {percent} above your average.'**
+  String patternBusiest(Object day, Object percent);
+
+  /// No description provided for @benchmarkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stores like yours'**
+  String get benchmarkTitle;
+
+  /// No description provided for @benchmarkFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{The middle of {count} similar stores near your size.}}'**
+  String benchmarkFrom(int count);
+
+  /// No description provided for @benchmarkMargin.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept from each sale'**
+  String get benchmarkMargin;
+
+  /// No description provided for @benchmarkExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses against sales'**
+  String get benchmarkExpenses;
+
+  /// No description provided for @benchmarkDailySales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales a day'**
+  String get benchmarkDailySales;
+
+  /// No description provided for @benchmarkYours.
+  ///
+  /// In en, this message translates to:
+  /// **'You: {value}'**
+  String benchmarkYours(Object value);
+
+  /// No description provided for @benchmarkTypical.
+  ///
+  /// In en, this message translates to:
+  /// **'Usual: {value}'**
+  String benchmarkTypical(Object value);
+
+  /// No description provided for @benchmarkNotEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparisons appear once enough stores your size are sharing theirs.'**
+  String get benchmarkNotEnough;
+
+  /// No description provided for @benchmarkNotSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparisons are off while you keep your own figures back.'**
+  String get benchmarkNotSharing;
+
+  /// No description provided for @benchmarkSharingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share anonymous comparisons'**
+  String get benchmarkSharingTitle;
+
+  /// No description provided for @benchmarkSharingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly totals join the middle figures other owners see. Never your name, your store or any single sale, and only across at least 20 stores.'**
+  String get benchmarkSharingHint;
+
+  /// No description provided for @benchmarkSharingOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sharing. You will not see comparisons either.'**
+  String get benchmarkSharingOff;
 }
 
 class _AppLocalizationsDelegate

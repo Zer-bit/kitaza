@@ -11,6 +11,7 @@ use tower_http::trace::TraceLayer;
 use crate::config::ServerSettings;
 use crate::features::audit::audit_routes;
 use crate::features::authentication::auth_routes;
+use crate::features::benchmarks::benchmark_routes;
 use crate::features::billing::{billing_pages, billing_routes};
 use crate::features::dashboard::dashboard_routes;
 use crate::features::devices::device_routes;
@@ -35,6 +36,7 @@ pub fn build_router(state: AppState, settings: &ServerSettings) -> Router {
     let api = Router::new()
         .merge(auth_routes())
         .merge(billing_routes())
+        .merge(benchmark_routes())
         .merge(store_routes())
         .merge(staff_routes())
         .merge(device_routes())

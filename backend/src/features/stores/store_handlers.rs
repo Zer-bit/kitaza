@@ -25,9 +25,14 @@ pub struct CreateStoreRequest {
 }
 
 #[derive(Debug, Deserialize, Validate)]
-pub struct RenameStoreRequest {
+pub struct UpdateStoreRequest {
+    #[serde(default)]
     #[validate(length(min = 2, max = 80, message = "must be between 2 and 80 characters"))]
-    pub name: String,
+    pub name: Option<String>,
+
+    /// Whether this store's figures join the anonymous comparisons.
+    #[serde(default)]
+    pub share_benchmarks: Option<bool>,
 }
 
 /// A second branch, or a carinderia next to the sari-sari store. Each store
@@ -41,7 +46,7 @@ pub async fn create_store(
 
     let store = sqlx::query_as::<_, StoreRecord>(
         "INSERT INTO stores (owner_id, name, business_type) VALUES ($1, $2, $3)
-         RETURNING id, name, business_type, currency_code",
+         RETURNING id, name, business_type, currency_code, share_benchmarks",
     )
     .bind(owner.owner_id)
     .bind(request.name.trim())
@@ -70,22 +75,28 @@ pub async fn create_store(
     Ok((StatusCode::CREATED, Json(to_summary(&store))))
 }
 
-pub async fn rename_store(
+pub async fn update_store(
     State(state): State<AppState>,
     scope: StoreScope,
-    ValidatedJson(request): ValidatedJson<RenameStoreRequest>,
+    ValidatedJson(request): ValidatedJson<UpdateStoreRequest>,
 ) -> ApiResult<Json<StoreSummary>> {
     scope.actor.require_owner()?;
 
     let renamed: Option<(String, StoreRecord)> = sqlx::query_as::<_, RenamedStore>(
-        // The self-join reads the row as it was before this update.
-        "UPDATE stores s SET name = $2, updated_at = now()
+        // The self-join reads the row as it was before this update. Either
+        // field may be left out, and keeps its value.
+        "UPDATE stores s SET
+             name = COALESCE($2, s.name),
+             share_benchmarks = COALESCE($3, s.share_benchmarks),
+             updated_at = now()
          FROM stores before
          WHERE s.id = $1 AND before.id = s.id
-         RETURNING before.name AS old_name, s.id, s.name, s.business_type, s.currency_code",
+         RETURNING before.name AS old_name, s.id, s.name, s.business_type, s.currency_code,
+                   s.share_benchmarks",
     )
     .bind(scope.store_id)
-    .bind(request.name.trim())
+    .bind(request.name.as_deref().map(str::trim))
+    .bind(request.share_benchmarks)
     .fetch_optional(&state.pool)
     .await?
     .map(|row| (row.old_name, row.store));

@@ -4,12 +4,14 @@ import 'package:kitaza_app/core/platform/link_opener.dart';
 import 'package:kitaza_app/data/models/access_grant.dart';
 import 'package:kitaza_app/data/models/activity_event.dart';
 import 'package:kitaza_app/data/models/auth_session.dart';
+import 'package:kitaza_app/data/models/benchmark_report.dart';
 import 'package:kitaza_app/data/models/billing_overview.dart';
 import 'package:kitaza_app/data/models/owner_account.dart';
 import 'package:kitaza_app/data/models/signed_in_device.dart';
 import 'package:kitaza_app/data/models/staff_member.dart';
 import 'package:kitaza_app/data/models/store_profile.dart';
 import 'package:kitaza_app/data/models/subscription.dart';
+import 'package:kitaza_app/data/remote/benchmarks_api.dart';
 import 'package:kitaza_app/data/remote/billing_api.dart';
 import 'package:kitaza_app/data/remote/team_api.dart';
 
@@ -61,6 +63,7 @@ class FakeTeamApi implements TeamApi {
   final List<({String name, Set<Permission> permissions})> added = [];
   final List<String> removed = [];
   final List<String> signedOut = [];
+  final List<({String? name, bool? shareBenchmarks})> updates = [];
   final List<({int? before, bool onlyRemovals})> activityRequests = [];
   List<SignedInDevice> deviceList = [];
   List<ActivityPage> activityPages = [];
@@ -164,9 +167,18 @@ class FakeTeamApi implements TeamApi {
   }
 
   @override
-  Future<StoreProfile> renameStore(String storeId, String name) async {
+  Future<StoreProfile> updateStore(
+    String storeId, {
+    String? name,
+    bool? shareBenchmarks,
+  }) async {
     _maybeFail();
-    return StoreProfile(id: storeId, name: name);
+    updates.add((name: name, shareBenchmarks: shareBenchmarks));
+    return StoreProfile(
+      id: storeId,
+      name: name ?? 'Test Store',
+      shareBenchmarks: shareBenchmarks ?? true,
+    );
   }
 }
 
@@ -324,4 +336,29 @@ BillingOverview billingOverview({
     ),
   ],
   payments: payments,
+);
+
+/// Stands in for the comparisons endpoint.
+class FakeBenchmarksApi implements BenchmarksApi {
+  FakeBenchmarksApi({this.report});
+
+  BenchmarkReport? report;
+  Object? failWith;
+
+  @override
+  Future<BenchmarkReport> forStore(String storeId) async {
+    if (failWith case final error?) throw error;
+    return report ?? comparedWith(20);
+  }
+}
+
+/// A store keeping less than its peers, compared with [stores] others.
+BenchmarkReport comparedWith(int stores) => BenchmarkReport(
+  available: true,
+  sampleSize: stores,
+  comparisons: const [
+    Comparison(metric: 'gross_margin_percent', yours: 14, typical: 22),
+    Comparison(metric: 'expense_percent', yours: 11, typical: 6),
+    Comparison(metric: 'daily_sales', yours: 1800, typical: 2400),
+  ],
 );

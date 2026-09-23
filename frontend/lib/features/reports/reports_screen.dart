@@ -9,6 +9,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/page_body.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../dashboard/widgets/period_selector.dart';
+import '../insights/insights_section.dart';
 import 'report_controller.dart';
 import 'widgets/expense_breakdown_card.dart';
 import 'widgets/profit_trend_chart.dart';
@@ -33,6 +34,7 @@ class ReportsScreen extends ConsumerWidget {
               data.topProducts.isNotEmpty ||
               data.expenseBreakdown.isNotEmpty;
 
+          // Nothing sold yet means nothing to chart and nothing to suggest.
           if (!hasAnything) {
             return EmptyState(
               icon: Icons.insights_rounded,
@@ -72,6 +74,7 @@ class ReportsScreen extends ConsumerWidget {
                       UnusualExpensesCard(expenses: data.unusualExpenses),
                       AppSpacing.gapMd,
                     ],
+                    const InsightsSection(),
                     AppSpacing.gapXl,
                   ],
                 ),

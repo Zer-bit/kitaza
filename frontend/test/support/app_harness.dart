@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kitaza_app/core/storage/preferences_store.dart';
@@ -40,14 +41,20 @@ class TestPhone {
     Size size = smallPhone,
     double textScale = 1.0,
     Brightness brightness = Brightness.light,
+    bool cloud = false,
     List<Override> Function(Database db, PreferencesStore preferences)?
     overrides,
   }) async {
     final db = await openTestDatabase(sameIsolate: true);
     await db.insert('owners', {'id': 'owner', 'full_name': 'Nena Reyes'});
 
+    // A cloud phone needs a refresh token to count as signed in; without
+    // one the app rightly treats the session as ended.
+    FlutterSecureStorage.setMockInitialValues(
+      cloud ? {'kitaza.refresh_token': 'refresh'} : {},
+    );
     SharedPreferences.setMockInitialValues({
-      'kitaza.storage_mode': 'local',
+      'kitaza.storage_mode': cloud ? 'cloud' : 'local',
       'kitaza.active_store_id': testStoreId,
       'kitaza.onboarded': true,
     });

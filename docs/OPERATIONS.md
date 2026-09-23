@@ -148,6 +148,36 @@ grace week. Accounts that existed before billing was added were given a
 
 ---
 
+## Comparisons between stores
+
+Owners see "stores like yours" figures only when at least 20 other sharing
+stores of the same business type and size band have traded in the last 30
+days. Until the service has that many, every owner sees "comparisons appear
+once enough stores your size are sharing", which is the expected state
+early on.
+
+To see how close a bucket is:
+
+```sql
+SELECT s.business_type,
+       width_bucket(month.total, ARRAY[30000, 150000]) AS size_band,
+       count(*) AS stores
+FROM stores s
+JOIN LATERAL (
+    SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS sales
+    FROM sales WHERE store_id = s.id AND deleted_at IS NULL
+      AND occurred_at >= now() - interval '30 days'
+) month ON TRUE
+WHERE s.share_benchmarks AND month.sales >= 20
+GROUP BY 1, 2 ORDER BY stores DESC;
+```
+
+Medians are held in each instance's memory for six hours, so a change in
+the data shows up within that. Nothing about comparisons is stored; they
+are computed from the sales and expenses tables on the way out.
+
+---
+
 ## Devices and staff
 
 Owners manage both from the app: *Settings → Stores and staff*. Support rarely

@@ -134,4 +134,6 @@ pub struct StoreSummary {
     pub name: String,
     pub business_type: String,
     pub currency_code: String,
+    /// Whether this store's figures join the anonymous comparisons.
+    pub share_benchmarks: bool,
 }

@@ -155,6 +155,8 @@ void countMessagesShowTheirNumber() {
       'planStatusTrial': l10n.planStatusTrial,
       'planBannerTrial': l10n.planBannerTrial,
       'planBannerEnding': l10n.planBannerEnding,
+      'restockDays': l10n.restockDays,
+      'benchmarkFrom': l10n.benchmarkFrom,
       'backupConfirmSummary': (count) =>
           l10n.backupConfirmSummary('Store', count, count),
     };

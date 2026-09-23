@@ -1899,4 +1899,150 @@ class AppLocalizationsFil extends AppLocalizations {
   String activitySubscriptionPaid(Object name, Object amount, Object plan) {
     return 'Nagbayad si $name ng $amount para sa $plan';
   }
+
+  @override
+  String get insightsTitle => 'Mga mungkahi';
+
+  @override
+  String get insightsEarlyDays =>
+      'Magtala lang ng benta nang mga dalawang linggo at makakapagmungkahi na ang Kitaza kung ano ang i-restock at aling presyo ang dapat tingnan.';
+
+  @override
+  String get insightsHowTitle => 'Paano ito kinukuwenta';
+
+  @override
+  String get insightsHowBody =>
+      'Mula sa sarili mong records sa phone na ito: ang huling apat na linggong benta ng bawat produkto, hindi kasama ang mga araw na ubos ang stock. Walang binabago rito sa presyo at walang ino-order.';
+
+  @override
+  String get restockTitle => 'I-restock na';
+
+  @override
+  String restockOrder(Object quantity, Object unit) {
+    return 'Mag-order ng $quantity $unit';
+  }
+
+  @override
+  String restockReasonRate(Object quantity, Object unit, Object days) {
+    return 'Mga $quantity $unit kada araw. May $days pa.';
+  }
+
+  @override
+  String restockReasonEmpty(Object quantity, Object unit) {
+    return 'Mga $quantity $unit kada araw, at wala nang natitira.';
+  }
+
+  @override
+  String get restockReasonLevel =>
+      'Mas mababa na sa reorder level na itinakda mo.';
+
+  @override
+  String restockDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count araw',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get priceTitle => 'Mga presyong dapat tingnan';
+
+  @override
+  String priceReasonBelowCost(Object cost) {
+    return 'Mas mura pa sa $cost na puhunan mo.';
+  }
+
+  @override
+  String priceReasonThin(Object percent) {
+    return '$percent na lang ang natitira pagkatapos ng puhunan.';
+  }
+
+  @override
+  String get priceReasonSlow =>
+      'Halos hindi nabebenta. Perang nakatengga sa istante.';
+
+  @override
+  String priceTry(Object price) {
+    return 'Subukan ang $price';
+  }
+
+  @override
+  String priceExtraPerMonth(Object amount) {
+    return 'Mga $amount pa kada buwan';
+  }
+
+  @override
+  String get priceSlowAdvice =>
+      'Mag-order ng mas kaunti sa susunod, o ibaba muna ang presyo.';
+
+  @override
+  String get patternTitle => 'Ang takbo ng tindahan mo';
+
+  @override
+  String patternPayday(Object percent) {
+    return 'Mga $percent mas malaki ang pasok tuwing payday week kaysa sa ibang araw ng buwan.';
+  }
+
+  @override
+  String patternNextPayday(Object date) {
+    return 'Ang susunod na payday ay $date. Mag-stock bago ito.';
+  }
+
+  @override
+  String patternBusiest(Object day, Object percent) {
+    return 'Ang $day ang pinakamalakas mong araw, mga $percent mas mataas sa karaniwan.';
+  }
+
+  @override
+  String get benchmarkTitle => 'Mga tindahang katulad mo';
+
+  @override
+  String benchmarkFrom(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ang gitna ng $count tindahang kasinlaki mo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get benchmarkMargin => 'Kita sa bawat benta';
+
+  @override
+  String get benchmarkExpenses => 'Gastos kumpara sa benta';
+
+  @override
+  String get benchmarkDailySales => 'Benta kada araw';
+
+  @override
+  String benchmarkYours(Object value) {
+    return 'Ikaw: $value';
+  }
+
+  @override
+  String benchmarkTypical(Object value) {
+    return 'Karaniwan: $value';
+  }
+
+  @override
+  String get benchmarkNotEnough =>
+      'Lalabas ang paghahambing kapag sapat na ang tindahang kasinlaki mo na nagbabahagi.';
+
+  @override
+  String get benchmarkNotSharing =>
+      'Naka-off ang paghahambing habang hindi ka nagbabahagi ng sarili mong numero.';
+
+  @override
+  String get benchmarkSharingTitle => 'Magbahagi ng anonymous na paghahambing';
+
+  @override
+  String get benchmarkSharingHint =>
+      'Sasama ang buwanang kabuuan mo sa gitnang numerong nakikita ng ibang may-ari. Hindi kasama ang pangalan mo, ang tindahan mo, o kahit isang benta, at hindi bababa sa 20 tindahan ang pinagsasamahan.';
+
+  @override
+  String get benchmarkSharingOff =>
+      'Hindi nagbabahagi. Hindi mo rin makikita ang paghahambing.';
 }

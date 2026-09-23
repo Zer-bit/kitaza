@@ -34,6 +34,12 @@ abstract final class SchemaMigrations {
       "ALTER TABLE sync_queue ADD COLUMN store_id TEXT NOT NULL DEFAULT ''",
       "UPDATE sync_queue SET store_id = COALESCE((SELECT id FROM stores LIMIT 1), '')",
     ],
+    4: [
+      // Whether a store's totals join the anonymous comparisons. Stores
+      // that existed before the question was asked start as sharing, the
+      // same as the server's default, and Settings can turn it off.
+      'ALTER TABLE stores ADD COLUMN share_benchmarks INTEGER NOT NULL DEFAULT 1',
+    ],
   };
 
   static int get latestVersion => _steps.keys.fold(

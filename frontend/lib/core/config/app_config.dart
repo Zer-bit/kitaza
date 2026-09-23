@@ -24,5 +24,5 @@ abstract final class AppConfig {
   static const String databaseFile = 'kitaza.db';
 
   /// Must match the newest step in `SchemaMigrations`.
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 4;
 }

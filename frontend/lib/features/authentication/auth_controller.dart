@@ -117,15 +117,30 @@ class AuthController extends AsyncNotifier<AuthSession?> {
 
     final renamed = await ref
         .read(teamApiProvider)
-        .renameStore(store.id, name.trim());
-    await _sessions.rememberStore(renamed);
+        .updateStore(store.id, name: name.trim());
+    await _rememberStore(current, renamed);
+  }
+
+  /// Turns this store's share of the anonymous comparisons on or off.
+  Future<void> setBenchmarkSharing(bool sharing) async {
+    final current = state.value;
+    if (current == null || !current.isCloud || !current.access.isOwner) return;
+
+    final updated = await ref
+        .read(teamApiProvider)
+        .updateStore(current.store.id, shareBenchmarks: sharing);
+    await _rememberStore(current, updated);
+  }
+
+  Future<void> _rememberStore(AuthSession current, StoreProfile store) async {
+    await _sessions.rememberStore(store);
 
     state = AsyncValue.data(
       current.copyWith(
-        store: current.store.id == renamed.id ? renamed : current.store,
+        store: current.store.id == store.id ? store : current.store,
         stores: [
           for (final existing in current.stores)
-            existing.id == renamed.id ? renamed : existing,
+            existing.id == store.id ? store : existing,
         ],
       ),
     );

@@ -20,6 +20,7 @@ abstract final class ApiEndpoints {
   static String staffInvite(String storeId, String staffId) =>
       '/stores/$storeId/staff/$staffId/invite';
   static String activity(String storeId) => '/stores/$storeId/activity';
+  static String benchmarks(String storeId) => '/stores/$storeId/benchmarks';
 
   static String syncPush(String storeId) => '/stores/$storeId/sync/push';
   static String syncPull(String storeId) => '/stores/$storeId/sync/pull';

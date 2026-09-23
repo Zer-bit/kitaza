@@ -9,6 +9,7 @@ import 'package:kitaza_app/data/models/expense_category.dart';
 import 'package:kitaza_app/data/models/payment_method.dart';
 import 'package:kitaza_app/data/models/staff_member.dart';
 import 'package:kitaza_app/data/models/subscription.dart';
+import 'package:kitaza_app/data/remote/benchmarks_api.dart';
 import 'package:kitaza_app/data/remote/billing_api.dart';
 import 'package:kitaza_app/data/remote/team_api.dart';
 import 'package:kitaza_app/data/repositories/expense_repository.dart';
@@ -141,6 +142,11 @@ final Map<String, (String, WidgetBuilder, AuthSession)> _signedInScreens = {
     (_) => const JoinStoreScreen(),
     cloudOwner(),
   ),
+  'reports, compared with other stores': (
+    RoutePaths.reports,
+    (_) => const ReportsScreen(),
+    cloudOwner(),
+  ),
   'plan, paused': (
     RoutePaths.plan,
     (_) => const PlanScreen(),
@@ -256,6 +262,7 @@ void main() {
                 busy ? _busyTeam() : FakeTeamApi(),
               ),
               billingApiProvider.overrideWithValue(_billing(busy: busy)),
+              benchmarksApiProvider.overrideWithValue(FakeBenchmarksApi()),
             ],
           );
           if (busy) await _seedBusyDay(phone);

@@ -109,6 +109,31 @@ database can be read.
   never taken from the device. Staff may re-send their own rows (a retry) but
   not overwrite anyone else's.
 
+### Suggestions are worked out on the phone
+
+Restock, price and pattern suggestions live in Dart, in `data/analysis/`,
+and read only what is already in SQLite. An owner counting stock in a
+storeroom with no signal gets the same advice as one behind the counter,
+which is the whole point of a local-first app; a server-side copy would be
+worse advice delivered less often. They are deliberately plain arithmetic -
+a weighted average of the last four weeks, with a heavier weight on the last
+seven days - so every figure on screen can be checked by hand, and the
+screen says which numbers it used.
+
+Three rules keep them honest:
+
+- **Days a product was out of stock are not counted.** Stock is walked
+  backwards from what is on the shelf now; a counted adjustment sets a total
+  rather than a change, so days before the last count are taken as stocked
+  rather than guessed at. Treating an empty shelf as "sold nothing" is how a
+  fast seller talks itself into never being restocked.
+- **Days before a product existed are not counted either**, or anything
+  added last week looks like a slow seller.
+- **Too little history falls back to Phase 3.** Under ten selling days or
+  five units sold, the owner's own reorder level decides, and the card says
+  so. Under two weeks of trading, the section says to keep recording rather
+  than guessing.
+
 ### Plans and payments
 
 Billing is a check, not a wall. Every store-scoped request asks
@@ -133,6 +158,22 @@ nothing is enforced at all.
 The subscription is read with the session on each request (cached like the
 rest of the session), so a payment unpauses every phone on its next request;
 the phones are also nudged over the socket to re-read their account.
+
+### Anonymous comparisons
+
+The one thing a phone cannot work out alone is what other stores do. The
+server publishes medians only: per business type and size band, over the
+last 30 days, and only when at least twenty *other* sharing stores sit in
+the bucket. Below that the answer is "not enough stores" rather than a
+number, because a median of three is neither typical nor anonymous. The
+asking store is excluded from its own comparison, sharing can be switched
+off in Settings (and switching it off also switches off seeing others'),
+and offline stores never take part because their figures never leave the
+phone.
+
+Medians are cached per bucket for six hours, since they move slowly and the
+query reads every sharing store's month; a bucket too small to publish is
+not cached, so a comparison appears as soon as enough stores are sharing.
 
 ### Money
 

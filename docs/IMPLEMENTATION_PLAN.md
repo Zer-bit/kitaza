@@ -1,9 +1,9 @@
 # Kitaza — Implementation Plan
 
 This is the build order for Kitaza, from the scaffold that exists today through
-to a product small businesses pay for monthly. Phases 0–7 are **done and
-verified** as far as they can be without real phones, real stores and a live
-payment account (Phases 5–7 list exactly what that leaves); 8 is planned.
+to a product small businesses pay for monthly. Every phase is **done and
+verified** as far as it can be without real phones, real stores and a live
+payment account; Phases 5–8 list exactly what that leaves.
 
 Each phase ends at something demonstrable, because the biggest risk in this
 product is not technical — it is that store owners keep using their notebook.
@@ -384,18 +384,64 @@ live PayMongo account.
 
 ---
 
-## Phase 8 — Genuine intelligence
+## Phase 8 — Genuine intelligence ✅ Done
 
-Only once there is enough real data to learn from.
+Nothing here is a model. Every suggestion is arithmetic an owner can check,
+worked out on the phone from that store's own records, and every card says
+what it used. That is the difference between advice a store owner will
+follow and a number they will ignore.
 
-- [ ] Demand forecasting per product to drive restock suggestions.
-- [ ] Price recommendations from observed margin and turnover.
-- [ ] Seasonality (payday cycles, fiestas, school openings — these dominate
-      sari-sari demand).
-- [ ] Anonymised benchmarks: "stores your size keep 18% margin on beverages".
+- [x] **Demand forecasting per product, driving restock suggestions.** A
+      weighted average of the last four weeks, with the last seven days
+      counting for more. Days the product was out of stock are left out -
+      an empty shelf is not evidence of low demand - and so are days before
+      the product existed. The suggestion says how fast it sells, how long
+      the stock will last, and how much to order.
+- [x] **Price recommendations from margin and turnover.** Anything sold
+      below cost, a thin margin on something that sells well, and stock that
+      barely moves. Each with the price to try and what it would add in a
+      month, and none of them below ₱50 a month, which is not worth
+      bothering an owner about.
+- [x] **Seasonality, measured rather than assumed.** Payday weeks are
+      compared with the rest of the month *in that store's own takings*, and
+      only mentioned when the difference is at least 15%. Same for the best
+      day of the week. A store beside a school and one beside a factory do
+      not share a rhythm, and neither would survive an assumption written
+      into the app.
+- [x] **Anonymised benchmarks.** "Stores like yours keep 22%; you keep 14%",
+      over margin, expenses against sales, and sales a day. Medians only, per
+      business type and size band, and only across at least 20 other sharing
+      stores. Sharing is a switch in Settings, and switching it off also
+      switches off seeing everyone else's.
+- [x] **Everything degrades to the Phase 3 rules.** Under ten selling days
+      or five units sold, the owner's reorder level decides and the card says
+      so. Under two weeks of trading, the section says to keep recording
+      instead of guessing.
 
-Each of these must degrade to the Phase 3 rules when data is thin, and must
-always show its reasoning.
+### Defects found and fixed
+
+| Defect | Effect | Caught by |
+|---|---|---|
+| The recent-week window counted eight days | The weighting was off by a day, quietly | Forecast test |
+| A brand-new store's only product was called a slow mover | The app judged a store that had not traded yet | Repository test |
+| The reorder row's order line was a trailing widget | **Layout overflow** at large text in Filipino on a 360px phone | Accessibility audit |
+| `make_interval(days => …)` was given a float | The comparisons endpoint returned 500 | Integration test |
+
+### What is not verified, and why
+
+- **On a real phone**, as with every phase since 5.
+- **Comparisons with real stores.** The thresholds and buckets are tested
+  against seeded data; no bucket has 20 real stores in it yet, so every
+  owner will see "not enough stores" until the service has them.
+- **The suggestions against a real store's judgement.** Whether an owner
+  agrees with what the app says to reorder is exactly what the Phase 5 field
+  trial is for.
+- **The Filipino wording** of the 33 new strings.
+
+**Exit criteria:** an owner is told something about their own store they did
+not already know, and can see why it is true. The arithmetic is there on
+every card; whether it tells them something new is the field trial's
+question.
 
 ---
 

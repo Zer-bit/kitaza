@@ -45,7 +45,10 @@ class LocalDatabase {
     await db.execute('PRAGMA foreign_keys = ON');
     // WAL keeps a slow report query from blocking the cashier ringing up a
     // sale, and NORMAL sync is the right durability trade for a phone.
-    await db.execute('PRAGMA journal_mode = WAL');
+    // journal_mode returns the resulting mode as a row, and Android's
+    // execSQL rejects statements that return data, so this one must go
+    // through rawQuery to work on both Android and desktop ffi.
+    await db.rawQuery('PRAGMA journal_mode = WAL');
     await db.execute('PRAGMA synchronous = NORMAL');
     await db.execute('PRAGMA temp_store = MEMORY');
   }
