@@ -7,6 +7,7 @@ import '../core/config/app_config.dart';
 import '../core/localization/locale_controller.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
+import '../core/theme/theme_reveal.dart';
 import '../l10n/l10n.dart';
 import 'app_router.dart';
 
@@ -34,10 +35,10 @@ class KitazaApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ref.watch(themeControllerProvider),
-      // MaterialApp cross-fades between the two themes; this sets how long
-      // that takes when the owner flips the switch.
-      themeAnimationDuration: const Duration(milliseconds: 280),
-      themeAnimationCurve: Curves.easeOutCubic,
+      // No blend between themes: ThemeReveal switches instantly under a
+      // picture of the old screen. Blending would rebuild the whole app on
+      // every frame of the fade.
+      themeAnimationDuration: Duration.zero,
       builder: (context, child) {
         // Dates and month names outside Material widgets follow this.
         Intl.defaultLocale = Localizations.localeOf(context).toLanguageTag();
@@ -49,7 +50,7 @@ class KitazaApp extends ConsumerWidget {
 
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: scale),
-          child: child ?? const SizedBox.shrink(),
+          child: ThemeReveal(child: child ?? const SizedBox.shrink()),
         );
       },
     );

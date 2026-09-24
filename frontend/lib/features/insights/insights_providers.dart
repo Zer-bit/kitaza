@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/keep_for.dart';
 import '../../data/models/access_grant.dart';
 import '../../data/models/benchmark_report.dart';
 import '../../data/remote/benchmarks_api.dart';
@@ -11,6 +12,7 @@ import '../authentication/auth_controller.dart';
 /// What the store's own records suggest. Worked out on the phone, so it is
 /// there with or without a connection.
 final storeInsightsProvider = FutureProvider.autoDispose<StoreInsights>((ref) {
+  ref.keepFor(tabDataLifetime);
   ref.watch(dataRevisionProvider);
   ref.watch(activeStoreIdProvider);
   return ref.watch(insightsRepositoryProvider).compile();

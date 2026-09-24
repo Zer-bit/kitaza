@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/keep_for.dart';
 import '../../data/models/dashboard_summary.dart';
 import '../../data/models/report_period.dart';
 import '../../data/repositories/dashboard_repository.dart';
@@ -21,12 +22,9 @@ class SelectedPeriod extends Notifier<ReportPeriod> {
 final dashboardSummaryProvider = FutureProvider.autoDispose<DashboardSummary>((
   ref,
 ) {
+  ref.keepFor(tabDataLifetime);
   ref.watch(dataRevisionProvider);
   final period = ref.watch(selectedPeriodProvider);
-
-  // Held briefly so flicking between periods does not re-query SQLite for a
-  // window the owner just looked at.
-  ref.keepAlive();
 
   return ref.watch(dashboardRepositoryProvider).summarise(period);
 });

@@ -8,7 +8,12 @@ import 'app_typography.dart';
 /// Both themes are built from one description so light and dark never drift
 /// apart. Every colour below has a deliberate counterpart on the other side.
 abstract final class AppTheme {
-  static ThemeData light() => _build(
+  /// Built once. A theme is a few hundred objects, and making a fresh pair on
+  /// every rebuild of the app root is work nobody sees.
+  static ThemeData light() => _light;
+  static ThemeData dark() => _dark;
+
+  static final ThemeData _light = _build(
     brightness: Brightness.light,
     scheme: const ColorScheme.light(
       primary: AppPalette.teal,
@@ -32,7 +37,7 @@ abstract final class AppTheme {
     line: AppPalette.line,
   );
 
-  static ThemeData dark() => _build(
+  static final ThemeData _dark = _build(
     brightness: Brightness.dark,
     scheme: const ColorScheme.dark(
       primary: AppPalette.tealBright,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_controller.dart';
+import '../../core/theme/theme_reveal.dart';
 import '../../l10n/l10n.dart';
 import '../../shared/widgets/page_body.dart';
 import '../../shared/widgets/section_header.dart';
@@ -57,9 +58,12 @@ class SettingsScreen extends ConsumerWidget {
                           width: double.infinity,
                           child: ThemeModeSelector(
                             selected: ref.watch(themeControllerProvider),
-                            onChanged: (mode) => ref
-                                .read(themeControllerProvider.notifier)
-                                .select(mode),
+                            onChanged: (mode, from) => ThemeReveal.switchTo(
+                              context,
+                              ref,
+                              mode,
+                              from: from,
+                            ),
                           ),
                         ),
                       ],
